@@ -1,21 +1,392 @@
-parallella-ubuntu
-=================
 
-Official Ubuntu distro for Parallella.
+WORK IN PROGRESS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-=================
 
-For now,we are simply using the latest ubuntu-desktop distribution from Linaro.
+###################################################################
+#Format an 8GB SD card with 256MB FAT32 'BOOT' and 7GB 'ext4 rootfs
+####################################################################
+sudo gparted
 
-1.) To download the Linaro Ubuntu distribution:
+####################################################################
+#Get the distributions
+####################################################################
 
-> wget http://releases.linaro.org/12.11/ubuntu/precise-images/ubuntu-desktop/linaro-precise-ubuntu-desktop-20121124-560.tar.gz
+wget http://releases.linaro.org/14.05/ubuntu/trusty-images/nano/linaro-trusty-nano-20140522-661.tar.gz
 
-2.) To uncompress and copy root file system to an SD card
+wget http://downloads.parallella.org/boot/boot-e16-7z020-v01-140528.tgz
 
-> sudo tar --strip-components=3 -C /media/rootfs -xzpf linaro-precise-ubuntu-desktop-20121124-560.tar.gz binary/boot/filesystem.dir
+####################################################################
+#Copy files sd card
+####################################################################
 
-> ls /media/rootfs/
-bin/  boot/  dev/  etc/  home/  lib/  lost+found/  media/  mnt/ opt/
-proc/  root/  run/  sbin/  selinux/  srv/  sys/  tmp/  usr/  var/
+sudo tar -zxvf linaro-trusty-nano-20140522-661.tar.gz
+cd binary
+sudo rsync -a --progress ./ /media/aolofsson/rootfs
+tar -zxvf boot-e16-7z020-v01-140528.tgz -C /media/aolofsson/BOOT
+
+####################################################################
+#Copy BOOT files to SD card
+####################################################################
+
+tar -zxvf boot-e16-7z020-v01-140528.tgz -C /media/aolofsson/BOOT
+
+####################################################################
+#Set up network interface
+####################################################################
+sudo emacs /media/aolofsson/rootfs/etc/network/interfaces
+
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet dhcp
+
+#allow-hotplug wlan0
+#iface wlan0 inet dhcp
+
+####################################################################
+#Enable devtmpfs
+####################################################################
+cd /media/aolofsson/rootfs/dev
+sudo su
+mknod -m 660 mmcblk0 b 179 0
+mknod -m 660 mmcblk0p1 b 179 1
+mknod -m 660 mmcblk0p2 b 179 2
+
+#sudo mount   mmcblk0p1 /mnt
+#sudo dtc -I dtb -O dts -o devicetree.dts /mnt/devicetree.dtb
+#sudo emacs devicetree.dts
+#sudo dtc -I dts -O dtb -o /mnt/devicetree.dtb devicetree.dts
+
+####################################################################
+#Create the tty node for initial setup
+####################################################################
+#cd /media/aolofsson/rootfs/dev
+#sudo su
+#mknod ttyPS0 c 251 0
+#mknod fb0 c 29 0
+#mkdir dri 
+#mknod dri/card0 c 226 0
+#mknod dri/controlD64 c 226 64
+
+
+
+####################################################################
+#Unmounting card and plug into Parallella
+####################################################################
+sudo sync
+umount /media/aolofsson/rootfs/
+
+####################################################################
+#Boot with putty/serial cable
+####################################################################
+su linaro
+sudo apt-get update
+changed repo to 
+
+#edited the following
+sudo emacs /var/lib/dpkg/info/libpam-systemd:armhf.postinst
+commented out the following line:
+ --invoke-rc.d systemd-logind start || exit $?
+
+####################################################################
+#Enabling networking
+####################################################################
+
+ifconfig 
+
+sudo emacs /etc/init/failsafe.conf
+
+(Change the timeout value from 60 seconds to 10 seconds in case there
+is no ethernet cable)
+
+
+####################################################################
+#SSH into board from other computer for ease of use
+####################################################################
+ssh linaro@192.168.1.121 #password 'linaro'
+
+####################################################################
+#Installing a windows manager
+####################################################################
+sudo apt-get install lxde
+sudo apt-get install xfce4
+#sudo nano /etc/xdg/lxsession/LXDE/autostart
+#(Append these line to the bottom of the file)
+#     @feh --bg-fill /home/linaro/background.png
+
+#Desktop-Session Settings: Enable notification, mount helper, volume control
+#xfce4-settings-manager
+
+####################################################################
+#First screen
+####################################################################
+
+####################################################################
+#Installing minimal system
+####################################################################
+sudo apt-get update
+sudo apt-get install lxde
+sudo apt-get install openssh-server
+sudo apt-get install xserver-xorg-video-modesetting 
+
+####################################################################
+#Weird Edits???
+####################################################################
+sudo chmod u+s `which ping`
+sudo emacs /var/lib/dpkg/info/libpam-systemd:armhf.postinst
+     comment out the following line:
+     "#invoke-rc.d systemd-logind start || exit $?"
+
+####################################################################
+#Second Login
+####################################################################
+(login with screen connected, or through ssh)
+
+####################################################################
+#More configurations
+####################################################################
+
+#XFCE windows manager alternative
+sudo apt-get install xfce4
+
+#General
+sudo apt-get install less tcsh emacs vim ftp wget synaptic tkcvs
+sudo apt-get install fake-hwclock unzip feh lsb-rele
+#Compiling/Building
+sudo apt-get install build-essential git curl m4 flex bison gawk
+
+#Networking
+sudo apt-get install ethtool iperf ifplugd
+sudo apt-get install network-manager
+
+#Linux Tools
+sudo apt-get install xutils-dev device-tree-compiler usbutils
+
+#Media
+sudo apt-get install firefox 
+sudo apt-get install smplayer
+suto apt-get install evince
+sudo apt-get install gimp
+
+#Programming
+sudo apt-get install octave
+sudo apt-get install scratch
+
+#Sound
+sudo apt-get install xfce4-mixer gstreamer0.10-alsa
+sudo apt-get install alsa-base alsa-utils libasound2-plugins 
+sudo apt-get install libdrm-dev libasound2-dev
+sudo apt-get install libfluidsynth-dev fluidsynth fluid-soundfont-gm
+
+#X Windows
+sudo apt-get install xinit
+sudo apt-get install libx11-dev
+
+#Camera
+sudo apt-get install camorama
+
+#Wifi
+sudo apt-get install wicd-curses 
+sudo apt-get install linux-firmware
+
+#Office
+#sudo apt-get install libreoffice
+
+#Getting all packages
+dpkg --get-selections > my.packages
+
+
+
+####################################################################
+#Purging bad packages
+####################################################################
+sudo apt-get purge chromium-browser xscreensaver
+
+####################################################################
+#Editing video config file
+####################################################################
+emacs /etc/X11/xorg.conf
+
+Section "Device"
+  Identifier "Card0"
+  Driver "modesetting"
+  Option "ShadowFB" "True"
+  Option "SWCursor" "True"
+  Option "HWCursor" "False"
+EndSection
+Section "Screen"
+  Identifier "Screen0"
+  Device "Card0"
+  SubSection "Display"
+#---- Uncomment your preferred mode ----
+    #Modes "1920x1200"
+    #Modes "1920x1080"
+    Modes "1280x720"
+    #Modes "640x480"
+  EndSubSection
+EndSection
+####################################################################
+#Editing audio config file
+####################################################################
+emacs ~/.asoundrc
+
+pcm.!default {
+ type rate
+ slave {
+  pcm "hw:0"
+  rate 48000
+ }
+ converter "samplerate"
+}
+
+####################################################################
+#Tuning LXDE for speed
+####################################################################
+rm -f ~/.config/lxsession/LXDE/autostart
+sudo emacs /etc/xdg/lxsession/LXDE/autostart
+
+Delete the line "@pcmanfm --desktop --profile LXDE". 
+
+####################################################################
+#Fix GCONF permission
+####################################################################
+sudo chown -R linaro:linaro ~/.gconf
+
+####################################################################
+#Speedup ssh 
+####################################################################
+sudo emacs /etc/ssh/sshd_config
+Append this line to the bottom of the file. 
+UseDNS no
+
+####################################################################
+#Change default shell to tcsh and change sh-->bash
+####################################################################
+sudo rm /bin/sh
+sudo ln -s /bin/bash /bin/sh
+sudo emacs /etc/passwd #change shell to tcsh for user linaro
+
+###################
+setenv HISTSIZE 1000
+setenv EDITOR emacs
+set history=2000
+set savehist=40
+
+setenv LS_COLORS 'no=00:fi=00:di=01;34:ln=01;36:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;35;01:su=37;41:sg=30;43:tw=30;42\
+:ow=34;42:st=37;44:ex=01;31:*.tar=01;35:*.tgz=01;35:*.arj=01;35:*.taz=01;35:*.lzh=01;35:*.zip=01;35:*.z=01;35:*.Z=01;35:*.gz=01;35:*.bz2=\
+01;35:*.deb=01;35:*.rpm=01;35:*.jar=01;35:*.jpg=01;35:*.jpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;3\
+5:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.avi=01;35:*.fli=01;35:*.gl=01;35:*.\
+dl=01;35:*.xcf=01;35:*.xwd=01;35:*.flac=01;35:*.mp3=01;35:*.mpc=01;35:*.ogg=01;35:*.wav=01;35:'
+
+####################
+#ALIASES
+####################
+alias s         'source'
+alias e         'emacs'
+alias rm        'rm -i'
+alias cp        'cp -i -p'
+alias mv        'mv -i'
+alias ls        'ls --color -p'
+alias ll        'ls -ltr'
+alias ps        'ps -e'
+alias rsh       'rsh -X'
+alias less      'less -X'
+
+####################################################################
+#Installing Epiphany SDK
+####################################################################
+sudo apt-get install libmpfr-dev libmpc-dev libgmp3-dev libmpc2
+sudo mkdir -p /opt/adapteva/
+wget http://downloads.parallella.org/esdk/esdk.5.13.09.10_linux_armv7l.tgz
+sudo tar xzf esdk.5.13.09.10_linux_armv7l.tgz -C /opt/adapteva/
+sudo ln -sTf /opt/adapteva/esdk.5.13.09.10 /opt/adapteva/esdk
+
+emacs ~/.cshrc
+setenv EPIPHANY_HOME      /opt/adapteva/esdk
+source ${EPIPHANY_HOME}/setup.csh
+
+emacs ~/.bashrc
+echo 'EPIPHANY_HOME=/opt/adapteva/esdk' >> ${HOME}/.bashrc
+echo '. ${EPIPHANY_HOME}/setup.sh' >> ${HOME}/.bashrc
+
+####################################################################
+#Installing COPRTHR Prerequisites
+####################################################################
+
+###libelf
+wget www.mr511.de/software/libelf-0.8.13.tar.gz
+tar -zxvf libelf-0.8.13.tar.gz
+cd libelf-0.8.13
+./configure
+sudo make install
+cd ../
+
+##libevent
+wget github.com/downloads/libevent/libevent/libevent-2.0.18-stable.tar.gz
+tar -zxvf libevent-2.0.18-stable.tar.g
+cd libevent-2.0.18-stable
+./configure
+sudo make install
+cd ../
+
+##libconfig
+wget www.hyperrealm.com/libconfig/libconfig-1.4.8.tar.gz
+tar -zxvf libconfig-1.4.8.tar.gz
+cd libconfig-1.4.8
+./configure
+sudo make install
+cd ../
+
+####################################################################
+#Setting up COPRTHR
+####################################################################
+wget http://www.browndeertechnology.com/code/coprthr-1.6.0-parallella.tgz
+tar -zxvf coprthr-1.6.0-parallella.tgz
+sudo ./browndeer/scripts/install_coprthr_parallella.sh
+
+emacs ~/.bashrc
+
+export PATH=/usr/local/browndeer/bin:$PATH
+export LD_LIBRARY_PATH=/usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH
+
+sudo su
+emacs ./bashrc
+export PATH=/usr/local/browndeer/bin:$PATH
+export LD_LIBRARY_PATH=/usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH
+
+
+####################################################################
+#KNOWN ISSUES:
+####################################################################
+#firefox is not 100% stable, workaround:??
+#slow boot with no network attached
+#no uart by default
+#wifi not working
+
+####################################################################
+#TESTS
+####################################################################
+#play video (sound, video)
+#check bandwidth
+#sound only comes out if you add and adjust sound icon on lxde menu bar
+#installing cheese crashes the system
+
+
+####
+couldn't install synaptic
+###
+
+Commented out the start condition in /etc/xdg/autostart/nm-applet
+sudo usermod -F netdev -a linaro
+sudo apt-get --reinstall install policykit-1
+
+Errors were encountered while processing:
+ libpam-systemd:armhf
+ policykit-1
+ colord
+
+
+
 

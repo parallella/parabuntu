@@ -1,144 +1,99 @@
 
-WORK IN PROGRESS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# WORK IN PROGRESS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-###################################################################
-#Format an 8GB SD card with 256MB FAT32 'BOOT' and 7GB 'ext4 rootfs
-####################################################################
+## Format SD Card
+
     sudo gparted
 
-####################################################################
-#Get the distributions
-####################################################################
+* Create a 256MB FAT32 partition named 'BOOT'
+* Create a 4GB+ EXT4 partition named 'rootfs'
+
+## Download Ubuntu root files system and boot files
 
     wget http://releases.linaro.org/14.05/ubuntu/trusty-images/nano/linaro-trusty-nano-20140522-661.tar.gz
     wget http://downloads.parallella.org/boot/boot-e16-7z020-v01-140528.tgz
 
-####################################################################
-#Insert SD card into your regular computer and copy files sd card
-####################################################################
 
-    sudo tar -zxvf linaro-trusty-nano-20140522-661.tar.gz
-    cd binary
-    sudo rsync -a --progress ./ /media/aolofsson/rootfs
-    tar -zxvf boot-e16-7z020-v01-140528.tgz -C /media/aolofsson/BOOT
+## Insert SD card into your regular computer and copy files sd card
 
-####################################################################
-#Set up network interface (with sd card still inserted)
-####################################################################
+    $ sudo tar -zxvf linaro-trusty-nano-20140522-661.tar.gz
+    $ cd binary
+    s sudo rsync -a --progress ./ /media/aolofsson/rootfs
+    $ tar -zxvf boot-e16-7z020-v01-140528.tgz -C /media/aolofsson/BOOT
 
-    sudo emacs /media/aolofsson/rootfs/etc/network/interfaces
 
-auto lo
-iface lo inet loopback
+## Set up network interface (with sd card still inserted)
 
-auto eth0
-iface eth0 inet dhcp
+    $ sudo emacs /media/aolofsson/rootfs/etc/network/interfaces
 
-#allow-hotplug wlan0
-#iface wlan0 inet dhcp
 
-####################################################################
-#Enable devtmpfs
-####################################################################
+    auto lo
+    iface lo inet loopback
+    auto eth0
+    iface eth0 inet dhcp
 
-    cd /media/aolofsson/rootfs/dev
-    sudo su
-    mknod -m 660 mmcblk0 b 179 0
-    mknod -m 660 mmcblk0p1 b 179 1
-    mknod -m 660 mmcblk0p2 b 179 2
+## Enable devtmpfs
 
-#sudo mount   mmcblk0p1 /mnt
-#sudo dtc -I dtb -O dts -o devicetree.dts /mnt/devicetree.dtb
-#sudo emacs devicetree.dts
-#sudo dtc -I dts -O dtb -o /mnt/devicetree.dtb devicetree.dts
+    $ cd /media/aolofsson/rootfs/dev
+    $ sudo su
+    $ mknod -m 660 mmcblk0 b 179 0
+    $ mknod -m 660 mmcblk0p1 b 179 1
+    $ mknod -m 660 mmcblk0p2 b 179 2
 
-####################################################################
-#Create the tty node for initial setup
-####################################################################
-#cd /media/aolofsson/rootfs/dev
-#sudo su
-#mknod ttyPS0 c 251 0
-#mknod fb0 c 29 0
-#mkdir dri 
-#mknod dri/card0 c 226 0
-#mknod dri/controlD64 c 226 64
 
-####################################################################
-#Unmounting card
-####################################################################
+## Unmounting card
 
-    sudo sync
-    umount /media/aolofsson/rootfs/
-    umount /media/aolofsson/BOOT
+    $ sudo sync
+    $ umount /media/aolofsson/rootfs/
+    $ umount /media/aolofsson/BOOT
 
-####################################################################
-#Boot board (screen attached)
-####################################################################
+## First boot (with screen/keyboard/mouse attached)
 
-    su linaro
-    sudo apt-get update
+* User=linaro
+* Password=linaro
 
-####################################################################
-#SSH into board from other computer for ease of use
-####################################################################
+    $ su linaro
+    $ sudo apt-get update
 
-    ssh linaro@192.168.1.121 #password 'linaro'
 
-####################################################################
-#Installing a windows manager
-####################################################################
+## SSH into board from other computer for ease of use
+
+    ssh linaro@192.168.1.121 
+    
+
+## Installing a windows manager
 
     sudo apt-get install lxde
     sudo apt-get install xfce4
 
-#sudo nano /etc/xdg/lxsession/LXDE/autostart
-#(Append these line to the bottom of the file)
-#     @feh --bg-fill /home/linaro/background.png
-
-#Desktop-Session Settings: Enable notification, mount helper, volume control
-#xfce4-settings-manager
-
-####################################################################
-#First screen
-####################################################################
-
-#You should see logs of boot messages and a minimal login prompt
-#Login with "user=linaro, password=linaro"
- 
-####################################################################
-#Enable ssh
-####################################################################
+## Enable ssh
 
     sudo apt-get update
     sudo apt-get install openssh-server
 
-####################################################################
-#Installing minimal graphical desktop
-####################################################################
+## Installing windows manager
+
 
     sudo apt-get install lxde
     sudo apt-get install xfce4
     sudo apt-get install xserver-xorg-video-modesetting
 
-####################################################################
-#Weird Edits to fix issues???
-####################################################################
+## Temporary edits
 
-#Not sure why the pin is not working?
+--Work around ping permision limitation??
     sudo chmod u+s `which ping`
 
-#Working around bug with this package.
+--Ubuntu 14.04 package bug
     sudo emacs /var/lib/dpkg/info/libpam-systemd:armhf.postinst
      #comment out the following line. FIX THIS!
      "#invoke-rc.d systemd-logind start || exit $?"
 
-#Working around slow boot time without ethernet connected
+--Slow boot time (timeout) when ethernet cable isn't connected
     sudo emacs /etc/init/failsafe.conf
     #Change the timeout value from 60 seconds to make boot faster
     #in case there is no cable inserted.Note: FIX THIS!
 
-#Trying to improve firefox stability
+--Attempts at fixing firefox stability issue
 In firefox:
   about:config
      webgl.disabled=true
@@ -147,21 +102,19 @@ In firefox:
      browser.cache.disk.enable=false
      mousewheel.acceleration.start=2
 
-####################################################################
-#Second Login
-####################################################################
-(login with screen connected, or through ssh)
+--Creating Parallella background 
+    sudo emacs /etc/xdg/lxsession/LXDE/autostart
 
-####################################################################
-#More configurations
-####################################################################
-#less tcsh emacs vim ftp wget synaptic tkcvs fake-hwclock unzip feh lsb-release  build-essential git curl m4 flex bison gawk ethtool iperf ifplugd network-manager xutils-dev device-tree-compiler usbutils firefox smplayer evince  gimp 
+@feh --bg-fill /home/linaro/background.png
 
-#"Must haves"
+
+#Essential Paclkages
+
+--"Must haves"
     sudo apt-get install less tcsh emacs vim ftp wget synaptic tkcvs
     sudo apt-get install fake-hwclock unzip feh lsb-release
 
-#Compiling/Building
+--Compiling/Building
     sudo apt-get install build-essential git curl m4 flex bison gawk
 
 #Networking
@@ -182,11 +135,12 @@ In firefox:
     sudo apt-get install scratch
 
 #Scientific
-    sudo apt-get install python-numpy python-scipy python-matplotlib ipython ipython-notebook python-pandas python-sympy python-nose
+    sudo apt-get install python-numpy python-scipy python-matplotlib 
+    sudo apt-get install ipython ipython-notebook python-pandas python-sympy python-nose
     sudo apt-get install r-base
 
 #Sound
-#sudo apt-get install xfce4-mixer gstreamer0.10-alsa
+    sudo apt-get install xfce4-mixer gstreamer0.10-alsa
     sudo apt-get install alsa-base alsa-utils libasound2-plugins 
 
 #For Demos

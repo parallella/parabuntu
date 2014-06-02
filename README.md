@@ -2,7 +2,6 @@
 WORK IN PROGRESS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-
 ###################################################################
 #Format an 8GB SD card with 256MB FAT32 'BOOT' and 7GB 'ext4 rootfs
 ####################################################################
@@ -13,11 +12,10 @@ sudo gparted
 ####################################################################
 
 wget http://releases.linaro.org/14.05/ubuntu/trusty-images/nano/linaro-trusty-nano-20140522-661.tar.gz
-
 wget http://downloads.parallella.org/boot/boot-e16-7z020-v01-140528.tgz
 
 ####################################################################
-#Copy files sd card
+#Insert SD card into your regular computer and copy files sd card
 ####################################################################
 
 sudo tar -zxvf linaro-trusty-nano-20140522-661.tar.gz
@@ -26,13 +24,7 @@ sudo rsync -a --progress ./ /media/aolofsson/rootfs
 tar -zxvf boot-e16-7z020-v01-140528.tgz -C /media/aolofsson/BOOT
 
 ####################################################################
-#Copy BOOT files to SD card
-####################################################################
-
-tar -zxvf boot-e16-7z020-v01-140528.tgz -C /media/aolofsson/BOOT
-
-####################################################################
-#Set up network interface
+#Set up network interface (with sd card still inserted)
 ####################################################################
 sudo emacs /media/aolofsson/rootfs/etc/network/interfaces
 
@@ -70,37 +62,18 @@ mknod -m 660 mmcblk0p2 b 179 2
 #mknod dri/card0 c 226 0
 #mknod dri/controlD64 c 226 64
 
-
-
 ####################################################################
-#Unmounting card and plug into Parallella
+#Unmounting card
 ####################################################################
 sudo sync
 umount /media/aolofsson/rootfs/
+umount /media/aolofsson/BOOT
 
 ####################################################################
-#Boot with putty/serial cable
+#Boot board (screen attached)
 ####################################################################
 su linaro
 sudo apt-get update
-changed repo to 
-
-#edited the following
-sudo emacs /var/lib/dpkg/info/libpam-systemd:armhf.postinst
-commented out the following line:
- --invoke-rc.d systemd-logind start || exit $?
-
-####################################################################
-#Enabling networking
-####################################################################
-
-ifconfig 
-
-sudo emacs /etc/init/failsafe.conf
-
-(Change the timeout value from 60 seconds to 10 seconds in case there
-is no ethernet cable)
-
 
 ####################################################################
 #SSH into board from other computer for ease of use
@@ -123,21 +96,49 @@ sudo apt-get install xfce4
 #First screen
 ####################################################################
 
+#You should see logs of boot messages and a minimal login prompt
+#Login with "user=linaro, password=linaro"
+ 
 ####################################################################
-#Installing minimal system
+#Enable ssh
 ####################################################################
+
 sudo apt-get update
-sudo apt-get install lxde
 sudo apt-get install openssh-server
-sudo apt-get install xserver-xorg-video-modesetting 
 
 ####################################################################
-#Weird Edits???
+#Installing minimal graphical desktop
 ####################################################################
+
+sudo apt-get install lxde
+sudo apt-get install xfce4
+sudo apt-get install xserver-xorg-video-modesetting
+
+####################################################################
+#Weird Edits to fix issues???
+####################################################################
+
+#Not sure why the pin is not working?
 sudo chmod u+s `which ping`
+
+#Working around bug with this package.
 sudo emacs /var/lib/dpkg/info/libpam-systemd:armhf.postinst
-     comment out the following line:
+     #comment out the following line. FIX THIS!
      "#invoke-rc.d systemd-logind start || exit $?"
+
+#Working around slow boot time without ethernet connected
+sudo emacs /etc/init/failsafe.conf
+    #Change the timeout value from 60 seconds to make boot faster
+    #in case there is no cable inserted.Note: FIX THIS!
+
+#Trying to improve firefox stability
+In firefox:
+  about:config
+     webgl.disabled=true
+     webgl.disable0-extensions=true
+     layers.use-depracated-textures=false
+     browser.cache.disk.enable=false
+     mousewheel.acceleration.start=2
 
 ####################################################################
 #Second Login
@@ -147,13 +148,12 @@ sudo emacs /var/lib/dpkg/info/libpam-systemd:armhf.postinst
 ####################################################################
 #More configurations
 ####################################################################
+#less tcsh emacs vim ftp wget synaptic tkcvs fake-hwclock unzip feh lsb-release  build-essential git curl m4 flex bison gawk ethtool iperf ifplugd network-manager xutils-dev device-tree-compiler usbutils firefox smplayer evince  gimp 
 
-#XFCE windows manager alternative
-sudo apt-get install xfce4
-
-#General
+#"Must haves"
 sudo apt-get install less tcsh emacs vim ftp wget synaptic tkcvs
-sudo apt-get install fake-hwclock unzip feh lsb-rele
+sudo apt-get install fake-hwclock unzip feh lsb-release
+
 #Compiling/Building
 sudo apt-get install build-essential git curl m4 flex bison gawk
 
@@ -174,30 +174,42 @@ sudo apt-get install gimp
 sudo apt-get install octave
 sudo apt-get install scratch
 
+#Scientific
+sudo apt-get install python-numpy python-scipy python-matplotlib ipython ipython-notebook python-pandas python-sympy python-nose
+sudo apt-get install r-base
+
 #Sound
-sudo apt-get install xfce4-mixer gstreamer0.10-alsa
+#sudo apt-get install xfce4-mixer gstreamer0.10-alsa
 sudo apt-get install alsa-base alsa-utils libasound2-plugins 
+
+#For Demos
 sudo apt-get install libdrm-dev libasound2-dev
 sudo apt-get install libfluidsynth-dev fluidsynth fluid-soundfont-gm
 
-#X Windows
-sudo apt-get install xinit
+#X11 package for xtemp
 sudo apt-get install libx11-dev
 
 #Camera
 sudo apt-get install camorama
 
 #Wifi
-sudo apt-get install wicd-curses 
 sudo apt-get install linux-firmware
 
-#Office
-#sudo apt-get install libreoffice
+#Screen sharing
+sudo apt-get install tightvncserver
 
-#Getting all packages
+#Getting list of all packages
 dpkg --get-selections > my.packages
 
+####################################################################
+#Recommended
+####################################################################
 
+#sudo aptitude install boinc-client boinc-manager
+#sudo apt-get install libreoffice
+#sudo apt-get install openvpn
+#sudo apt-get install synergy
+#sudo apt-get install vlc
 
 ####################################################################
 #Purging bad packages
@@ -223,10 +235,13 @@ Section "Screen"
 #---- Uncomment your preferred mode ----
     #Modes "1920x1200"
     #Modes "1920x1080"
-    Modes "1280x720"
+    #Modes "1280x720"
     #Modes "640x480"
   EndSubSection
 EndSection
+
+
+
 ####################################################################
 #Editing audio config file
 ####################################################################
@@ -240,14 +255,6 @@ pcm.!default {
  }
  converter "samplerate"
 }
-
-####################################################################
-#Tuning LXDE for speed
-####################################################################
-rm -f ~/.config/lxsession/LXDE/autostart
-sudo emacs /etc/xdg/lxsession/LXDE/autostart
-
-Delete the line "@pcmanfm --desktop --profile LXDE". 
 
 ####################################################################
 #Fix GCONF permission
@@ -268,7 +275,10 @@ sudo rm /bin/sh
 sudo ln -s /bin/bash /bin/sh
 sudo emacs /etc/passwd #change shell to tcsh for user linaro
 
-###################
+####################################################################
+#Customizing the ~/.cshrc
+####################################################################
+
 setenv HISTSIZE 1000
 setenv EDITOR emacs
 set history=2000
@@ -280,9 +290,6 @@ setenv LS_COLORS 'no=00:fi=00:di=01;34:ln=01;36:pi=40;33:so=01;35:do=01;35:bd=40
 5:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.avi=01;35:*.fli=01;35:*.gl=01;35:*.\
 dl=01;35:*.xcf=01;35:*.xwd=01;35:*.flac=01;35:*.mp3=01;35:*.mpc=01;35:*.ogg=01;35:*.wav=01;35:'
 
-####################
-#ALIASES
-####################
 alias s         'source'
 alias e         'emacs'
 alias rm        'rm -i'
@@ -297,17 +304,18 @@ alias less      'less -X'
 ####################################################################
 #Installing Epiphany SDK
 ####################################################################
-sudo apt-get install libmpfr-dev libmpc-dev libgmp3-dev libmpc2
+sudo apt-get install libmpfr-dev libmpc-dev libgmp3-dev
 sudo mkdir -p /opt/adapteva/
 wget http://downloads.parallella.org/esdk/esdk.5.13.09.10_linux_armv7l.tgz
 sudo tar xzf esdk.5.13.09.10_linux_armv7l.tgz -C /opt/adapteva/
 sudo ln -sTf /opt/adapteva/esdk.5.13.09.10 /opt/adapteva/esdk
+sudo ln -s /usr/lib/arm-linux-gnueabihf/libmpc.so.3.0.0 /usr/lib/arm-linux-gnueabihf/libmpc.so.2 #HACK!
 
-emacs ~/.cshrc
-setenv EPIPHANY_HOME      /opt/adapteva/esdk
-source ${EPIPHANY_HOME}/setup.csh
+#Adding esdk setup to .cshrc
+echo 'setenv EPIPHANY_HOME      /opt/adapteva/esdk' >> ${HOME}/.cshrc
+echo 'source ${EPIPHANY_HOME}/setup.csh' >> ${HOME}/.cshrc
 
-emacs ~/.bashrc
+#Adding esdk setup to .bashrc
 echo 'EPIPHANY_HOME=/opt/adapteva/esdk' >> ${HOME}/.bashrc
 echo '. ${EPIPHANY_HOME}/setup.sh' >> ${HOME}/.bashrc
 
@@ -373,20 +381,13 @@ export LD_LIBRARY_PATH=/usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH
 #sound only comes out if you add and adjust sound icon on lxde menu bar
 #installing cheese crashes the system
 
+#Commented out the start condition in /etc/xdg/autostart/nm-applet
 
-####
-couldn't install synaptic
-###
-
-Commented out the start condition in /etc/xdg/autostart/nm-applet
-sudo usermod -F netdev -a linaro
-sudo apt-get --reinstall install policykit-1
-
-Errors were encountered while processing:
- libpam-systemd:armhf
- policykit-1
- colord
-
-
-
+####################################################################
+#MPI Installation from source
+####################################################################
+wget http://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.1.tar.gz
+tar -zxvf openmpi-1.8.1.tar.gz
+make all
+make install
 

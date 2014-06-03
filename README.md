@@ -99,9 +99,12 @@ sudo emacs /var/lib/dpkg/info/libpam-systemd:armhf.postinst
 Slow boot time (timeout) without ethernet cable:
 ```
 sudo emacs /etc/init/failsafe.conf
-#Change the timeout value from 60 seconds to make boot faster
-#in case there is no cable inserted.Note: FIX THIS!
+#Change sleep values to 4 seconds (in case no eth cable inserted)
 ```
+
+DNS not working
+sudo emacs /etc/NetworkManager/NetworkManger.conf
+#comment out line "dns=dnsmasq"
 
 Firefox stability issue(not solved!):
 ```
@@ -341,4 +344,7 @@ sudo make install
 ### Known Issues
 * Firefox not 100% stable
 * No serial port access with default Linux kernel.
-
+* The wifi connection is hit and miss?
+* Start wireless with app with 'sudo nm-applet`
+* Define a connection with 'sudo nm-connection-editor'-->disable all things ipv6
+* 

@@ -351,7 +351,5 @@ sudo make install
 ### Known Issues
 * Firefox not 100% stable
 * No serial port access with default Linux kernel.
-* The wifi connection is hit and miss?
 * Start wireless with app with 'sudo nm-applet`
 * Define a connection with 'sudo nm-connection-editor'-->disable all things ipv6
-* 

@@ -104,12 +104,14 @@ sudo emacs /etc/init/failsafe.conf
 ```
 
 Firefox stability issue(not solved!):
+```
 In firefox URL window: (about:config)
      webgl.disabled=true
      webgl.disable0-extensions=true
      layers.use-depracated-textures=false
      browser.cache.disk.enable=false
      mousewheel.acceleration.start=2
+```
 
 Creating Parallella background:
 ```
@@ -167,7 +169,7 @@ sudo apt-get install linux-firmware
 sudo apt-get install tightvncserver
 ```
 
-###  13. Getting list of all packages installed
+### 13. Getting list of all packages installed
 ```
 dpkg --get-selections > my.packages
 ```
@@ -214,7 +216,7 @@ EndSection
 ```
 
 
-### Create ~/.asoundrc config file
+### 17. Create ~/.asoundrc config file
 
 ```
 pcm.!default {
@@ -227,12 +229,12 @@ pcm.!default {
 }
 ```
 
-### Fix GCONF permission
+### 18. Fix GCONF permission
 ```
 sudo chown -R linaro:linaro ~/.gconf
 ```
 
-### Fix annoying Ubuntu shell defaults
+### 19. Fix annoying Ubuntu shell defaults
 
 ```
 sudo rm /bin/sh
@@ -242,7 +244,7 @@ sudo ln -s /bin/bash /bin/sh
 sudo emacs /etc/passwd
 ```
 
-### Customizing the ~/.cshrc
+### 20. Customizing the ~/.cshrc
 
 ```
 setenv HISTSIZE 1000
@@ -268,7 +270,7 @@ alias rsh       'rsh -X'
 alias less      'less -X'
 ```
 
-### Installing Epiphany SDK
+### 21. Installing Epiphany SDK
 ```
 sudo apt-get install libmpfr-dev libmpc-dev libgmp3-dev
 sudo mkdir -p /opt/adapteva/
@@ -282,7 +284,7 @@ echo 'EPIPHANY_HOME=/opt/adapteva/esdk' >> ${HOME}/.bashrc
 echo '. ${EPIPHANY_HOME}/setup.sh' >> ${HOME}/.bashrc
 ```    
 
-### Setup COPRTHR
+### 22. Setup COPRTHR
 
 ```    
 ###Libelf prerequisite
@@ -324,7 +326,7 @@ echo `export PATH=/usr/local/browndeer/bin:$PATH` >> ~/.bashrc
 echo `export LD_LIBRARY_PATH=/usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH` >> ~/.bashrc
 ```
 
-### MPI Installation from source
+### 23. MPI Installation from source
 ```
 wget http://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.1.tar.gz
 tar -zxvf openmpi-1.8.1.tar.gz

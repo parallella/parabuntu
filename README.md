@@ -317,13 +317,13 @@ tar -zxvf coprthr-1.6.0-parallella.tgz
 sudo ./browndeer/scripts/install_coprthr_parallella.sh
 
 ### Add paths to .bashrc
-echo `export PATH=/usr/local/browndeer/bin:$PATH` >> ~/.bashrc
-echo `export LD_LIBRARY_PATH=/usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH` >> ~/.bashrc
+echo 'export PATH=/usr/local/browndeer/bin:$PATH' >> ~/.bashrc
+echo 'export LD_LIBRARY_PATH=/usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
 
 ### Add paths to root .bashrc
 sudo su
-echo `export PATH=/usr/local/browndeer/bin:$PATH` >> ~/.bashrc
-echo `export LD_LIBRARY_PATH=/usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH` >> ~/.bashrc
+echo 'export PATH=/usr/local/browndeer/bin:$PATH' >> ~/.bashrc
+echo 'export LD_LIBRARY_PATH=/usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
 ```
 
 ### 23. MPI Installation from source

@@ -1,180 +1,195 @@
-# Parallella Ubuntu Image Creation 
+## Parallella Ubuntu Image Creation 
 
-## 1. Format a blank SD Card
+### 1. Format a blank SD Card
 
-    $ sudo gparted
+```
+sudo gparted
+```
 
 * Create a 256 MB FAT32 partition named 'BOOT'
 * Create a 4 GB+ EXT4 partition named 'rootfs'
 
-## 2. Download Ubuntu distribution and BOOT files
+### 2. Download Ubuntu distribution and BOOT files
 
-    $ wget http://releases.linaro.org/14.05/ubuntu/trusty-images/nano/linaro-trusty-nano-20140522-661.tar.gz
-    $ wget http://downloads.parallella.org/boot/boot-e16-7z020-v01-140528.tgz
+```
+wget http://releases.linaro.org/14.05/ubuntu/trusty-images/nano/linaro-trusty-nano-20140522-661.tar.gz
+wget http://downloads.parallella.org/boot/boot-e16-7z020-v01-140528.tgz
+```
 
+### 3. Copy files to SD card
 
-## 3. Copy files to SD card
+```
+sudo tar -zxvf linaro-trusty-nano-20140522-661.tar.gz
+cd binary
+sudo rsync -a --progress ./ /media/aolofsson/rootfs
+tar -zxvf boot-e16-7z020-v01-140528.tgz -C /media/aolofsson/BOOT
+```
 
-    $ sudo tar -zxvf linaro-trusty-nano-20140522-661.tar.gz
-    $ cd binary
-    s sudo rsync -a --progress ./ /media/aolofsson/rootfs
-    $ tar -zxvf boot-e16-7z020-v01-140528.tgz -C /media/aolofsson/BOOT
+### 4. Set up network interface (with sd card still inserted)
 
+```
+sudo emacs /media/aolofsson/rootfs/etc/network/interfaces
+```
 
-## 4. Set up network interface (with sd card still inserted)
+interfaces:
+```
+auto lo
+iface lo inet loopback
+auto eth0
+iface eth0 inet dhcp
+```
 
-    $ sudo emacs /media/aolofsson/rootfs/etc/network/interfaces
-  
-    auto lo
-    iface lo inet loopback
-    auto eth0
-    iface eth0 inet dhcp
+### 5. Enable devtmpfs
+```
+cd /media/aolofsson/rootfs/dev
+sudo su
+mknod -m 660 mmcblk0 b 179 0
+mknod -m 660 mmcblk0p1 b 179 1
+mknod -m 660 mmcblk0p2 b 179 2
+```
+### 6. Unmount uSD card
+```
+sudo sync
+umount /media/aolofsson/rootfs/
+umount /media/aolofsson/BOOT
+```
 
-## 5. Enable devtmpfs
-
-    $ cd /media/aolofsson/rootfs/dev
-    $ sudo su
-    $ mknod -m 660 mmcblk0 b 179 0
-    $ mknod -m 660 mmcblk0p1 b 179 1
-    $ mknod -m 660 mmcblk0p2 b 179 2
-
-
-## 6. Unmount uSD card
-
-    $ sudo sync
-    $ umount /media/aolofsson/rootfs/
-    $ umount /media/aolofsson/BOOT
-
-## 7. First boot (with screen/keyboard/mouse attached)
+### 7. First boot (with screen/keyboard/mouse attached)
 
 * User=linaro
 * Password=linaro
 
 ```
-    $ su linaro
-    $ sudo apt-get update
+su linaro
+sudo apt-get update
 ```
 
-## 8. Install a windows manager
-
-    sudo apt-get install lxde
-    sudo apt-get install xfce4
-    sudo apt-get install xserver-xorg-video-modesetting
-
-## 9. Enable ssh
-
-    sudo apt-get update
-    sudo apt-get install openssh-server
-
-
-## 10. SSH into Parallella from 2nd computer
-
-    ssh linaro@<lan-ip-address>
-    
-## 11. Temporary edits
-
---Work around ping permision limitation??
+### 8. Install a windows manager
 ```
-    sudo chmod u+s `which ping`
+sudo apt-get install lxde
+sudo apt-get install xfce4
+sudo apt-get install xserver-xorg-video-modesetting
+```
+
+### 9. Enable ssh
+```
+sudo apt-get update
+sudo apt-get install openssh-server
+```
+
+### 10. SSH into Parallella from 2nd computer
+```
+ssh linaro@<lan-ip-address>
+```
+
+### 11. Temporary edits
+
+Work around ping permision limitation:
+```
+sudo chmod u+s `which ping`
 ``` 
 
---Ubuntu 14.04 package bug
+Ubuntu 14.04 packaging bug:
 ```
-    sudo emacs /var/lib/dpkg/info/libpam-systemd:armhf.postinst
-
-     #comment out the following line
-     #invoke-rc.d systemd-logind start || exit $?"
+sudo emacs /var/lib/dpkg/info/libpam-systemd:armhf.postinst
+#comment out the following line
+#invoke-rc.d systemd-logind start || exit $?"
 ```
---Slow boot time (timeout) when ethernet cable isn't connected
-    sudo emacs /etc/init/failsafe.conf
-    #Change the timeout value from 60 seconds to make boot faster
-    #in case there is no cable inserted.Note: FIX THIS!
 
---Attempts at fixing firefox stability issue
-In firefox:
-  about:config
+Slow boot time (timeout) without ethernet cable:
+```
+sudo emacs /etc/init/failsafe.conf
+#Change the timeout value from 60 seconds to make boot faster
+#in case there is no cable inserted.Note: FIX THIS!
+```
+
+Firefox stability issue(not solved!):
+In firefox URL window: (about:config)
      webgl.disabled=true
      webgl.disable0-extensions=true
      layers.use-depracated-textures=false
      browser.cache.disk.enable=false
      mousewheel.acceleration.start=2
 
---Creating Parallella background 
+Creating Parallella background:
+```
     sudo emacs /etc/xdg/lxsession/LXDE/autostart
+    #add @feh --bg-fill /home/linaro/background.png
+```
 
-@feh --bg-fill /home/linaro/background.png
+### 12. Essential Packages
 
-
-## Essential Packages
-
+```
 ### "Must haves"
-    $ sudo apt-get install less tcsh emacs vim ftp wget synaptic tkcvs
-    $ sudo apt-get install fake-hwclock unzip feh lsb-release
+sudo apt-get install less tcsh emacs vim ftp wget synaptic tkcvs
+sudo apt-get install fake-hwclock unzip feh lsb-release
 
 ### Compiling/Building
-    $ udo apt-get install build-essential git curl m4 flex bison gawk
+sudo apt-get install build-essential git curl m4 flex bison gawk
 
 ### Networking
-    $ sudo apt-get install ethtool iperf ifplugd
-    $ sudo apt-get install network-manager
+sudo apt-get install ethtool iperf ifplugd
+sudo apt-get install network-manager
 
 ### Linux Tools
-    $ sudo apt-get install xutils-dev device-tree-compiler usbutils
+sudo apt-get install xutils-dev device-tree-compiler usbutils
 
 ### Media
-    $ sudo apt-get install firefox 
-    $ sudo apt-get install smplayer
-    $ suto apt-get install evince
-    $ sudo apt-get install gimp
+sudo apt-get install firefox 
+sudo apt-get install smplayer
+sudo apt-get install evince
+sudo apt-get install gimp
 
-#### Programming
-    $ sudo apt-get install octave
-    $ sudo apt-get install scratch
+### Programming
+sudo apt-get install octave
+sudo apt-get install scratch
 
 ### Scientific
-    $ sudo apt-get install python-numpy python-scipy python-matplotlib 
-    $ sudo apt-get install ipython ipython-notebook python-pandas python-sympy python-nose
-    $ sudo apt-get install r-base
+sudo apt-get install python-numpy python-scipy python-matplotlib 
+sudo apt-get install ipython ipython-notebook python-pandas python-sympy python-nose
+sudo apt-get install r-base
 
 ### Sound
-    $ sudo apt-get install xfce4-mixer gstreamer0.10-alsa
-    $ sudo apt-get install alsa-base alsa-utils libasound2-plugins 
+sudo apt-get install xfce4-mixer gstreamer0.10-alsa
+sudo apt-get install alsa-base alsa-utils libasound2-plugins 
 
 ### For Demos
-    $ sudo apt-get install libdrm-dev libasound2-dev libx11-dev
-    $ sudo apt-get install libfluidsynth-dev fluidsynth fluid-soundfont-gm
+sudo apt-get install libdrm-dev libasound2-dev libx11-dev
+sudo apt-get install libfluidsynth-dev fluidsynth fluid-soundfont-gm
 
 ### Camera
-    $ sudo apt-get install camorama
+sudo apt-get install camorama
 
 ### Wifi
-    $ sudo apt-get install linux-firmware
+sudo apt-get install linux-firmware
 
 ### Screen sharing
-    $ sudo apt-get install tightvncserver
-
-## Getting list of all packages
-
-    $ dpkg --get-selections > my.packages
-
-
-## Recommended Packages (not in default)
-```
-#sudo aptitude install boinc-client boinc-manager
-#sudo apt-get install libreoffice
-#sudo apt-get install openvpn
-#sudo apt-get install synergy
-#sudo apt-get install vlc
+sudo apt-get install tightvncserver
 ```
 
-## Purging bad packages
+###  13. Getting list of all packages installed
+```
+dpkg --get-selections > my.packages
+```
 
-    $ sudo apt-get purge chromium-browser xscreensaver
+### 14.  Recommended Packages (not in default)
+```
+sudo aptitude install boinc-client boinc-manager
+sudo apt-get install libreoffice
+sudo apt-get install openvpn
+sudo apt-get install synergy
+sudo apt-get install vlc
+```
 
+### 15. Purging bad packages
+```
+sudo apt-get purge chromium-browser xscreensaver
+```
 
-## Create xorg.conf file
-
-    $ emacs /etc/X11/xorg.conf
+### 16. Create xorg.conf file
+```
+sudo emacs /etc/X11/xorg.conf
+```
 
 xorg.conf:
 ```
@@ -199,9 +214,8 @@ EndSection
 ```
 
 
-## Add to audio config file
+### Create ~/.asoundrc config file
 
-~/.asoundrc:
 ```
 pcm.!default {
  type rate
@@ -213,30 +227,22 @@ pcm.!default {
 }
 ```
 
-## Fix GCONF permission
-
-    $ sudo chown -R linaro:linaro ~/.gconf
-
-
-## Speedup ssh 
-
-    $ sudo emacs /etc/ssh/sshd_config
-
-Add at bottom of sshd_config:
+### Fix GCONF permission
 ```
-UseDNS no
+sudo chown -R linaro:linaro ~/.gconf
 ```
 
-
-## Fix annoying Ubuntu shell defaults
+### Fix annoying Ubuntu shell defaults
 
 ```
-    $ sudo rm /bin/sh
-    $ sudo ln -s /bin/bash /bin/sh
-    $ sudo emacs /etc/passwd #change shell to tcsh for user linaro
+sudo rm /bin/sh
+sudo ln -s /bin/bash /bin/sh
+
+##Edit password file and replace bash with tcsh
+sudo emacs /etc/passwd
 ```
 
-## Customizing the ~/.cshrc
+### Customizing the ~/.cshrc
 
 ```
 setenv HISTSIZE 1000
@@ -262,70 +268,75 @@ alias rsh       'rsh -X'
 alias less      'less -X'
 ```
 
-## Installing Epiphany SDK
+### Installing Epiphany SDK
 ```
-    sudo apt-get install libmpfr-dev libmpc-dev libgmp3-dev
-    sudo mkdir -p /opt/adapteva/
-    wget http://downloads.parallella.org/esdk/esdk.5.13.09.10_linux_armv7l.tgz
-    sudo tar xzf esdk.5.13.09.10_linux_armv7l.tgz -C /opt/adapteva/
-    sudo ln -sTf /opt/adapteva/esdk.5.13.09.10 /opt/adapteva/esdk
-    sudo ln -s /usr/lib/arm-linux-gnueabihf/libmpc.so.3.0.0 /usr/lib/arm-linux-gnueabihf/libmpc.so.2 #HACK!
-    echo 'setenv EPIPHANY_HOME      /opt/adapteva/esdk' >> ${HOME}/.cshrc
-    echo 'source ${EPIPHANY_HOME}/setup.csh' >> ${HOME}/.cshrc
-    echo 'EPIPHANY_HOME=/opt/adapteva/esdk' >> ${HOME}/.bashrc
-    echo '. ${EPIPHANY_HOME}/setup.sh' >> ${HOME}/.bashrc
+sudo apt-get install libmpfr-dev libmpc-dev libgmp3-dev
+sudo mkdir -p /opt/adapteva/
+wget http://downloads.parallella.org/esdk/esdk.5.13.09.10_linux_armv7l.tgz
+sudo tar xzf esdk.5.13.09.10_linux_armv7l.tgz -C /opt/adapteva/
+sudo ln -sTf /opt/adapteva/esdk.5.13.09.10 /opt/adapteva/esdk
+sudo ln -s /usr/lib/arm-linux-gnueabihf/libmpc.so.3.0.0 /usr/lib/arm-linux-gnueabihf/libmpc.so.2 #HACK!
+echo 'setenv EPIPHANY_HOME      /opt/adapteva/esdk' >> ${HOME}/.cshrc
+echo 'source ${EPIPHANY_HOME}/setup.csh' >> ${HOME}/.cshrc
+echo 'EPIPHANY_HOME=/opt/adapteva/esdk' >> ${HOME}/.bashrc
+echo '. ${EPIPHANY_HOME}/setup.sh' >> ${HOME}/.bashrc
 ```    
 
-## Setup COPRTHR
+### Setup COPRTHR
 
 ```    
-    $ wget www.mr511.de/software/libelf-0.8.13.tar.gz
-    $ tar -zxvf libelf-0.8.13.tar.gz
-    $ cd libelf-0.8.13
-    $ ./configure
-    $ sudo make install
-    $ cd ../
+###Libelf prerequisite
+wget www.mr511.de/software/libelf-0.8.13.tar.gz
+tar -zxvf libelf-0.8.13.tar.gz
+cd libelf-0.8.13
+./configure
+sudo make install
+cd ../
 
-    $ wget github.com/downloads/libevent/libevent/libevent-2.0.18-stable.tar.gz
-    $ tar -zxvf libevent-2.0.18-stable.tar.g
-    $ cd libevent-2.0.18-stable
-    $ ./configure
-    $ sudo make install
-    $ cd ../
+###Libevent prerequisite
+wget github.com/downloads/libevent/libevent/libevent-2.0.18-stable.tar.gz
+tar -zxvf libevent-2.0.18-stable.tar.g
+cd libevent-2.0.18-stable
+./configure
+sudo make install
+cd ../
 
-    $ wget www.hyperrealm.com/libconfig/libconfig-1.4.8.tar.gz
-    $ tar -zxvf libconfig-1.4.8.tar.gz
-    $ cd libconfig-1.4.8
-    $ ./configure
-    $ sudo make install
-    $ cd ../
+###Libconfig prerequisite
+wget www.hyperrealm.com/libconfig/libconfig-1.4.8.tar.gz
+tar -zxvf libconfig-1.4.8.tar.gz
+cd libconfig-1.4.8
+./configure
+sudo make install
+cd ../
 
-    $ wget http://www.browndeertechnology.com/code/coprthr-1.6.0-parallella.tgz
-    $ tar -zxvf coprthr-1.6.0-parallella.tgz
-    $ sudo ./browndeer/scripts/install_coprthr_parallella.sh
+###Install parallella opencl package
+wget http://www.browndeertechnology.com/code/coprthr-1.6.0-parallella.tgz
+tar -zxvf coprthr-1.6.0-parallella.tgz
+sudo ./browndeer/scripts/install_coprthr_parallella.sh
 
-    $ echo `export PATH=/usr/local/browndeer/bin:$PATH` >> ~/.bashrc
-    $ echo `export LD_LIBRARY_PATH=/usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH` >> ~/.bashrc
+### Add paths to .bashrc
+echo `export PATH=/usr/local/browndeer/bin:$PATH` >> ~/.bashrc
+echo `export LD_LIBRARY_PATH=/usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH` >> ~/.bashrc
 
-    $ sudo su
-    
-    $ echo `export PATH=/usr/local/browndeer/bin:$PATH` >> ~/.bashrc
-    $ echo `export LD_LIBRARY_PATH=/usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH` >> ~/.bashrc
+### Add paths to root .bashrc
+sudo su
+echo `export PATH=/usr/local/browndeer/bin:$PATH` >> ~/.bashrc
+echo `export LD_LIBRARY_PATH=/usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH` >> ~/.bashrc
 ```
 
-## MPI Installation from source
+### MPI Installation from source
 ```
-    $ wget http://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.1.tar.gz
-    $ tar -zxvf openmpi-1.8.1.tar.gz
-    $ cd openmpi-1.8.1
-    $ ./configure --prefix=~/usr \
-                --enable-mpirun-prefix-by-default \
-                --enable-static 
-    $ make all
-    $ sudo make install
+wget http://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.1.tar.gz
+tar -zxvf openmpi-1.8.1.tar.gz
+cd openmpi-1.8.1
+./configure --prefix=~/usr \
+            --enable-mpirun-prefix-by-default \
+            --enable-static 
+make all
+sudo make install
 ```
 
-## Known Issues
+### Known Issues
 * Firefox not 100% stable
 * No serial port access with default Linux kernel.
 

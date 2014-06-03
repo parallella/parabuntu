@@ -103,8 +103,10 @@ sudo emacs /etc/init/failsafe.conf
 ```
 
 DNS not working
+```
 sudo emacs /etc/NetworkManager/NetworkManger.conf
 #comment out line "dns=dnsmasq"
+```
 
 Firefox stability issue(not solved!):
 ```
@@ -118,8 +120,8 @@ In firefox URL window: (about:config)
 
 Creating Parallella background:
 ```
-    sudo emacs /etc/xdg/lxsession/LXDE/autostart
-    #add @feh --bg-fill /home/linaro/background.png
+sudo emacs /etc/xdg/lxsession/LXDE/autostart
+#add @feh --bg-fill /home/linaro/background.png
 ```
 
 ### 12. Essential Packages
@@ -327,6 +329,11 @@ echo 'export LD_LIBRARY_PATH=/usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY
 sudo su
 echo 'export PATH=/usr/local/browndeer/bin:$PATH' >> ~/.bashrc
 echo 'export LD_LIBRARY_PATH=/usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
+
+### Add paths to .cshrc
+echo 'setenv PATH /usr/local/bin:$PATH' >> ~/.cshrc
+echo 'setenv LD_LIBRARY_PATH /usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH' >> ~/.cshrc
+
 ```
 
 ### 23. MPI Installation from source

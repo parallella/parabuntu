@@ -346,6 +346,23 @@ make all
 sudo make install
 ```
 
+### 24. Backing up card
+From Parallella:
+```
+sync
+```
+From regular computer:
+```
+sudo dd if=/dev/mmcblk0 of=my_backup.img bs=4M
+```
+
+### 25. Burning another card
+Insert a new micro SD card into regular computer
+```
+sudo dd bs=64k if=my_backup.img of=/dev/mmcblk0
+```
+
+
 ### Known Issues
 * Firefox not 100% stable
 * No serial port access with default Linux kernel.

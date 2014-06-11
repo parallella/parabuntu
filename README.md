@@ -37,6 +37,14 @@ auto lo
 iface lo inet loopback
 ```
 
+```
+#Remove the persistent rules
+sudo rm /etc/udev/rules.d/70-persistent-net.rules
+
+#Make sure they don't come back
+sudo mv  /lib/udev/rules.d/75-persistent-net-generator.rules lib/udev/rules.d/75-persistent-net-generator.rules.bak
+```
+
 ### 5. Enable devtmpfs
 ```
 cd /media/aolofsson/rootfs/dev

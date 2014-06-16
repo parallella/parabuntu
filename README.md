@@ -134,7 +134,7 @@ sudo emacs /etc/xdg/lxsession/LXDE/autostart
 
 ```
 ### "Must haves"
-sudo apt-get install less tcsh emacs vim ftp wget synaptic tkcvs
+sudo apt-get install less tcsh emacs vim ftp wget synaptic tkcvs wish
 sudo apt-get install fake-hwclock unzip feh lsb-release
 
 ### Compiling/Building

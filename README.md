@@ -294,6 +294,14 @@ echo 'source ${EPIPHANY_HOME}/setup.csh' >> ${HOME}/.cshrc
 echo 'EPIPHANY_HOME=/opt/adapteva/esdk' >> ${HOME}/.bashrc
 echo '. ${EPIPHANY_HOME}/setup.sh' >> ${HOME}/.bashrc
 ```    
+Initialize the chip at boot, in `/etc/rc.local` add the following lines before `exit 0`:
+```
+export EPIPHANY_HOME=/opt/adapteva/esdk
+export EPIPHANY_HDF=$EPIPHANY_HOME/bsps/current/platform.hdf
+export LD_LIBRARY_PATH=$EPIPHANY_HOME/tools/host/lib
+export PATH=$EPIPHANY_HOME/tools/host/bin:$EPIPHANY_HOME/tools/e-gnu/bin:$PATH
+e-reset
+```
 
 ### 22. Setup COPRTHR
 

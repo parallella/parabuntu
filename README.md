@@ -73,7 +73,7 @@ sudo apt-get update
 ### 8. Install a windows manager
 ```
 sudo apt-get install lxde
-sudo apt-get install xfce4
+#sudo apt-get install xfce4
 sudo apt-get install xserver-xorg-video-modesetting
 ```
 
@@ -135,7 +135,8 @@ sudo emacs /etc/xdg/lxsession/LXDE/autostart
 ```
 ### "Must haves"
 sudo apt-get install less tcsh emacs vim nano ftp wget synaptic tkcvs wish
-sudo apt-get install fake-hwclock unzip feh lsb-release
+sudo apt-get install unzip feh lsb-release
+sudo apt-get install fake-hwclock
 
 ### Compiling/Building
 sudo apt-get install build-essential git curl m4 flex bison gawk

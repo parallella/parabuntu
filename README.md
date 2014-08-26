@@ -7,16 +7,21 @@ sudo gparted
 ```
 
 * Create a 256 MB FAT32 partition named 'BOOT'
-* Create a 4 GB+ EXT4 partition named 'rootfs'
+* Create an EXT4 partition named 'rootfs' (ideally larger then 4GB)
 
-### 2. Download Ubuntu distribution and BOOT files
+### 2. Download Ubuntu distribution
 
 ```
-wget http://releases.linaro.org/14.05/ubuntu/trusty-images/nano/linaro-trusty-nano-20140522-661.tar.gz
+wget http://releases.linaro.org/14.07/ubuntu/trusty-images/nano/linaro-trusty-nano-20140727-680.tar.gz
 wget http://downloads.parallella.org/boot/boot-e16-7z020-v01-140528.tgz
 ```
 
-### 3. Copy files to SD card
+### 3. Download firmware files for BOOT partition
+```
+wget http://downloads.parallella.org/boot/boot-e16-7z020-v01-140528.tgz
+```
+
+### 4. Copy files to SD card
 
 ```
 sudo tar -zxvf linaro-trusty-nano-20140522-661.tar.gz
@@ -25,70 +30,57 @@ sudo rsync -a --progress ./ /media/aolofsson/rootfs
 tar -zxvf boot-e16-7z020-v01-140528.tgz -C /media/aolofsson/BOOT
 ```
 
-### 4. Set up network interface (with sd card still inserted)
+### 5. Configure ethernet configuraiton on sd-card from host computer
 
-```
-sudo emacs /media/aolofsson/rootfs/etc/network/interfaces
-```
+/media/$USER/rootfs/etc/network/interfaces:
 
-interfaces:
 ```
 auto lo
 iface lo inet loopback
+
+auto eth0
+iface eth0 inet dhcp
 ```
 
-```
-#Remove the persistent rules
-sudo rm /etc/udev/rules.d/70-persistent-net.rules
+### 6. Disable the auto-generation of rule for interface names
 
-#Make sure they don't come back
-sudo mv  /lib/udev/rules.d/75-persistent-net-generator.rules lib/udev/rules.d/75-persistent-net-generator.rules.bak
+```
+sudo mv /media/$USER/rootfs/lib/udev/rules.d/75-persistent-net-generator.rules /media/$USER/rootfs/lib/udev/rules.d/75-persistent-net-generator.rules.bak
 ```
 
-### 5. Enable devtmpfs
+### 7. Enable devtmpfs and make SD card accessible from Parallella
 ```
-cd /media/aolofsson/rootfs/dev
-sudo su
-mknod -m 660 mmcblk0 b 179 0
-mknod -m 660 mmcblk0p1 b 179 1
-mknod -m 660 mmcblk0p2 b 179 2
+cd /media/$USER/rootfs/dev
+sudo mknod -m 660 mmcblk0 b 179 0
+sudo mknod -m 660 mmcblk0p1 b 179 1
+sudo mknod -m 660 mmcblk0p2 b 179 2
 ```
-### 6. Unmount uSD card
+
+### 8. Unmount uSD card from host computer
 ```
-sudo sync
+sync
 umount /media/aolofsson/rootfs/
 umount /media/aolofsson/BOOT
 ```
 
-### 7. First boot (with screen/keyboard/mouse attached)
+### 9. First boot (with screen/keyboard/mouse or serial port attached)
 
 * User=linaro
 * Password=linaro
 
-```
-su linaro
-sudo apt-get update
-```
-
-### 8. Install a windows manager
-```
-sudo apt-get install lxde
-#sudo apt-get install xfce4
-sudo apt-get install xserver-xorg-video-modesetting
-```
-
-### 9. Enable ssh
+### 10. Install ssh
 ```
 sudo apt-get update
-sudo apt-get install openssh-server
+sudo apt-get install ssh
+ifconfig
 ```
 
-### 10. SSH into Parallella from 2nd computer
+### 11. SSH into Parallella from 2nd computer
 ```
-ssh linaro@<lan-ip-address>
+ssh linaro@<parallella-ip-address>
 ```
 
-### 11. Temporary edits
+### 12. Fix issues with Ubuntu
 
 Work around ping permision limitation:
 ```
@@ -102,19 +94,45 @@ sudo emacs /var/lib/dpkg/info/libpam-systemd:armhf.postinst
 #invoke-rc.d systemd-logind start || exit $?"
 ```
 
-Slow boot time (timeout) without ethernet cable:
+Slow boot time without ethernet cable:
 ```
 sudo emacs /etc/init/failsafe.conf
-#Change sleep values to 4 seconds (in case no eth cable inserted)
+#Change sleep values to 4 seconds (when there is no network detected)
 ```
 
-DNS not working
+### 13. Sync the file system and power off the board
 ```
-sudo emacs /etc/NetworkManager/NetworkManger.conf
+sync
+```
+Remove power.
+
+### 14. Create minimal headless Parallella backup image (from host)
+
+Insert micro-sd card into external host
+```
+sudo dd if=/dev/mmcblk0 of=<headless.img> bs=4M
+```
+
+### 15. Reboot the Parallella
+
+### 16. Install a windows manager
+```
+sudo apt-get install lxde 
+sudo apt-get install xinit
+```
+
+#DNS not working
+#```
+#sudo emacs /etc/NetworkManager/NetworkManger.conf
 #comment out line "dns=dnsmasq"
-```
+#```
 
-Firefox stability issue(not solved!):
+### 17. Trying to solve firefox instability problem
+
+sudo emacs /etc/fstab
+```
+tmpfs /home/linaro/.cache tmpfs noatime,nodev,nosuid,size=64M 0 0
+
 ```
 In firefox URL window: (about:config)
      webgl.disabled=true
@@ -124,22 +142,26 @@ In firefox URL window: (about:config)
      mousewheel.acceleration.start=2
 ```
 
+Edit 
+```
+
 Creating Parallella background:
 ```
 sudo emacs /etc/xdg/lxsession/LXDE/autostart
 #add @feh --bg-fill /home/linaro/background.png
 ```
 
-### 12. Essential Packages
+### 18. Essential Packages
 
 ```
 ### "Must haves"
-sudo apt-get install less tcsh emacs vim nano ftp wget synaptic tkcvs wish putty
-sudo apt-get install unzip feh lsb-release
-sudo apt-get install fake-hwclock
+sudo apt-get install less tcsh emacs nano ftp synaptic tkcvs wish screen putty
+sudo apt-get install feh lsb-release
+sudo apt-get install fake-hwclock ntp
 
 ### Compiling/Building
 sudo apt-get install build-essential git curl m4 flex bison gawk
+
 
 ### Networking
 sudo apt-get install ethtool iperf ifplugd
@@ -161,18 +183,17 @@ sudo apt-get install scratch
 ### Scientific
 sudo apt-get install python-numpy python-scipy python-matplotlib 
 sudo apt-get install ipython ipython-notebook python-pandas python-sympy python-nose
-sudo apt-get install r-base
+sudo apt-get install r-base r-base-dev
 
 ### Sound
-sudo apt-get install xfce4-mixer gstreamer0.10-alsa
-sudo apt-get install alsa-base alsa-utils libasound2-plugins 
+sudo apt-get install gstreamer0.10-alsa alsa-base alsa-utils libasound2-plugins 
 
 ### For Demos
 sudo apt-get install libdrm-dev libasound2-dev libx11-dev
 sudo apt-get install libfluidsynth-dev fluidsynth fluid-soundfont-gm
 
 ### Camera
-sudo apt-get install camorama
+sudo apt-get install camorama guvcview
 
 ### Wifi
 sudo apt-get install linux-firmware
@@ -181,26 +202,26 @@ sudo apt-get install linux-firmware
 sudo apt-get install tightvncserver
 ```
 
-### 13. Getting list of all packages installed
+### 19. Getting list of all packages installed
 ```
 dpkg --get-selections > my.packages
 ```
 
-### 14.  Recommended Packages (not in default)
+### 20.  Recommended Packages (not in default)
 ```
-sudo aptitude install boinc-client boinc-manager
+sudo apt-get install boinc-client boinc-manager
 sudo apt-get install libreoffice
 sudo apt-get install openvpn
 sudo apt-get install synergy
 sudo apt-get install vlc
 ```
 
-### 15. Purging bad packages
+### 21. Purging bad packages
 ```
-sudo apt-get purge chromium-browser xscreensaver
+sudo apt-get purge xscreensaver pulseaudio
 ```
 
-### 16. Create xorg.conf file
+### 22. Create xorg.conf file
 ```
 sudo emacs /etc/X11/xorg.conf
 ```
@@ -228,25 +249,53 @@ EndSection
 ```
 
 
-### 17. Create ~/.asoundrc config file
+### 23. Create ~/.asoundrc config file
 
 ```
 pcm.!default {
- type rate
+ type plug
+ slave.pcm "softvol"
+}
+
+pcm.softvol {
+ type softvol
  slave {
+  pcm "dmixer"
+ }
+ control {
+  name "PCM"
+  card 0
+ }
+}
+
+pcm.dmixer {
+  type dmix
+  ipc_key 1024
+  slave {
   pcm "hw:0"
+  period_time 0
+  period_size 1024
+  buffer_size 4096
   rate 48000
  }
- converter "samplerate"
+ bindings {
+  0 0
+  1 1
+ }
+}
+
+ctl.dmixer {
+ type hw
+ card 0
 }
 ```
 
-### 18. Fix GCONF permission
+### 24. Fix GCONF permission
 ```
 sudo chown -R linaro:linaro ~/.gconf
 ```
 
-### 19. Fix annoying Ubuntu shell defaults
+### 25. Fix annoying Ubuntu shell defaults
 
 ```
 sudo rm /bin/sh
@@ -256,7 +305,13 @@ sudo ln -s /bin/bash /bin/sh
 sudo emacs /etc/passwd
 ```
 
-### 20. Customizing the ~/.cshrc
+```
+emacs /etc/apt/sources.list
+deb http://ports.ubuntu.com/ubuntu-ports/ trusty-updates main universe
+deb-src http://ports.ubuntu.com/ubuntu-ports/ trusty-updates main universe
+```
+
+### 26. Customizing the ~/.cshrc
 
 ```
 setenv HISTSIZE 1000
@@ -282,7 +337,7 @@ alias rsh       'rsh -X'
 alias less      'less -X'
 ```
 
-### 21. Installing Epiphany SDK
+### 27. Installing Epiphany SDK
 ```
 sudo apt-get install libmpfr-dev libmpc-dev libgmp3-dev
 sudo mkdir -p /opt/adapteva/
@@ -296,7 +351,7 @@ echo 'EPIPHANY_HOME=/opt/adapteva/esdk' >> ${HOME}/.bashrc
 echo '. ${EPIPHANY_HOME}/setup.sh' >> ${HOME}/.bashrc
 ```    
 
-### 22. Setup COPRTHR
+### 28. Setup COPRTHR
 
 ```    
 ###Libelf prerequisite
@@ -343,7 +398,7 @@ echo 'setenv LD_LIBRARY_PATH /usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY
 
 ```
 
-### 23. MPI Installation from source
+### 29. MPI Installation from source
 ```
 wget http://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.1.tar.gz
 tar -zxvf openmpi-1.8.1.tar.gz
@@ -355,7 +410,7 @@ make all
 sudo make install
 ```
 
-### 24. Backing up card
+### 30. Backing up the complete file system
 From Parallella:
 ```
 sync
@@ -365,7 +420,7 @@ From regular computer:
 sudo dd if=/dev/mmcblk0 of=my_backup.img bs=4M
 ```
 
-### 25. Burning another card
+### 31. Burning another card
 Insert a new micro SD card into regular computer
 
 Option#1: Copying the whole image

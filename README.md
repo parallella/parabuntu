@@ -13,7 +13,6 @@ sudo gparted
 
 ```
 wget http://releases.linaro.org/14.07/ubuntu/trusty-images/nano/linaro-trusty-nano-20140727-680.tar.gz
-wget http://downloads.parallella.org/boot/boot-e16-7z020-v01-140528.tgz
 ```
 
 ### 3. Download firmware files for BOOT partition
@@ -33,7 +32,6 @@ tar -zxvf boot-e16-7z020-v01-140528.tgz -C /media/aolofsson/BOOT
 ### 5. Configure ethernet configuraiton on sd-card from host computer
 
 /media/$USER/rootfs/etc/network/interfaces:
-
 ```
 auto lo
 iface lo inet loopback
@@ -57,6 +55,7 @@ sudo mknod -m 660 mmcblk0p2 b 179 2
 ```
 
 ### 8. Unmount uSD card from host computer
+
 ```
 sync
 umount /media/aolofsson/rootfs/
@@ -69,6 +68,7 @@ umount /media/aolofsson/BOOT
 * Password=linaro
 
 ### 10. Install ssh
+
 ```
 sudo apt-get update
 sudo apt-get install ssh
@@ -76,6 +76,7 @@ ifconfig
 ```
 
 ### 11. SSH into Parallella from 2nd computer
+
 ```
 ssh linaro@<parallella-ip-address>
 ```
@@ -113,7 +114,8 @@ Insert micro-sd card into external host
 sudo dd if=/dev/mmcblk0 of=<headless.img> bs=4M
 ```
 
-### 15. Reboot the Parallella
+### 15. Reboot the Parallella (ssh into computer or use as regular desktop)
+
 
 ### 16. Install a windows manager
 ```
@@ -121,33 +123,7 @@ sudo apt-get install lxde
 sudo apt-get install xinit
 ```
 
-
-
-### 17. Trying to solve firefox instability problem
-
-sudo emacs /etc/fstab
-```
-tmpfs /home/linaro/.cache tmpfs noatime,nodev,nosuid,size=64M 0 0
-
-```
-In firefox URL window: (about:config)
-     webgl.disabled=true
-     webgl.disable0-extensions=true
-     layers.use-depracated-textures=false
-     browser.cache.disk.enable=false
-     mousewheel.acceleration.start=2
-```
-
-Edit 
-```
-
-Creating Parallella background:
-```
-sudo emacs /etc/xdg/lxsession/LXDE/autostart
-#add @feh --bg-fill /home/linaro/background.png
-```
-
-### 18. Essential Packages
+### 18. Install other essential Packages
 
 ```
 ### "Must haves"
@@ -157,7 +133,6 @@ sudo apt-get install fake-hwclock ntp
 
 ### Compiling/Building
 sudo apt-get install build-essential git curl m4 flex bison gawk
-
 
 ### Networking
 sudo apt-get install ethtool iperf ifplugd
@@ -181,6 +156,9 @@ sudo apt-get install python-numpy python-scipy python-matplotlib
 sudo apt-get install ipython ipython-notebook python-pandas python-sympy python-nose
 sudo apt-get install r-base r-base-dev
 
+### Erlang ###
+sudo apt-get install erlang-mini
+
 ### Sound
 sudo apt-get install gstreamer0.10-alsa alsa-base alsa-utils libasound2-plugins 
 
@@ -197,19 +175,20 @@ sudo apt-get install linux-firmware
 ### Screen sharing
 sudo apt-get install tightvncserver
 ```
-
-### 19. Getting list of all packages installed
-```
-dpkg --get-selections > my.packages
-```
-
-### 20.  Recommended Packages (not in default)
 ```
 sudo apt-get install boinc-client boinc-manager
 sudo apt-get install libreoffice
 sudo apt-get install openvpn
 sudo apt-get install synergy
 sudo apt-get install vlc
+```
+
+### 19.  Install Erlang
+
+
+### 20. Getting list of all packages installed
+```
+dpkg --get-selections > my.packages
 ```
 
 ### 21. Purging bad packages
@@ -291,20 +270,39 @@ ctl.dmixer {
 sudo chown -R linaro:linaro ~/.gconf
 ```
 
+### 24. Trying to solve firefox instability problem
+
+sudo emacs /etc/fstab
+```
+tmpfs /home/linaro/.cache tmpfs noatime,nodev,nosuid,size=64M 0 0
+
+```
+In firefox URL window: (about:config)
+     webgl.disabled=true
+     webgl.disable0-extensions=true
+     layers.use-depracated-textures=false
+     browser.cache.disk.enable=false
+     mousewheel.acceleration.start=2
+
+Creating Parallella background:
+```
+sudo emacs /etc/xdg/lxsession/LXDE/autostart
+#add @feh --bg-fill /home/linaro/background.png
+
 ### 25. Fix annoying Ubuntu shell defaults
 
 ```
-sudo rm /bin/sh
-sudo ln -s /bin/bash /bin/sh
-
+#Replace dash default shell with bash
+sudo ln -sTf /bin/bash /bin/sh
 ##Edit password file and replace bash with tcsh
 sudo emacs /etc/passwd
 ```
 
+Edit /etc/apt/sources.list:
 ```
-emacs /etc/apt/sources.list
 deb http://ports.ubuntu.com/ubuntu-ports/ trusty-updates main universe
 deb-src http://ports.ubuntu.com/ubuntu-ports/ trusty-updates main universe
+deb http://packages.erlang-solutions.com/ubuntu trusty contrib
 ```
 
 ### 26. Customizing the ~/.cshrc

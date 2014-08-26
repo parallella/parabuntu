@@ -121,11 +121,7 @@ sudo apt-get install lxde
 sudo apt-get install xinit
 ```
 
-#DNS not working
-#```
-#sudo emacs /etc/NetworkManager/NetworkManger.conf
-#comment out line "dns=dnsmasq"
-#```
+
 
 ### 17. Trying to solve firefox instability problem
 
@@ -438,3 +434,9 @@ sudo rsync -a --progress /media/aolofsson/rootfs ./
 * No serial port access with default Linux kernel.
 * Start wireless with app with 'sudo nm-applet`
 * Define a connection with 'sudo nm-connection-editor'-->disable all things ipv6
+
+```
+#sudo emacs /etc/NetworkManager/NetworkManger.conf
+#comment out line "dns=dnsmasq"
+```
+

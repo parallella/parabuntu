@@ -1,0 +1,2 @@
+Parallella BOOT partition images
+

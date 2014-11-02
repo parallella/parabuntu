@@ -1,73 +1,114 @@
 ## Parallella Ubuntu Image Creation 
 
-### 1. Format a blank SD Card
+**TODO: We need to remove generated SSH host certificates after we are done**
+
+
+
+### 1. Create a workspace
+```
+export WORKSPACE=/var/tmp/workspace
+mkdir $WORKSPACE
+cd $WORKSPACE
+```
+
+### 2. Format a blank SD Card
 
 ```
 sudo gparted
 ```
 
-* Create a 256 MB FAT32 partition named 'BOOT'
-* Create an EXT4 partition named 'rootfs' (ideally larger then 4GB)
+* Create a 100 MiB FAT32 partition named 'BOOT'
+* Create an 3700 MiB EXT4 partition named 'rootfs' (so the image fits in a 4GB SD card)
+* Apply changes
+* Set 'boot' flag for 'BOOT' partition. (Might not be necessary). 
 
-### 2. Download Ubuntu distribution
-
-```
-wget http://releases.linaro.org/14.07/ubuntu/trusty-images/nano/linaro-trusty-nano-20140727-680.tar.gz
-```
-
-### 3. Download firmware files for BOOT partition
-```
-wget http://downloads.parallella.org/boot/boot-e16-7z020-v01-140528.tgz
-```
-
-### 4. Copy files to SD card
+### 3. Download Ubuntu distribution
 
 ```
-sudo tar -zxvf linaro-trusty-nano-20140522-661.tar.gz
-cd binary
-sudo rsync -a --progress ./ /media/aolofsson/rootfs
-tar -zxvf boot-e16-7z020-v01-140528.tgz -C /media/aolofsson/BOOT
+wget http://releases.linaro.org/14.10/ubuntu/trusty-images/nano/linaro-trusty-nano-20141024-684.tar.gz
 ```
 
-### 5. Configure ethernet configuraiton on sd-card from host computer
+### [FIXME] 4. Download firmware files for BOOT partition
+```
+wget http://downloads.parallella.org/boot/TBD
+```
 
-/media/$USER/rootfs/etc/network/interfaces:
+### 5. Mount partitions
+```
+mkdir -p mnt/{boot,rootfs}
+sudo mount /dev/mmcblk0p1 mnt/boot
+sudo mount /dev/mmcblk0p2 mnt/rootfs
+```
+
+### 6. Copy files to SD card
+
+```
+sudo tar --strip-components 1 -xvzpf linaro-trusty-nano-20141024-684.tar.gz -C mnt/rootfs/
+```
+
+[FIXME]  
+```
+tar -zxvf boot-e16-7z020-v01-140528.tgz -C mnt/boot
+```
+
+### 7. Configure ethernet configuraiton on sd-card from host computer
+
+mnt/rootfs/etc/network/interfaces.d/lo:
 ```
 auto lo
 iface lo inet loopback
+```
 
+mnt/rootfs/etc/network/interfaces.d/eth0:
+```
 auto eth0
 iface eth0 inet dhcp
 ```
 
-### 6. Disable the auto-generation of rule for interface names
+### 8. Add udev rule to make Parallella ethernet port eth0
 
+mnt/rootfs/etc/udev/rules.d/74-parallella-persistent-net.rules:
 ```
-sudo mv /media/$USER/rootfs/lib/udev/rules.d/75-persistent-net-generator.rules /media/$USER/rootfs/lib/udev/rules.d/75-persistent-net-generator.rules.bak
+# Always map Parallella network interface to eth0
+SUBSYSTEM=="net", ACTION=="add", DEVPATH=="/devices/amba.1/e000b000.eth/*", DRIVERS=="?*", KERNEL=="eth*", NAME="eth0"
 ```
 
-### 7. Enable devtmpfs and make SD card accessible from Parallella
+### 9. Fix file permissions for Epiphany driver
+mnt/rootfs/etc/udev/rules.d/90-epiphany-device.rules
+```
+# Set appropriate permissions on the epiphany device node
+KERNEL=="epiphany", MODE="0666"h
+```
+### 10. Enable devtmpfs and make SD card accessible from Parallella
 ```
 cd /media/$USER/rootfs/dev
 sudo mknod -m 660 mmcblk0 b 179 0
 sudo mknod -m 660 mmcblk0p1 b 179 1
 sudo mknod -m 660 mmcblk0p2 b 179 2
 ```
+[TODO] Do we need to add `/dev/dri` and `/dev/input` ???
 
-### 8. Unmount uSD card from host computer
+### [TODO] 11. Copy kernel modules over
+TODO
+
+### 12. Unmount uSD card from host computer
 
 ```
 sync
-umount /media/aolofsson/rootfs/
-umount /media/aolofsson/BOOT
+sudo umount mnt/rootfs
+sudo umount mnt/boot
 ```
 
-### 9. First boot (with screen/keyboard/mouse or serial port attached)
+### [TODO] Boot with QEMU instead 
+
+
+### 12. First boot (with screen/keyboard/mouse or serial port attached)
 
 * User=linaro
 * Password=linaro
 
-### 10. Install ssh
+
+### 13. Install ssh
 
 ```
 sudo apt-get update
@@ -75,64 +116,94 @@ sudo apt-get install ssh
 ifconfig
 ```
 
-### 11. SSH into Parallella from 2nd computer
+### 14. Install editors
+```
+apt-get install -y vim emacs nano
+```
+
+### 14. SSH into Parallella from 2nd computer
 
 ```
 ssh linaro@<parallella-ip-address>
 ```
 
-### 12. Fix issues with Ubuntu
-
-Work around ping permision limitation:
+### 15. Become root
 ```
-sudo chmod u+s `which ping`
+sudo su
+```
+
+### 16. Log install commands
+```
+export HISTSIZE=100000
+sudo touch /var/log/install_log
+sudo chmod 644 /var/log/install_log
+shopt -s histappend
+```
+
+
+### 17. Fix issues with Ubuntu
+
+Work around ping permision limitation:  
+[TODO] We can do this before booting ...  
+```
+sudo chmod u+s /bin/ping
+sudo chmod u+s /bin/ping6
 ``` 
 
-Ubuntu 14.04 packaging bug:
+Ubuntu 14.04 packaging bug:  
+[TODO] Seems to be gone in 14.10. Verify.
 ```
 sudo emacs /var/lib/dpkg/info/libpam-systemd:armhf.postinst
 #comment out the following line
 #invoke-rc.d systemd-logind start || exit $?"
 ```
 
-Slow boot time without ethernet cable:
+Slow boot time without ethernet cable:  
+[TODO] Can be done before we boot  
+[TODO] Should be added to dhclient conf
 ```
 sudo emacs /etc/init/failsafe.conf
-#Change sleep values to 4 seconds (when there is no network detected)
+#Change sleep values to 20 seconds (when there is no network detected)
 ```
 
-### 13. Sync the file system and power off the board
+### 14. Sync the file system and power off the board
 ```
 sync
 ```
 Remove power.
 
-### 14. Create minimal headless Parallella backup image (from host)
+
+### 15. Create minimal headless Parallella backup image (from host)
+
+[TODO] Don't we want same rootfs for everything? Easier maintenance. We could just disable X/LXDE autostart as final step in headless. 
 
 Insert micro-sd card into external host
 ```
 sudo dd if=/dev/mmcblk0 of=<headless.img> bs=4M
 ```
 
-### 15. Reboot the Parallella (ssh into computer or use as regular desktop)
+### 16. Reboot the Parallella (ssh into computer or use as regular desktop)
 
 
-### 16. Install a windows manager
+### 17. Install a windows manager
 ```
 sudo apt-get install lxde 
 sudo apt-get install xinit
 ```
 
-### 18. Install other essential Packages
+### 19. Install other essential Packages
 
 ```
 ### "Must haves"
-sudo apt-get install less tcsh emacs nano ftp synaptic tkcvs wish screen putty
+apt-get install less tcsh emacs nano ftp synaptic tkcvs wish screen putty
 sudo apt-get install feh lsb-release
 sudo apt-get install fake-hwclock ntp
 
 ### Compiling/Building
-sudo apt-get install build-essential git curl m4 flex bison gawk
+sudo apt-get install build-essential git curl m4 flex bison gawk pkg-config
+
+### Ubuntu package tools
+sudo apt-get install devscripts dpkg-dev
 
 ### Networking
 sudo apt-get install ethtool iperf ifplugd
@@ -183,20 +254,20 @@ sudo apt-get install synergy
 sudo apt-get install vlc
 ```
 
-### 19.  Install Erlang
+### 20.  Install Erlang
 
 
-### 20. Getting list of all packages installed
+### 21. Getting list of all packages installed
 ```
 dpkg --get-selections > my.packages
 ```
 
-### 21. Purging bad packages
+### 22. Purging bad packages
 ```
 sudo apt-get purge xscreensaver pulseaudio
 ```
 
-### 22. Create xorg.conf file
+### 23. Create xorg.conf file
 ```
 sudo emacs /etc/X11/xorg.conf
 ```
@@ -224,7 +295,7 @@ EndSection
 ```
 
 
-### 23. Create ~/.asoundrc config file
+### 24. Create ~/.asoundrc config file
 
 ```
 pcm.!default {
@@ -265,12 +336,12 @@ ctl.dmixer {
 }
 ```
 
-### 24. Fix GCONF permission
+### 25. Fix GCONF permission
 ```
 sudo chown -R linaro:linaro ~/.gconf
 ```
 
-### 24. Trying to solve firefox instability problem
+### 26. Trying to solve firefox instability problem
 
 sudo emacs /etc/fstab
 ```
@@ -288,24 +359,33 @@ Creating Parallella background:
 ```
 sudo emacs /etc/xdg/lxsession/LXDE/autostart
 #add @feh --bg-fill /home/linaro/background.png
+```
 
-### 25. Fix annoying Ubuntu shell defaults
+### 27. Fix annoying Ubuntu shell defaults
 
 ```
 #Replace dash default shell with bash
-sudo ln -sTf /bin/bash /bin/sh
-##Edit password file and replace bash with tcsh
-sudo emacs /etc/passwd
+echo "dash dash/sh boolean false" | debconf-set-selections
+DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
 ```
 
-Edit /etc/apt/sources.list:
+Edit /etc/apt/sources.list.d/ubuntu-ports.list:
 ```
 deb http://ports.ubuntu.com/ubuntu-ports/ trusty-updates main universe
 deb-src http://ports.ubuntu.com/ubuntu-ports/ trusty-updates main universe
 deb http://packages.erlang-solutions.com/ubuntu trusty contrib
 ```
 
-### 26. Customizing the ~/.cshrc
+Edit /etc/apt/sources.list.d/ubuntu-sources.list
+```
+# newer versions of the distribution.
+deb-src http://archive.ubuntu.com/ubuntu/ trusty main restricted
+deb-src http://archive.ubuntu.com/ubuntu/ trusty main universe
+#deb-src http://archive.ubuntu.com/ubuntu/ trusty main multiverse
+```
+
+
+### 28. Customizing the ~/.cshrc
 
 ```
 setenv HISTSIZE 1000
@@ -331,7 +411,7 @@ alias rsh       'rsh -X'
 alias less      'less -X'
 ```
 
-### 27. Installing Epiphany SDK
+### 29. [TODO] Fix when we have final. Installing Epiphany SDK
 ```
 sudo apt-get install libmpfr-dev libmpc-dev libgmp3-dev
 sudo mkdir -p /opt/adapteva/
@@ -345,33 +425,33 @@ echo 'EPIPHANY_HOME=/opt/adapteva/esdk' >> ${HOME}/.bashrc
 echo '. ${EPIPHANY_HOME}/setup.sh' >> ${HOME}/.bashrc
 ```    
 
-### 28. Setup COPRTHR
+### 30. Setup COPRTHR
 
-```    
-###Libelf prerequisite
-wget www.mr511.de/software/libelf-0.8.13.tar.gz
-tar -zxvf libelf-0.8.13.tar.gz
-cd libelf-0.8.13
-./configure
-sudo make install
-cd ../
+## TODO: Set up Debian package armhf build server somewhere.
 
-###Libevent prerequisite
-wget github.com/downloads/libevent/libevent/libevent-2.0.18-stable.tar.gz
-tar -zxvf libevent-2.0.18-stable.tar.g
-cd libevent-2.0.18-stable
-./configure
-sudo make install
-cd ../
+* If you don't have the deb files:
 
-###Libconfig prerequisite
-wget www.hyperrealm.com/libconfig/libconfig-1.4.8.tar.gz
-tar -zxvf libconfig-1.4.8.tar.gz
-cd libconfig-1.4.8
-./configure
-sudo make install
-cd ../
+[TODO]: Verify that this works
+```
+apt-get install pkg-config
+mkdir /var/tmp/builddeb
+cd /var/tmp/builddeb
+apt-get build-dep libelf libelf-dev libevent libevent-dev libconfig libconfig-dev
+apt-get build-dep libelf libelf-dev libevent libevent-dev libconfig libconfig-dev
+apt-get --build source libelf libevent libconfig
+dpkg -i *.deb
+Copy over .deb packages. We can probably use them throughout the Linaro 14.** series without problems.
+cd ~
+rm -rf /var/tmp/builddeb
+```
 
+* If you have the .deb files:
+```
+cd packages
+dpkg -i $(ls *.deb | grep -v -- "-dgb_")
+```
+
+[TODO: We could put this in overlay]  
 ###Install parallella opencl package
 wget http://www.browndeertechnology.com/code/coprthr-1.6.0-parallella.tgz
 tar -zxvf coprthr-1.6.0-parallella.tgz
@@ -392,7 +472,10 @@ echo 'setenv LD_LIBRARY_PATH /usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY
 
 ```
 
-### 29. MPI Installation from source
+### 31. MPI Installation from source
+
+[Longterm TODO: There's only 1.6 source packages so install from source for now]
+
 ```
 wget http://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.1.tar.gz
 tar -zxvf openmpi-1.8.1.tar.gz
@@ -404,17 +487,18 @@ make all
 sudo make install
 ```
 
-### 30. Backing up the complete file system
+### 32. Backing up the complete file system
 From Parallella:
 ```
 sync
 ```
+
 From regular computer:
 ```
 sudo dd if=/dev/mmcblk0 of=my_backup.img bs=4M
 ```
 
-### 31. Burning another card
+### 33. Burning another card
 Insert a new micro SD card into regular computer
 
 Option#1: Copying the whole image
@@ -436,5 +520,15 @@ sudo rsync -a --progress /media/aolofsson/rootfs ./
 ```
 #sudo emacs /etc/NetworkManager/NetworkManger.conf
 #comment out line "dns=dnsmasq"
+```
+
+### 99. Remove SSH host keys 
+* Remove SSH host keys. Will result in SSH regenerates keys on reboot*
+```
+rm -rf mnt/rootfs/etc/ssh/ssh_host*
+```
+Verify that this line is present in mnt/rootfs/etc/rc.local
+```
+test -f /etc/ssh/ssh_host_dsa_key || dpkg-reconfigure openssh-server
 ```
 

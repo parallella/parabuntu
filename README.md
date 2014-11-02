@@ -1,15 +1,20 @@
-## Parallella Ubuntu Image Creation 
+# Parallella Ubuntu Image Creation 
 
 **TODO: We need to remove generated SSH host certificates after we are done**
 
+This is work in progress. The goal is to automate as much as possible. 
 
 
-### 1. Create a workspace
+### 1. Clone the repository
+[TODO: Move over to official parallella github eventually]  
 ```
-export WORKSPACE=/var/tmp/workspace
-mkdir $WORKSPACE
+git clone git@github.com/olajep/parallella-ubuntu workspace --branch 14.10-wip-dont-pull
+export WORKSPACE=$(readlink -e workspace)
 cd $WORKSPACE
 ```
+
+For all commands issued on PC it is assumed that `$WORKSPACE` is the current working directory.
+
 
 ### 2. Format a blank SD Card
 
@@ -50,48 +55,27 @@ sudo tar --strip-components 1 -xvzpf linaro-trusty-nano-20141024-684.tar.gz -C m
 ```
 tar -zxvf boot-e16-7z020-v01-140528.tgz -C mnt/boot
 ```
-
-### 7. Configure ethernet configuraiton on sd-card from host computer
-
-mnt/rootfs/etc/network/interfaces.d/lo:
+### 7. rsync overlay over rootfs
 ```
-auto lo
-iface lo inet loopback
+sudo rsync --verbose -ap overlay/rootfs/ mnt/rootfs/
 ```
 
-mnt/rootfs/etc/network/interfaces.d/eth0:
+### 8. Enable devtmpfs and make SD card accessible from Parallella
 ```
-auto eth0
-iface eth0 inet dhcp
-```
-
-### 8. Add udev rule to make Parallella ethernet port eth0
-
-mnt/rootfs/etc/udev/rules.d/74-parallella-persistent-net.rules:
-```
-# Always map Parallella network interface to eth0
-SUBSYSTEM=="net", ACTION=="add", DEVPATH=="/devices/amba.1/e000b000.eth/*", DRIVERS=="?*", KERNEL=="eth*", NAME="eth0"
+sudo ./scripts/10-create-device-files.sh
 ```
 
-### 9. Fix file permissions for Epiphany driver
-mnt/rootfs/etc/udev/rules.d/90-epiphany-device.rules
+### 9. Fix file permissions
+Currently only ping & ping6 setuid
 ```
-# Set appropriate permissions on the epiphany device node
-KERNEL=="epiphany", MODE="0666"h
-```
-### 10. Enable devtmpfs and make SD card accessible from Parallella
-```
-cd /media/$USER/rootfs/dev
-sudo mknod -m 660 mmcblk0 b 179 0
-sudo mknod -m 660 mmcblk0p1 b 179 1
-sudo mknod -m 660 mmcblk0p2 b 179 2
+sudo ./scripts/20-fix-permissions.sh
 ```
 [TODO] Do we need to add `/dev/dri` and `/dev/input` ???
 
-### [TODO] 11. Copy kernel modules over
-TODO
+### [TODO] 10. Copy kernel modules over
+TODO. Might be a good idea to integrate parallella-root-image.git into this...  
 
-### 12. Unmount uSD card from host computer
+### 11. Unmount uSD card from host computer
 
 ```
 sync
@@ -108,68 +92,72 @@ sudo umount mnt/boot
 * Password=linaro
 
 
-### 13. Install ssh
+### 13. Basic setup
 
+#### Make sure we'll get the latest packages available
 ```
 sudo apt-get update
-sudo apt-get install ssh
-ifconfig
 ```
 
-### 14. Install editors
+#### Install ssh
+
 ```
-apt-get install -y vim emacs nano
+sudo apt-get install ssh
+```
+
+#### Fix time
+```
+sudo apt-get install fake-hwclock ntp
+```
+
+#### Set up mDNS
+```
+sudo apt-get install avahi-daemon
+```
+
+#### Reboot
+
+Reboot so we get sane time.
+
+
+### 13. Copy package files over to Parallella from 2nd computer
+```
+scp -r packages-basic.txt packages linaro@linaro-nano.local:~
 ```
 
 ### 14. SSH into Parallella from 2nd computer
 
 ```
-ssh linaro@<parallella-ip-address>
+ssh linaro@linaro-nano.local
 ```
 
-### 15. Become root
+### 15. Install basic packages
 ```
-sudo su
-```
-
-### 16. Log install commands
-```
-export HISTSIZE=100000
-sudo touch /var/log/install_log
-sudo chmod 644 /var/log/install_log
-shopt -s histappend
+sudo apt-get install -y $(cat packages-basic.txt | grep -v "^#" | sed 's,\s\s*,\n,g' | grep -v "^\s*$)
+sudo dpkg -i $(ls packages | grep -v -dbg_)
 ```
 
+### 16. Remove packages
+Try to keep the minimal image minimal.
 
-### 17. Fix issues with Ubuntu
-
-Work around ping permision limitation:  
-[TODO] We can do this before booting ...  
 ```
-sudo chmod u+s /bin/ping
-sudo chmod u+s /bin/ping6
-``` 
-
-Ubuntu 14.04 packaging bug:  
-[TODO] Seems to be gone in 14.10. Verify.
-```
-sudo emacs /var/lib/dpkg/info/libpam-systemd:armhf.postinst
-#comment out the following line
-#invoke-rc.d systemd-logind start || exit $?"
+rm -rf packages*
 ```
 
-Slow boot time without ethernet cable:  
-[TODO] Can be done before we boot  
-[TODO] Should be added to dhclient conf
+### 16. Fix annoying Ubuntu shell defaults
+
 ```
-sudo emacs /etc/init/failsafe.conf
-#Change sleep values to 20 seconds (when there is no network detected)
+#Replace dash default shell with bash
+echo "dash dash/sh boolean false" | sudo debconf-set-selections
+sudo -E DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
 ```
 
-### 14. Sync the file system and power off the board
+### 17. Sync the file system and power off the board
 ```
 sync
+shutdown -h now
 ```
+
 Remove power.
 
 
@@ -183,6 +171,8 @@ sudo dd if=/dev/mmcblk0 of=<headless.img> bs=4M
 ```
 
 ### 16. Reboot the Parallella (ssh into computer or use as regular desktop)
+
+### 17. Install desktop packages
 
 
 ### 17. Install a windows manager
@@ -263,39 +253,14 @@ dpkg --get-selections > my.packages
 ```
 
 ### 22. Purging bad packages
+TODO: ISTR I've seen a fix for pulseaudio. It was something with tsched... 
 ```
 sudo apt-get purge xscreensaver pulseaudio
 ```
 
-### 23. Create xorg.conf file
-```
-sudo emacs /etc/X11/xorg.conf
-```
-
-xorg.conf:
-```
-Section "Device"
-  Identifier "Card0"
-  Driver "modesetting"
-  Option "ShadowFB" "True"
-  Option "SWCursor" "True"
-  Option "HWCursor" "False"
-EndSection
-Section "Screen"
-  Identifier "Screen0"
-  Device "Card0"
-  SubSection "Display"
-#---- Uncomment your preferred mode ----
-    #Modes "1920x1200"
-    #Modes "1920x1080"
-    #Modes "1280x720"
-    #Modes "640x480"
-  EndSubSection
-EndSection
-```
-
-
 ### 24. Create ~/.asoundrc config file
+
+Longterm TODO: We shouldn't need to do this  
 
 ```
 pcm.!default {
@@ -361,30 +326,6 @@ sudo emacs /etc/xdg/lxsession/LXDE/autostart
 #add @feh --bg-fill /home/linaro/background.png
 ```
 
-### 27. Fix annoying Ubuntu shell defaults
-
-```
-#Replace dash default shell with bash
-echo "dash dash/sh boolean false" | debconf-set-selections
-DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
-```
-
-Edit /etc/apt/sources.list.d/ubuntu-ports.list:
-```
-deb http://ports.ubuntu.com/ubuntu-ports/ trusty-updates main universe
-deb-src http://ports.ubuntu.com/ubuntu-ports/ trusty-updates main universe
-deb http://packages.erlang-solutions.com/ubuntu trusty contrib
-```
-
-Edit /etc/apt/sources.list.d/ubuntu-sources.list
-```
-# newer versions of the distribution.
-deb-src http://archive.ubuntu.com/ubuntu/ trusty main restricted
-deb-src http://archive.ubuntu.com/ubuntu/ trusty main universe
-#deb-src http://archive.ubuntu.com/ubuntu/ trusty main multiverse
-```
-
-
 ### 28. Customizing the ~/.cshrc
 
 ```
@@ -427,28 +368,23 @@ echo '. ${EPIPHANY_HOME}/setup.sh' >> ${HOME}/.bashrc
 
 ### 30. Setup COPRTHR
 
-## TODO: Set up Debian package armhf build server somewhere.
+### Install dependencies
+This step is needed *only* if for some reason were unable to install the .deb packages in `packages`
 
-* If you don't have the deb files:
 
 [TODO]: Verify that this works
 ```
-apt-get install pkg-config
 mkdir /var/tmp/builddeb
 cd /var/tmp/builddeb
-apt-get build-dep libelf libelf-dev libevent libevent-dev libconfig libconfig-dev
-apt-get build-dep libelf libelf-dev libevent libevent-dev libconfig libconfig-dev
-apt-get --build source libelf libevent libconfig
-dpkg -i *.deb
-Copy over .deb packages. We can probably use them throughout the Linaro 14.** series without problems.
+sudo apt-get build-dep libelf libelf-dev libevent libevent-dev libconfig libconfig-dev
+sudo apt-get build-dep libelf libelf-dev libevent libevent-dev libconfig libconfig-dev
+sudo apt-get --build source libelf libevent libconfig
+sudo dpkg -i $(ls *.deb | grep -v "-dbg_")
+```
+Copy over .deb packages. We can probably use them throughout the Linaro 14.** series without any problems.
+```
 cd ~
 rm -rf /var/tmp/builddeb
-```
-
-* If you have the .deb files:
-```
-cd packages
-dpkg -i $(ls *.deb | grep -v -- "-dgb_")
 ```
 
 [TODO: We could put this in overlay]  

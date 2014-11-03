@@ -55,9 +55,10 @@ sudo tar --strip-components 1 -xvzpf linaro-trusty-nano-20141024-684.tar.gz -C m
 ```
 tar -zxvf boot-e16-7z020-v01-140528.tgz -C mnt/boot
 ```
-### 7. rsync overlay over rootfs
+### 7. rsync overlays over rootfs
 ```
-sudo rsync --verbose -ap overlay/rootfs/ mnt/rootfs/
+sudo rsync -ap overlays/parallella/ mnt/rootfs/
+sudo rsync -ap overlays/browndeer-coprthr-1.6.0/ mnt/rootfs/
 ```
 
 ### 8. Enable devtmpfs and make SD card accessible from Parallella
@@ -122,7 +123,7 @@ Reboot so we get sane time.
 
 ### 13. Copy package files over to Parallella from 2nd computer
 ```
-scp -r packages-basic.txt packages linaro@linaro-nano.local:~
+scp -r packages.basic.txt packages linaro@linaro-nano.local:~
 ```
 
 ### 14. SSH into Parallella from 2nd computer
@@ -133,8 +134,8 @@ ssh linaro@linaro-nano.local
 
 ### 15. Install basic packages
 ```
-sudo apt-get install -y $(cat packages-basic.txt | grep -v "^#" | sed 's,\s\s*,\n,g' | grep -v "^\s*$)
-sudo dpkg -i $(ls packages | grep -v -dbg_)
+sudo apt-get install -y $(cat packages.basic.txt | grep -v "^#" | sed 's,\s\s*,\n,g' | grep -v "^\s*$)
+sudo dpkg -i $(ls packages | grep -v -- "-dbg_")
 ```
 
 ### 16. Remove packages
@@ -151,6 +152,84 @@ rm -rf packages*
 echo "dash dash/sh boolean false" | sudo debconf-set-selections
 sudo -E DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
 ```
+
+### 29. [TODO] Fix when we have final. Installing Epiphany SDK
+```
+sudo apt-get install libmpfr-dev libmpc-dev libgmp3-dev
+sudo mkdir -p /opt/adapteva/
+wget http://downloads.parallella.org/esdk/esdk.5.13.09.10_linux_armv7l.tgz
+sudo tar xzf esdk.5.13.09.10_linux_armv7l.tgz -C /opt/adapteva/
+sudo ln -sTf /opt/adapteva/esdk.5.13.09.10 /opt/adapteva/esdk
+sudo ln -s /usr/lib/arm-linux-gnueabihf/libmpc.so.3.0.0 /usr/lib/arm-linux-gnueabihf/libmpc.so.2 #HACK!
+echo 'setenv EPIPHANY_HOME      /opt/adapteva/esdk' >> ${HOME}/.cshrc
+echo 'source ${EPIPHANY_HOME}/setup.csh' >> ${HOME}/.cshrc
+echo 'EPIPHANY_HOME=/opt/adapteva/esdk' >> ${HOME}/.bashrc
+echo '. ${EPIPHANY_HOME}/setup.sh' >> ${HOME}/.bashrc
+```    
+
+### 30. Setup COPRTHR
+
+### Install dependencies
+This step is needed *only* if for some reason were unable to install the .deb packages in `packages`
+
+[TODO]: Verify that this works
+```
+mkdir /var/tmp/builddeb
+cd /var/tmp/builddeb
+sudo apt-get build-dep libelf libelf-dev libevent libevent-dev libconfig libconfig-dev
+sudo apt-get --build source libelf libevent libconfig
+sudo dpkg -i $(ls *.deb | grep -v -- "-dbg_")
+```
+Copy over .deb packages. We can probably use them throughout the Linaro 14.** series without any problems.
+```
+cd ~
+rm -rf /var/tmp/builddeb
+```
+
+
+###Install parallella opencl package
+This step is *only* necessary if there is a newer release than 1.6.0 available.
+```
+sudo rm -rf /usr/local/browndeer /etc/OpenCL/vendors/coprthr.icd
+wget http://www.browndeertechnology.com/code/coprthr-1.6.X-parallella.tgz
+tar -zxvf coprthr-1.6.0-parallella.tgz
+sudo ./browndeer/scripts/install_coprthr_parallella.sh
+rm -rf coprthr-1.6.0-parallella.tgz browndeer
+```
+
+```
+### Add paths to .bashrc
+echo 'export PATH=/usr/local/browndeer/bin:$PATH' >> ~/.bashrc
+echo 'export LD_LIBRARY_PATH=/usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
+
+### Add paths to root .bashrc
+sudo su
+echo 'export PATH=/usr/local/browndeer/bin:$PATH' >> ~/.bashrc
+echo 'export LD_LIBRARY_PATH=/usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
+
+### Add paths to .cshrc
+echo 'setenv PATH /usr/local/bin:$PATH' >> ~/.cshrc
+echo 'setenv LD_LIBRARY_PATH /usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH' >> ~/.cshrc
+
+```
+
+### 31. MPI Installation from source
+
+[Longterm TODO: There's only 1.6 .deb source packages so install from source for now]
+
+```
+wget http://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.3.tar.gz
+tar -zxvf openmpi-1.8.1.tar.gz
+cd openmpi-1.8.1
+./configure --prefix=~/usr \
+            --enable-mpirun-prefix-by-default \
+            --enable-static 
+make all
+sudo make install
+rm -rf openmpi*
+```
+
+
 
 ### 17. Sync the file system and power off the board
 ```
@@ -174,86 +253,28 @@ sudo dd if=/dev/mmcblk0 of=<headless.img> bs=4M
 
 ### 17. Install desktop packages
 
-
-### 17. Install a windows manager
+####Copy over desktop package list from 2nd computer:  
 ```
-sudo apt-get install lxde 
-sudo apt-get install xinit
+scp packages.desktop.txt linaro@linaro-nano.local:~
 ```
-
-### 19. Install other essential Packages
-
+#### SSH into Parallella board from 2nd computer
 ```
-### "Must haves"
-apt-get install less tcsh emacs nano ftp synaptic tkcvs wish screen putty
-sudo apt-get install feh lsb-release
-sudo apt-get install fake-hwclock ntp
-
-### Compiling/Building
-sudo apt-get install build-essential git curl m4 flex bison gawk pkg-config
-
-### Ubuntu package tools
-sudo apt-get install devscripts dpkg-dev
-
-### Networking
-sudo apt-get install ethtool iperf ifplugd
-sudo apt-get install network-manager
-
-### Linux Tools
-sudo apt-get install xutils-dev device-tree-compiler usbutils
-
-### Media
-sudo apt-get install firefox 
-sudo apt-get install smplayer
-sudo apt-get install evince
-sudo apt-get install gimp
-
-### Programming
-sudo apt-get install octave
-sudo apt-get install scratch
-
-### Scientific
-sudo apt-get install python-numpy python-scipy python-matplotlib 
-sudo apt-get install ipython ipython-notebook python-pandas python-sympy python-nose
-sudo apt-get install r-base r-base-dev
-
-### Erlang ###
-sudo apt-get install erlang-mini
-
-### Sound
-sudo apt-get install gstreamer0.10-alsa alsa-base alsa-utils libasound2-plugins 
-
-### For Demos
-sudo apt-get install libdrm-dev libasound2-dev libx11-dev
-sudo apt-get install libfluidsynth-dev fluidsynth fluid-soundfont-gm
-
-### Camera
-sudo apt-get install camorama guvcview
-
-### Wifi
-sudo apt-get install linux-firmware
-
-### Screen sharing
-sudo apt-get install tightvncserver
+ssh linaro@linaro-nano.local:~
 ```
+#### Installation
 ```
-sudo apt-get install boinc-client boinc-manager
-sudo apt-get install libreoffice
-sudo apt-get install openvpn
-sudo apt-get install synergy
-sudo apt-get install vlc
+sudo apt-get install -y $(cat packages.desktop.txt | grep -v "^#" | sed 's,\s\s*,\n,g' | grep -v "^\s*$)
 ```
 
-### 20.  Install Erlang
 
-
-### 21. Getting list of all packages installed
+### 18. Get list of installed packages
 ```
 dpkg --get-selections > my.packages
 ```
 
 ### 22. Purging bad packages
 TODO: ISTR I've seen a fix for pulseaudio. It was something with tsched... 
+Longterm TODO: We shouldn't need this  
 ```
 sudo apt-get purge xscreensaver pulseaudio
 ```
@@ -352,76 +373,8 @@ alias rsh       'rsh -X'
 alias less      'less -X'
 ```
 
-### 29. [TODO] Fix when we have final. Installing Epiphany SDK
-```
-sudo apt-get install libmpfr-dev libmpc-dev libgmp3-dev
-sudo mkdir -p /opt/adapteva/
-wget http://downloads.parallella.org/esdk/esdk.5.13.09.10_linux_armv7l.tgz
-sudo tar xzf esdk.5.13.09.10_linux_armv7l.tgz -C /opt/adapteva/
-sudo ln -sTf /opt/adapteva/esdk.5.13.09.10 /opt/adapteva/esdk
-sudo ln -s /usr/lib/arm-linux-gnueabihf/libmpc.so.3.0.0 /usr/lib/arm-linux-gnueabihf/libmpc.so.2 #HACK!
-echo 'setenv EPIPHANY_HOME      /opt/adapteva/esdk' >> ${HOME}/.cshrc
-echo 'source ${EPIPHANY_HOME}/setup.csh' >> ${HOME}/.cshrc
-echo 'EPIPHANY_HOME=/opt/adapteva/esdk' >> ${HOME}/.bashrc
-echo '. ${EPIPHANY_HOME}/setup.sh' >> ${HOME}/.bashrc
-```    
-
-### 30. Setup COPRTHR
-
-### Install dependencies
-This step is needed *only* if for some reason were unable to install the .deb packages in `packages`
 
 
-[TODO]: Verify that this works
-```
-mkdir /var/tmp/builddeb
-cd /var/tmp/builddeb
-sudo apt-get build-dep libelf libelf-dev libevent libevent-dev libconfig libconfig-dev
-sudo apt-get build-dep libelf libelf-dev libevent libevent-dev libconfig libconfig-dev
-sudo apt-get --build source libelf libevent libconfig
-sudo dpkg -i $(ls *.deb | grep -v "-dbg_")
-```
-Copy over .deb packages. We can probably use them throughout the Linaro 14.** series without any problems.
-```
-cd ~
-rm -rf /var/tmp/builddeb
-```
-
-[TODO: We could put this in overlay]  
-###Install parallella opencl package
-wget http://www.browndeertechnology.com/code/coprthr-1.6.0-parallella.tgz
-tar -zxvf coprthr-1.6.0-parallella.tgz
-sudo ./browndeer/scripts/install_coprthr_parallella.sh
-
-### Add paths to .bashrc
-echo 'export PATH=/usr/local/browndeer/bin:$PATH' >> ~/.bashrc
-echo 'export LD_LIBRARY_PATH=/usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
-
-### Add paths to root .bashrc
-sudo su
-echo 'export PATH=/usr/local/browndeer/bin:$PATH' >> ~/.bashrc
-echo 'export LD_LIBRARY_PATH=/usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
-
-### Add paths to .cshrc
-echo 'setenv PATH /usr/local/bin:$PATH' >> ~/.cshrc
-echo 'setenv LD_LIBRARY_PATH /usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH' >> ~/.cshrc
-
-```
-
-### 31. MPI Installation from source
-
-[Longterm TODO: There's only 1.6 source packages so install from source for now]
-
-```
-wget http://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.1.tar.gz
-tar -zxvf openmpi-1.8.1.tar.gz
-cd openmpi-1.8.1
-./configure --prefix=~/usr \
-            --enable-mpirun-prefix-by-default \
-            --enable-static 
-make all
-sudo make install
-```
 
 ### 32. Backing up the complete file system
 From Parallella:

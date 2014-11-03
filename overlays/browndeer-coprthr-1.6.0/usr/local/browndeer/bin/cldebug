@@ -1,0 +1,32 @@
+#!/bin/bash
+
+args=`getopt v:f:t: $*`
+
+set -- $args
+
+clmesg_level=7
+
+for i
+do
+   case $i in
+   --) shift; break
+   ;;
+   -a) have_a=1; shift
+   ;;
+   -v) shift; clmesg_level=$1;
+   ;;
+   -t) shift; tmpdir=$1;
+   ;;
+   *) shift
+   esac
+done
+
+if [ -z "$tmpdir" ]; then
+   export COPRTHR_CLMESG_LEVEL=$clmesg_level; $@;
+else
+	if [ ! -e "$tmpdir" ]; then
+		mkdir -p $tmpdir;
+	fi
+   export COPRTHR_CLMESG_LEVEL=$clmesg_level; export COPRTHR_TMP=$tmpdir; $@;
+fi
+

@@ -1,0 +1,45 @@
+PROG = clopen_example1.x clopen_example2.x clopen_example3.x
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+
+OPENCL_INCS = -I@OPENCL_INCLUDE@
+OPENCL_LIBS = -L@OPENCL_LIB@ -l@OPENCL_LIBNAME@
+
+STDCL_INCS = -I@includedir@
+STDCL_LIBS = -L@libdir@ -lstdcl
+
+INCS = $(OPENCL_INCS) $(STDCL_INCS)
+LIBS = $(OPENCL_LIBS) $(STDCL_LIBS)
+
+#LIBS += -lssl -L/usr/local/lib 
+
+CCFLAGS += -O3
+
+all: $(PROG)
+
+clopen_example1.x: clopen_example1.o 
+	$(CC) $(CCFLAGS) $(INCS) -o clopen_example1.x clopen_example1.o $(LIBS)
+
+clopen_example2.x: clopen_example2.o 
+	$(CC) $(CCFLAGS) $(INCS) -o clopen_example2.x clopen_example2.o $(LIBS)
+
+clopen_example3.x: clopen_example3.o outerprod_three.o
+	$(CC) $(CCFLAGS) $(INCS) -o clopen_example3.x clopen_example3.o $(LIBS) \
+		outerprod_three.o
+
+outerprod_three.o: outerprod_three.cl
+	clcc -c outerprod_three.cl 
+
+.SUFFIXES:
+.SUFFIXES: .c .o
+
+.c.o:
+	$(CC) $(CCFLAGS) $(INCS) -c $<
+
+clean:
+	rm -f *.o
+
+distclean: clean
+	rm -f *.x
+

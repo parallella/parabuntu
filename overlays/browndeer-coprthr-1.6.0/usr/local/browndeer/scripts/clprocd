@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# chkconfig: 2345 85 15
+
+prefix=/usr/local/browndeer
+exec_prefix=${prefix}
+
+start() {
+	${exec_prefix}/bin/clprocd > /dev/null &
+}
+
+restart() {
+	killall clprocd 
+	${exec_prefix}/bin/clprocd > /dev/null &
+}
+
+stop() {
+	killall clprocd 
+}
+
+case "$1" in 
+	start)
+		start
+		;;
+	restart)
+		restart
+		;;
+	stop)
+		stop
+		;;
+	*)
+		echo "usage: clprocd {start|restart|stop}"
+		exit 1
+esac
+
+exit 0
+

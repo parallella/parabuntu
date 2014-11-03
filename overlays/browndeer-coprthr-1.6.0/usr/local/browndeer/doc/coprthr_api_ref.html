@@ -1,0 +1,795 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Copyright © 2013-2014 Brown Deer Technology, LLC" />
+  <title>COPRTHR® API Reference</title>
+</head>
+<body>
+<img src="./bdt_logo.jpg">
+<div id="header">
+<h1 class="title">COPRTHR<sup>®</sup> API Reference</h1>
+<h2 class="author">Copyright © 2013-2014 Brown Deer Technology, LLC</h2>
+<h3 class="date"><em>Verbatim copying and distribution of this entire document is permitted in any medium, provided this notice is preserved.</em></h3>
+</div>
+<div id="TOC">
+<ul>
+<li><a href="#overview"><span class="toc-section-number">1</span> Overview</a><ul>
+<li><a href="#purpose"><span class="toc-section-number">1.1</span> Purpose</a></li>
+<li><a href="#components"><span class="toc-section-number">1.2</span> Components</a></li>
+</ul></li>
+<li><a href="#coprthrcc-a-cross-compiler-library-for-co-processors"><span class="toc-section-number">2</span> COPRTHR/cc: a cross-compiler library for co-processors</a></li>
+<li><a href="#coprthr-direct-run-time-api"><span class="toc-section-number">3</span> COPRTHR Direct Run-Time API</a><ul>
+<li><a href="#opening-a-co-processor-device"><span class="toc-section-number">3.1</span> Opening a co-processor device</a></li>
+<li><a href="#device-memory-allocation"><span class="toc-section-number">3.2</span> Device Memory Allocation</a></li>
+<li><a href="#distributed-memory-management"><span class="toc-section-number">3.3</span> Distributed Memory Management</a></li>
+<li><a href="#executing-device-kernels"><span class="toc-section-number">3.4</span> Executing Device Kernels</a></li>
+<li><a href="#event-synchronization"><span class="toc-section-number">3.5</span> Event Synchronization</a></li>
+<li><a href="#cross-compilation"><span class="toc-section-number">3.6</span> Cross-compilation</a></li>
+</ul></li>
+<li><a href="#coprthrthread"><span class="toc-section-number">4</span> COPRTHR/thread</a><ul>
+<li><a href="#pthread-style-threads"><span class="toc-section-number">4.1</span> Pthread-style threads</a></li>
+<li><a href="#pthread-style-mutexes"><span class="toc-section-number">4.2</span> Pthread-style mutexes</a></li>
+<li><a href="#pthread-style-ccondition-variables"><span class="toc-section-number">4.3</span> Pthread-style ccondition variables</a></li>
+</ul></li>
+<li><a href="#coprthrdev-low-level"><span class="toc-section-number">5</span> COPRTHR/dev (low-level)</a><ul>
+<li><a href="#overview-1"><span class="toc-section-number">5.1</span> Overview</a></li>
+<li><a href="#types"><span class="toc-section-number">5.2</span> Types</a></li>
+<li><a href="#general-device-dependent-operations"><span class="toc-section-number">5.3</span> General device-dependent operations</a></li>
+<li><a href="#testing-device-suport"><span class="toc-section-number">5.4</span> Testing device suport</a></li>
+<li><a href="#locking-a-device"><span class="toc-section-number">5.5</span> Locking a Device</a></li>
+<li><a href="#device-memory-allocation-1"><span class="toc-section-number">5.6</span> Device Memory Allocation</a></li>
+<li><a href="#accessing-device-memory"><span class="toc-section-number">5.7</span> Accessing device memory</a></li>
+<li><a href="#executing-code-on-a-co-processor-device"><span class="toc-section-number">5.8</span> Executing Code on a Co-Processor Device</a></li>
+<li><a href="#cross-compilation-1"><span class="toc-section-number">5.9</span> Cross-compilation</a></li>
+</ul></li>
+<li><a href="#examples"><span class="toc-section-number">6</span> Examples</a><ul>
+<li><a href="#example-1"><span class="toc-section-number">6.1</span> Example #1</a></li>
+<li><a href="#example-2"><span class="toc-section-number">6.2</span> Example #2</a></li>
+<li><a href="#example-3"><span class="toc-section-number">6.3</span> Example #3</a></li>
+<li><a href="#example-4"><span class="toc-section-number">6.4</span> Example #4</a></li>
+</ul></li>
+</ul>
+</div>
+<h1 id="overview"><a href="#overview"><span class="header-section-number">1</span> Overview</a></h1>
+<h2 id="purpose"><a href="#purpose"><span class="header-section-number">1.1</span> Purpose</a></h2>
+<p>The CO-PRocessing THReads<sup>®</sup> SDK provides the STDCL API for programming compute offload accelerators. STDCL contains a rich set of features designed around the application programmer in order to provide a high-level API that is intuitive, powerful and easy to use. The COPRTHR SDK also provides OpenCL implementations for various processors that can be leveraged using STDCL. For many scenarios this will be sufficient for the programmer.</p>
+<p>In some cases, a lower level API may be advantageous to access a co-processor device more directly and expose features that are not supported in higher level APIs such as STDCL and OpenCL. This proved to be the case for the Epiphany RISC array processor, which had features inaccessible from the higher level APIs designed for GPUs. Additionally, some projects building middleware for such a processor may find it desireable to use a more direct and light-weight API with less overhead. This was the motivation for formalizing into an API the &quot;machinery&quot; used to build the COPRTHR OpenCL implementations, and this is the origin of the COPRTHR API. The basic functions may appear similar in principle to other APIs for co-processors since ulimately all compute offload APIs have the same basic requirements.</p>
+<p>As a by-product of the effort, and a demonstration of the usefulness of such an API, a direct extension of Pthreads for co-processors was built as a part of this COPRTHR API utilizing the basic machinery to create functionality unsupported by the higher-level APIs. This likely serves as only one example of what might be constructed from such a low-level API for accessing a processor like Epiphany.</p>
+<p>At present this low-level COPRTHR API can be used to target x86 CPUs, ARM CPUs, and the Epiphany RISC array processors. Support will be extended to Intel MIC in the near future.</p>
+<p> </p>
+<h2 id="components"><a href="#components"><span class="header-section-number">1.2</span> Components</a></h2>
+<p>There are four elements of the COPRTHR API aiming to address specific requirements for complex development projects:</p>
+<ul>
+<li>COPRTHR/cc: a cross-compiler library for co-processors</li>
+<li>COPRTHR direct run-time API</li>
+<li>COPRTHR/thread: pthreads extension for co-processors</li>
+<li>COPRTHR/dev: low-level device API</li>
+</ul>
+<hr />
+<p> </p>
+<h1 id="coprthrcc-a-cross-compiler-library-for-co-processors"><a href="#coprthrcc-a-cross-compiler-library-for-co-processors"><span class="header-section-number">2</span> COPRTHR/cc: a cross-compiler library for co-processors</a></h1>
+<p>The COPRTHR/cc API is a generalized cross-compiler library for co-processor devices provided as part of the COPRTHR API. The functionality is completely separated from the associated run-time for the device, which may or may not be available. Therefore cross-compilation support may be used on platforms where the target device is not even present.</p>
+<p>The interface for cross-compilation is extremely general and simple, consisting of one essential function and two additional functions added for convenience. Program source code is provided as a string with the result being a program struct that may be used by the COPTHR API run-time. The interface is deliberately simple and generic, designed without complicated features, with the intent being that it may be used as part of more complex higher-level tools. An example of this can be found in the COPRTHR clcc compiler tool which uses this interface for cross-compilation. At the same time, programmers may find the interface to be a convenient and simple method for prgramming co-processor devices.</p>
+<p>Note that no special programming language is introduced for supporting co-processor devices since none is needed. C <em>without</em> <em>extensions</em> is perfectly suited for programming co-processors and attempts to introduce special device languages that break C compliance have been misguided. A design principle of COPRTHR is to avoid such mistakes.</p>
+<p>SYNOPSIS</p>
+<pre><code>#include &lt;coprthr.h&gt;
+#include &lt;coprthr_cc.h&gt;
+
+typedef struct coprthr_program* coprthr_program_t;
+
+coprthr_program_t 
+    coprthr_cc( const char* src, size_t len, const char* opt, char** log );
+
+size_t 
+    coprthr_cc_write_bin(const char* path, coprthr_program_t prg, int flags);
+
+coprthr_program_t 
+    coprthr_cc_read_bin( const char* path, int flags );
+
+coprthr_sym_t 
+    coprthr_getsym( coprthr_program_t program, const char* symbol );
+
+Link with -lcoprthrcc</code></pre>
+<p>DESCRIPTION</p>
+<p>The function coprthr_cc() will cross-compile the provided program and return a pointer to a struct representing the compiled program object that may be used by the COPRTHR API run-time.</p>
+<p>The source code for the program <em>src</em> of <em>len</em> bytes long will be compiled for the target device.<br />The argument <em>opt</em> must be used to select the cross-compile target. Any additional compiler options may be provided as a string of the form that would be provided to a compiler at the command line. The cross-compile target is selected using the command line style options, &quot;-mtarget=<device>&quot;.</p>
+<p>For convenience, several predefined targets are available as macros:</p>
+<pre><code>#define COPRTHR_CC_TARGET_X86_64 &quot;-mtarget=x86_64&quot;
+#define COPRTHR_CC_TARGET_I386 &quot;-mtarget=i386&quot;
+#define COPRTHR_CC_TARGET_ARM32 &quot;-mtarget=arm32&quot;
+#define COPRTHR_CC_TARGET_E32_EMEK &quot;-mtarget=e32_emek&quot;
+#define COPRTHR_CC_TARGET_E32 &quot;-mtarget=e32&quot;
+#define COPRTHR_CC_TARGET_ARM32_ANDROID &quot;-mtarget=arm32_android&quot;
+#define COPRTHR_CC_TARGET_MIC &quot;-mtarget=mic&quot;</code></pre>
+<p>Not all of these targets may be supported on a given platform. Passing the flag &quot;--targets&quot; will cause a list of supported targets to be provided as output in the compiler log.</p>
+<p>The argument <em>log</em> provides a pointer to a log buffer where the output log from the compiler can be stored.<br />When this argument points to a null pointer, a buffer of suitable size will be allocated, and should be subsequently released using the free() call.</p>
+<p>A final call mentioned here is not actually part of the COPRTHR/cc library, but is instead part of the COPRTHR API run-time. However it provides the bridge between the two and is useful to mention. Once a call to coprthr_cc() has produced a compiled program, it will be necessary to obtain a handle to the one or more entry points within the program that are defined by the thread functions of the program. The coprthr_getsym() function is used to get a handle for the thread function identified by name.</p>
+<hr />
+<p> </p>
+<h1 id="coprthr-direct-run-time-api"><a href="#coprthr-direct-run-time-api"><span class="header-section-number">3</span> COPRTHR Direct Run-Time API</a></h1>
+<p>The COPRTHR direct run-time API provides a convenient set of calls for accessing a co-processor device including malloc()-style functions for device memory allocation, a stream model for non-blocking asynchronous device operations, a threading model based on a direct extension of the Pthreads API for co-processors, and signaling support between threads of execution on the host and co-processor device.</p>
+<p> </p>
+<h2 id="opening-a-co-processor-device"><a href="#opening-a-co-processor-device"><span class="header-section-number">3.1</span> Opening a co-processor device</a></h2>
+<p>SYNOPSIS</p>
+<pre><code>#include &lt;coprthr.h&gt;
+
+int coprthr_dopen( const char* path, int flags);
+
+int coprthr_dclose( int dd );
+
+Link with -lcoprthr</code></pre>
+<p>DESCRIPTION</p>
+<p>Access to a co-processor device requires opening the device using the <em>coprthr_dopen()</em> call which returns a <em>device descriptor</em> that is used in all subsequent operations. The <em>path</em> may be a literal path to a device special file or one of the pre-defined macros for known supported devices. Currently supported devices include:</p>
+<pre><code>COPRTHR_DEVICE_X86_64 
+COPRTHR_DEVICE_I386 
+COPRTHR_DEVICE_ARM32 
+COPRTHR_DEVICE_E32_EMEK 
+COPRTHR_DEVICE_E32 
+COPRTHR_DEVICE_MIC</code></pre>
+<p>The <em>flags</em> argument controls the behavior of the opened device. The <code>COPRTHR_O_NONBLOCK</code> flag caues the call to return with an error if the device is temporarily unavailable.<br />The flag <code>COPRTHR_O_EXCLUSIVE</code> causes the call to return with an error if exclusive access to the device could not be established.</p>
+<p>The flags <code>COPRTHR_O_STREAM</code> and <code>COPRTHR_O_THREAD</code> specify the mode of operation in which the co-processor device should be opened.</p>
+<p>Finally, the flag <code>COPRTHR_O_DEFAULT</code> may be used to select the default flags configured by the installation.</p>
+<p>Access to the device is closed using the coprthr_dclose() function where the argument <em>dd</em> is the device descriptor that was returned from the coprthr_dopen() call.</p>
+<p> </p>
+<h2 id="device-memory-allocation"><a href="#device-memory-allocation"><span class="header-section-number">3.2</span> Device Memory Allocation</a></h2>
+<p>SYNOPSIS</p>
+<pre><code>#include &lt;coprthr.h&gt;
+
+coprthr_mem_t 
+    coprthr_dmalloc( int dd, size_t size, int flags );
+
+coprthr_mem_t 
+    coprthr_drealloc( int dd, coprthr_mem_t mem, size_t size, int flags );
+
+void coprthr_dfree( int dd, coprthr_mem_t mem );
+
+Link with -lcoprthr</code></pre>
+<p>DESCRIPTION</p>
+<p>Device memory is allocated using the familiar semantics of the conventional malloc() calls extended to a co-processor device. The coprthr_dmalloc() call returns a pointer to struct containing the necessary information abou the device allocation. In order to obtain the actual address of the device memory, the coprth_devmemptr() call, discussed below, may be used. The returned address is suitable, e.g., to use as an argument to a thread function executing on the co-processor. The size of an allocation may be altered using coprthr_drealloc().<br />Allocated device memory may be released using coprthr_dfree().</p>
+<p> </p>
+<h2 id="distributed-memory-management"><a href="#distributed-memory-management"><span class="header-section-number">3.3</span> Distributed Memory Management</a></h2>
+<p>SYNOPSIS</p>
+<pre><code>#include &lt;coprthr.h&gt;
+
+coprthr_event_t 
+    coprthr_dread(int dd, coprthr_mem_t mem, size_t offset, void* ptr, 
+        size_t len, int flags);
+
+coprthr_event_t 
+    coprthr_dwrite(int dd, coprthr_mem_t mem, size_t offset, void* ptr, 
+        size_t len, int flags)
+
+coprthr_event_t 
+    coprthr_dcopy(int dd, coprthr_mem_t mem_src, size_t offset_src,
+        coprthr_mem_t mem_dst, size_t offset_dst, size_t len, int flags)
+
+Link with -lcoprthr</code></pre>
+<p>DESCRIPTION</p>
+<p>Memory management of device memory is supported with three functions, coprthr_dread(), coprthr_dwrite(), and coprthr_dcopy(). The coprthr_dread() call is used for reading device memory, copying its contents to a buffer on the host. Conversely, coprthr_dwrite() is used for writing to device memory the contents of a buffer on the host. The coprthr_dcopy() call is used to initiate from the host the copying of memory from one device memory allocation to another. The offset argument is the offset in bytes into the device memory allocation. The use of non-zero offsets may or may not be supported by a given device.</p>
+<p>Using the steam model for the opened device will cause these operations to be queued in order and executed asynchronously. Synchronization with the host is discussed below.</p>
+<p> </p>
+<h2 id="executing-device-kernels"><a href="#executing-device-kernels"><span class="header-section-number">3.4</span> Executing Device Kernels</a></h2>
+<p>SYNOPSIS</p>
+<pre><code>#include &lt;coprthr.h&gt;
+
+coprthr_event_t 
+    coprthr_dexec( int dd, coprthr_kernel_t krn, unsigned int nargs, 
+        void** args, unsigned int nthr, void* reserved, int flags );
+
+coprthr_event_t 
+    coprthr_dnexec( int dd, unsigned int nkrn, coprthr_kernel_t v_krn[], 
+        unsigned int v_nargs[], void** v_args[], unsigned int v_nthr[], 
+        void* v_reserved[], int flags );
+
+Link with -lcoprthr</code></pre>
+<p>DESCRIPTION</p>
+<p>The coprthr_dexec() call executes a kernel on the device. The arguments <code>nargs</code> and <code>args</code> represent the number of arguments and an array of pointers to the arguments for the kernel. The argument <code>nthr</code> specifies the number of threads over which the kernel should be executed.</p>
+<p>The coprthr_dnexec() call is a variant that allows multiple kernels to be executed simultaneously and treated as a single operation. The argument <code>nkrn</code> is the number of kernels to be executd. The remainder of the arguments are vectorized versions of those in the coprthr_dexec() call over the multiple kernels.</p>
+<p>Using the stream model for the opened device will cause these operations to be queued in order and executed asynchronously. Synchronization with the host is discussed below.</p>
+<p> </p>
+<h2 id="event-synchronization"><a href="#event-synchronization"><span class="header-section-number">3.5</span> Event Synchronization</a></h2>
+<p>SYNOPSIS</p>
+<pre><code>#include &lt;coprthr.h&gt;
+
+int coprthr_dwaitev( int dd, coprthr_event_t ev );
+
+int coprthr_dwait( int dd );
+
+Link with -lcoprthr</code></pre>
+<p>DESCRIPTION</p>
+<p>In general, the distributed memory management and kernel execution operations are executed asynchronously with the host and other devices. Therefore a synchronization mechanism is needed.</p>
+<p>The coprthr_dwaitev() call will cause the host to block until the operation associated with the event <code>ev</code> has completed.</p>
+<p>The coprthr_dwait() call will cause the host to block until all operations scheduled on the device have completed.</p>
+<p> </p>
+<h2 id="cross-compilation"><a href="#cross-compilation"><span class="header-section-number">3.6</span> Cross-compilation</a></h2>
+<p>SYNOPSIS</p>
+<pre><code>#include &lt;coprthr.h&gt;
+#include &lt;coprthr_cc.h&gt;
+
+coprthr_program_t 
+    coprthr_dcompile( int dd, char* src, size_t len, char* opt, char** log );
+
+coprthr_sym_t 
+    coprthr_getsym( coprthr_program_t prg, const char* symbol );
+
+Link with -lcoprthr -lcoprthrcc</code></pre>
+<p>DESCRIPTION</p>
+<p>The coprthr_dcompile() call is a convenience wrapper for the cross-compilation interface call coprthr_cc() and will compile code targeting the device associated with the device descriptor <code>dd</code>.</p>
+<p>The coprthr_getsym() call is used to get the named symbol in the program, e.g., to get a handle to a given device kernel.</p>
+<hr />
+<p> </p>
+<h1 id="coprthrthread"><a href="#coprthrthread"><span class="header-section-number">4</span> COPRTHR/thread</a></h1>
+<p>The COPRTHR direct API depends on a lower level API, COPRTHR/dev, described in a following section. Here lower level means primitive, and this API will be of little interest to the casual application programmer. The utility of this primitive API can be seen in what it enables. The above described COPRTHR direct API is augmented with a thread model designed as a logical and minimal extension Pthreads to support co-processors. This was the original concept for the COPRTHR project, and the refactoring discussed at the begining of this document enabled the implementation of basic functionality for &quot;pthreads for co-processors&quot; in a very short amount of time. This thread support is included in the basic COPRTHR API.</p>
+<p> </p>
+<h2 id="pthread-style-threads"><a href="#pthread-style-threads"><span class="header-section-number">4.1</span> Pthread-style threads</a></h2>
+<p>SYNOPSIS</p>
+<pre><code>#include &lt;coprthr.h&gt;
+
+int coprthr_attr_init( coprthr_td_attr_t* attr );
+
+int coprthr_attr_destroy( coprthr_td_attr_t* attr );
+
+int coprthr_attr_setdetachstate( coprthr_td_attr_t* attr, int state );
+
+int coprthr_attr_setdevice( coprthr_td_attr_t* attr, int dd ); /*NEW*/
+
+int coprthr_attr_setinit( coprthr_td_attr_t* attr, int action ); /*NEW*/
+
+int coprthr_create( coprthr_td_t* td, coprthr_td_attr_t* attr, 
+    coprthr_sym_t thr, void* arg );
+
+int coprthr_ncreate( unsigned int nthr, coprthr_td_t* td,
+    coprthr_td_attr_t* attr, coprthr_sym_t thrfunc, void* arg );
+
+int coprthr_join( coprthr_td_t td, void** val );
+
+Link with -lcoprthr</code></pre>
+<p>DESCRIPTION</p>
+<p>By design, the API for the extension of pthreads to co-processors mirrors that of conventional POSIX threads calls in every possible way. Therefore most calls require description - just read the man page for the equivalent pthreads call.</p>
+<p>The mechanism for maintaining near transparency with pthreads is to attach the device specification to the attribute used in the creation of the conventional pthread objects. The coprthr_attr_setdevice() call is introduced to attach the device descriptor to the attribute that will be used for thread creation.</p>
+<p>An additional call is added, coprthr_attr_setinit(), to allow control over what happens when a thread is created. It was decided long ago that a pthread should not require an explicit &quot;execute&quot; call, and that the thread should be executed immediately and implicitly upon creation. In the world of co-processors, this behavior may not be ideal, so the flag <code>COPRTHR_A_CREATE_SUSPEND</code> requests that the thread be suspended upon creation. A scheduling call is then used to &quot;execute&quot; the thread at a later time. Conventional behavior (execute upon creation) can be requested with the flag <code>COPRTHR_A_CREATE_EXECUTE</code>.</p>
+<p> </p>
+<h2 id="pthread-style-mutexes"><a href="#pthread-style-mutexes"><span class="header-section-number">4.2</span> Pthread-style mutexes</a></h2>
+<p>SYNOPSIS</p>
+<pre><code>#include &lt;coprthr.h&gt;
+
+int coprthr_mutex_attr_init( coprthr_mutex_attr_t* mtxattr);
+
+int coprthr_mutex_attr_destroy( coprthr_mutex_attr_t* mtxattr);
+
+int coprthr_mutex_attr_setdevice( coprthr_mutex_attr_t* mtxattr, int dd ); /*NEW*/
+
+int coprthr_mutex_init( coprthr_mutex_t* mtx, coprthr_mutex_attr_t* mtxattr);
+
+int coprthr_mutex_destroy( coprthr_mutex_t* mtx );
+
+int coprthr_mutex_lock( coprthr_mutex_t* mtx);
+
+int coprthr_mutex_unlock( coprthr_mutex_t* mtx);
+
+Link with -lcoprthr</code></pre>
+<p>DESCRIPTION</p>
+<p>Pthread style mutexes are supported with the only additional call being coprthr_mutex_attr_setdevice() which sets the device descriptor to which the mutex is associated.</p>
+<p>The coprthr_mutex_lock() and coprthr_mutex_unlock() calls may be used symmetrically on the host and device.</p>
+<h2 id="pthread-style-ccondition-variables"><a href="#pthread-style-ccondition-variables"><span class="header-section-number">4.3</span> Pthread-style ccondition variables</a></h2>
+<p>SYNOPSIS</p>
+<pre><code>#include &lt;coprthr.h&gt;
+
+int coprthr_cond_attr_init( coprthr_cond_attr_t* condattr);
+
+int coprthr_cond_attr_destroy( coprthr_cond_attr_t* condattr);
+
+int coprthr_cond_attr_setdevice( coprthr_cond_attr_t* condattr, int dd);
+
+int coprthr_cond_init( coprthr_cond_t* cond, coprthr_cond_attr_t* condattr);
+
+int coprthr_cond_destroy( coprthr_cond_t* cond);
+
+int coprthr_wait( coprthr_cond_t* cond, coprthr_mutex_t* mtx);
+
+int coprthr_signal( coprthr_cond_t* cond);
+
+Link with -lcoprthr</code></pre>
+<p>DESCRIPTION</p>
+<p>Condition variables are supported with the only additional call being coprthr_cond_attr_setdevice() which sets the device descriptor to which the condition variable is associated.</p>
+<hr />
+<p> </p>
+<h1 id="coprthrdev-low-level"><a href="#coprthrdev-low-level"><span class="header-section-number">5</span> COPRTHR/dev (low-level)</a></h1>
+<h2 id="overview-1"><a href="#overview-1"><span class="header-section-number">5.1</span> Overview</a></h2>
+<p>The COPRTHR/dev API is the lowest-level API for accessing a co-processor device, and is therefore expected to be quite primitive. All calls are blocking with operations immediately and without any dependencies. In order to ensure the safe execution of these operations, the programmer should first acquire a lock on the device. There is no requirement implied by the API for all devices to suport all functionality. The programmer may test suport for key functionality using a set of coprthr_testsup_*() calls.</p>
+<p> </p>
+<h2 id="types"><a href="#types"><span class="header-section-number">5.2</span> Types</a></h2>
+<p>For convenience the following typedefs are provided for common structs used by the COPRTHR API. Each defined type is simply a pointer to a corresponding C struct.</p>
+<pre><code>typedef struct coprthr_program* coprthr_program_t;
+typedef struct coprthr_kernel* coprthr_kernel_t;
+typedef struct coprthr_device* coprthr_dev_t;
+typedef struct coprthr_mem* coprthr_mem_t;
+typedef struct coprthr_sym* coprthr_sym_t;
+typedef struct coprthr_event* coprthr_event_t;</code></pre>
+<h2 id="general-device-dependent-operations"><a href="#general-device-dependent-operations"><span class="header-section-number">5.3</span> General device-dependent operations</a></h2>
+<p>General device-dependent opertions may be performed using a call very similar to the UNIX ioctl() call. These operations are entirely dependent upon the specific device implementation.</p>
+<pre><code>int coprthr_devctl( coprthr_dev_t dev, int request, ... )</code></pre>
+<h2 id="testing-device-suport"><a href="#testing-device-suport"><span class="header-section-number">5.4</span> Testing device suport</a></h2>
+<p>A single mandatory operation required of all device implementations is providing information about the functionality suported by the device. This may be obtained using the request <code>COPRTHR_DEVCTL_TESTSUP</code> returning a 32-bit word with the appropriate bits set to represent the suported functionality.</p>
+<pre><code>int devsup = coprthr_devctl(dev,COPRTHR_DEVCTL_TESTSUP);</code></pre>
+<p>The following flags may be used to check for specific support:</p>
+<pre><code>COPRTHR_DEVSUP_F_RUNTIME
+COPRTHR_DEVSUP_F_COMPILER
+COPRTHR_DEVSUP_F_STREAM
+COPRTHR_DEVSUP_F_THREAD
+COPRTHR_DEVSUP_F_SIGNAL
+
+COPRTHR_DEVSUP_F_MEM_BUFFER
+COPRTHR_DEVSUP_F_MEM_MUTEX
+COPRTHR_DEVSUP_F_MEM_SIGNAL
+COPRTHR_DEVSUP_F_MEM_REGISTER
+COPRTHR_DEVSUP_F_MEM_FIFO
+COPRTHR_DEVSUP_F_MEM_STACK
+
+COPRTHR_DEVSUP_F_MEM_PROT
+COPRTHR_DEVSUP_F_MEM_OFFSET</code></pre>
+<p> </p>
+<h2 id="locking-a-device"><a href="#locking-a-device"><span class="header-section-number">5.5</span> Locking a Device</a></h2>
+<p>SYNOPSIS</p>
+<pre><code>#include &lt;coprthr.h&gt;
+#include &lt;coprthr_dev.h&gt;
+
+coprthr_dev_t coprthr_getdev( const char* path, int flags );
+
+int coprthr_devlock( coprthr_dev_t dev, int flags );
+
+int coprthr_devunlock( coprthr_dev_t dev, int flags );
+
+Link with -lcoprthr</code></pre>
+<p>DESCRIPTION</p>
+<p>The device struct for a co-processor device can be obtained using the coprthr_getdev() call. The <code>path</code> argument may specify a device file associated with the physical device. Alternatively, one of several pre-defined macros may be used to identify specific supported devices (that may or may not be present on the platform). The pre-defined macros are:</p>
+<pre><code>COPRTHR_ARCH_ID_X86_64   
+COPRTHR_ARCH_ID_I386     
+COPRTHR_ARCH_ID_ARM32    
+COPRTHR_ARCH_ID_E32_EMEK 
+COPRTHR_ARCH_ID_E32     
+COPRTHR_ARCH_ID_MIC</code></pre>
+<p>Prior to performing any low-level operation on a device the programmer should acquire a lock on the device. This lock should be held until the device is no longer being used at which point <em>all</em> resources and other constructs instantiated during the use of the device will be invalidated.</p>
+<p>The flag <code>COPRTHR_DEVLOCK_NOWAIT</code> may be used to request that the call not block in the event that the device is temporarily unavailable.</p>
+<p>The flag <code>COPRTHR_DEVLOCK_NOINIT</code> is used to prevent initializing the device, and is used in conjunction with the flag <code>COPRTHR_DEVUNLOCK_PERSIST</code> described below.</p>
+<p>When the device is no longer needed the following call should be used to release the lock on the device, invalidating any resources and constructs instantiated during it use.</p>
+<p>The exception to the normal behavior may be requested using the the flag <code>COPRTHR_DEVUNLOCK_PERSIST</code> which will cause all resources to persist in anticipation of a lock on the device being re-acquired in the future. The subsequent call to coprthr_devlock() must set the flag <code>COPRTHR_DEVLOCK_NOINIT</code> to prevent the device from being initialized.</p>
+<p> </p>
+<h2 id="device-memory-allocation-1"><a href="#device-memory-allocation-1"><span class="header-section-number">5.6</span> Device Memory Allocation</a></h2>
+<p>SYNOPSIS</p>
+<pre><code>#include &lt;coprthr.h&gt;
+#include &lt;coprthr_dev.h&gt;
+
+coprthr_mem_t coprthr_devmemalloc( coprthr_dev_t dev, void* addr, size_t nemb,
+    size_t size, int flags );
+
+void coprthr_devmemfree( coprthr_dev_t dev, coprthr_mem_t mem );
+
+size_t coprthr_memsize( coprthr_mem_t mem );
+
+void* coprthr_memptr( coprthr_mem_t mem, int flag );
+
+Link with -lcoprthr</code></pre>
+<p>DESCRIPTION</p>
+<p>Device memory may be allocated using a generalized allocator coprthr_devmemalloc(). The allocation of a specific type of memory is selected using one of the following flags:</p>
+<pre><code>COPRTHR_DEVMEM_TYPE_BUFFER
+COPRTHR_DEVMEM_TYPE_MUTEX
+COPRTHR_DEVMEM_TYPE_SIGNAL
+COPRTHR_DEVMEM_TYPE_REGISTER
+COPRTHR_DEVMEM_TYPE_FIFO
+COPRTHR_DEVMEM_TYPE_STACK</code></pre>
+<p>Additionally, the certain types of allocated memory may have read/write protection enabled using the following flags:</p>
+<pre><code>COPRTHR_DEVMEM_PROT_ENABLED
+COPRTHR_DEVMEM_PROT_READ
+COPRTHR_DEVMEM_PROT_WRITE
+
+COPRTHR_DEVMEM_FIXED</code></pre>
+<p>The allocated device memory may be released using coprthgr_devmemfree().</p>
+<p>For convenience, the size of any allocation can be obtained with the coprthr_memsize() call. In many cases, the programmer will need the device memory address associated with a specific allocation. A typical example is for passing pointer arguments to functions executed on the device. The device address may be obtained using the coprthr_memptr() call.</p>
+<p> </p>
+<h2 id="accessing-device-memory"><a href="#accessing-device-memory"><span class="header-section-number">5.7</span> Accessing device memory</a></h2>
+<p>SYNOPSIS</p>
+<pre><code>#include &lt;coprthr.h&gt;
+#include &lt;coprthr_dev.h&gt;
+
+size_t coprthr_devread( coprthr_dev_t dev, coprthr_mem_t mem, 
+    size_t offset, void* buf, size_t len, int flags);
+
+size_t coprthr_devwrite( coprthr_dev_t dev, coprthr_mem_t mem, 
+    size_t offset, void* buf, size_t len, int flags);
+
+size_t coprthr_devcopy( coprthr_dev_t dev, coprthr_mem_t mem_src, 
+    size_t offset_src, coprthr_mem_t mem_dst, size_t offset_dst, 
+    size_t len, int flags);
+
+Link with -lcoprthr</code></pre>
+<p>DESCRIPTION</p>
+<p>The functions coprthr_devread, coprthr_devwrite(), and coprthr_devcopy() are provided to access device memory. The coprthr_devwrite() call writes the contents of a host buffer to a device memory allocation. The coprthr_devread() call reads the contents of a device memory allocation to a host buffer. The coprthr_devcopy() copies the contents of one device memory allocation to another.</p>
+<p>Some devices may not support offsets into device memory. Each call returns the number of bytes successfully copied. If a non-zero value is provided for the offset arguement targeting a device that does not support this capability, a zero is returned and <code>errno</code> is set to ENOTSUP.</p>
+<p> </p>
+<h2 id="executing-code-on-a-co-processor-device"><a href="#executing-code-on-a-co-processor-device"><span class="header-section-number">5.8</span> Executing Code on a Co-Processor Device</a></h2>
+<p>SYNOPSIS</p>
+<pre><code>#include &lt;coprthr.h&gt;
+#include &lt;coprthr_dev.h&gt;
+
+int coprthr_devexec( coprthr_dev_t dev, int nthr, void* reserved,
+    coprthr_kernel_t krn, unsigned int narg, void** args);
+
+Link with -lcoprthr</code></pre>
+<p>DESCRIPTION</p>
+<p>The coprthr_devexec() call is used to execute a kernel <code>krn</code> on a co-processor device using <code>nthr</code> threads. The arguments <code>narg</code> and <code>args</code> specify the number of arguments and an array of pointers to the arguments to be used when the kernel is called.</p>
+<p> </p>
+<h2 id="cross-compilation-1"><a href="#cross-compilation-1"><span class="header-section-number">5.9</span> Cross-compilation</a></h2>
+<p>SYNOPSIS</p>
+<pre><code>#include &lt;coprthr.h&gt;
+#include &lt;coprthr_cc.h&gt;
+
+coprthr_program_t coprthr_devcompile( coprthr_dev_t dev, char* src, size_t len,
+    char* opt, char** log );
+
+coprthr_sym_t 
+    coprthr_getsym( coprthr_program_t prg, const char* symbol );
+
+Link with -lcoprthr -lcoprthrcc</code></pre>
+<p>DESCRIPTION</p>
+<p>The coprthr_devcompile() call is a convenience wrapper for the cross-compilation interface call coprthr_cc() and will compile code targeting the device associated with the device <code>dev</code>.</p>
+<p>The coprthr_getsym() call is used to get the named symbol in the program, e.g., to get a handle to a given device kernel.</p>
+<hr />
+<p> </p>
+<h1 id="examples"><a href="#examples"><span class="header-section-number">6</span> Examples</a></h1>
+<p>The following four examples provide a glimpse of how the COPRTHR API can be used.</p>
+<h2 id="example-1"><a href="#example-1"><span class="header-section-number">6.1</span> Example #1</a></h2>
+<p>As a simple example showing the use of these calls, the program below performs the following steps: 1) check cross-compiler version, 2) check available cross-compiler targets, 3) compile a simple thread function creating a program struct suitable for use with the COPRTHR API run-time, 4) write the compiled binary object to a file, and 5) read the written file creating a new program struct.</p>
+<pre><code>    #include &lt;stdio.h&gt;
+    #include &lt;stdlib.h&gt;
+    #include &lt;string.h&gt;
+
+    #include &quot;coprthr.h&quot;
+    #include &quot;coprthr_cc.h&quot;
+
+    /* define a simple thread function for adding two vectors */
+    char src[] = \
+        &quot;#include &lt;coprthr.h&gt;\n&quot; \
+        &quot;void my_kern( float* a, float* b, float* c) {\n&quot; \
+        &quot;  int tid = coprthr_get_thread_index();\n&quot; \
+        &quot;  c[tid] = a[tid]+b[tid];\n&quot; \
+        &quot;}\n&quot;;
+
+    int main()
+    {
+        int i;
+        coprthr_program_t prg, prg2;
+
+        /* get cross-compiler version info */
+        char* log = 0;
+        coprthr_cc(0,0,&quot;--version&quot;,&amp;log);
+        printf(&quot;%s\n&quot;,log);
+        free(log);
+
+        /* get cross-compiler supported targets */
+        log = 0;
+        coprthr_cc(0,0,&quot;--targets&quot;,&amp;log);
+        printf(&quot;%s\n&quot;,log);
+        free(log);
+
+        /* compile program for Epiphany RISC array */
+        prg = coprthr_cc(src,sizeof(src),COPRTHR_CC_TARGET_E32,0);
+        if (prg) {
+
+            /* write out the binary */
+            coprthr_cc_write_bin(&quot;./bin_e32.o&quot;,prg,0);
+
+            /* then read it back into a new program struct */
+            prg2 =  coprthr_cc_read_bin( &quot;./bin_e32.o&quot;, 0 );
+        }
+
+    }</code></pre>
+<p> </p>
+<h2 id="example-2"><a href="#example-2"><span class="header-section-number">6.2</span> Example #2</a></h2>
+<p>In this example a simple kernel that adds two vectors is compiled and executed using 16 threads.</p>
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+#include &quot;coprthr.h&quot;
+
+#define SIZE 16
+
+char src[] = \
+    &quot;#include &lt;coprthr.h&gt;\n&quot; \
+   &quot;void my_kern( float* a, float* b, float* c) {\n&quot; \
+   &quot;  int idx = coprthr_get_thread_index();\n&quot; \
+   &quot;  c[idx] = a[idx]+b[idx];\n&quot; \
+   &quot;}\n&quot;;
+
+int main()
+{
+   int i;
+
+   int dd = coprthr_dopen(COPRTHR_DEVICE_X86_64,COPRTHR_O_STREAM);
+
+   coprthr_program_t prg = coprthr_dcompile(dd,src,sizeof(src),&quot;&quot;,0);
+   coprthr_kernel_t krn = coprthr_getsym(prg,&quot;my_kern&quot;);
+
+   float* a = (float*)malloc(SIZE*sizeof(float));
+   float* b = (float*)malloc(SIZE*sizeof(float));
+   float* c = (float*)malloc(SIZE*sizeof(float));
+
+   for(i=0; i&lt;SIZE; i++) {
+      a[i] = 1.0f * i;
+      b[i] = 2.0f * i;
+      c[i] = 0.0f;
+   }
+
+   coprthr_mem_t mema = coprthr_dmalloc(dd,SIZE*sizeof(float),0);
+   coprthr_mem_t memb = coprthr_dmalloc(dd,SIZE*sizeof(float),0);
+   coprthr_mem_t memc = coprthr_dmalloc(dd,SIZE*sizeof(float),0);
+
+   coprthr_dwrite(dd,mema,0,a,SIZE*sizeof(float),COPRTHR_E_NOWAIT);
+   coprthr_dwrite(dd,memb,0,b,SIZE*sizeof(float),COPRTHR_E_NOWAIT);
+   coprthr_dwrite(dd,memc,0,c,SIZE*sizeof(float),COPRTHR_E_NOWAIT);
+
+   unsigned int nargs = 3;
+   void* args[] = { &amp;mema, &amp;memb, &amp;memc };
+   unsigned int nthr = SIZE;
+
+   coprthr_dexec(dd,krn,nargs,args,nthr,0,COPRTHR_E_NOWAIT);
+
+   coprthr_dcopy(dd,memc,0,memb,0,SIZE*sizeof(float),COPRTHR_E_NOWAIT);
+
+   coprthr_dread(dd,memc,0,c,SIZE*sizeof(float),COPRTHR_E_NOWAIT);
+
+    coprthr_dwait(dd);
+
+   for(i=0; i&lt;SIZE; i++)
+      printf(&quot;%f + %f = %f\n&quot;,a[i],b[i],c[i]);
+
+   coprthr_dfree(dd,mema);
+   coprthr_dfree(dd,memb);
+   coprthr_dfree(dd,memc);
+
+   free(a);
+   free(b);
+   free(c);
+
+   coprthr_dclose(dd);
+}</code></pre>
+<hr />
+<p> </p>
+<h2 id="example-3"><a href="#example-3"><span class="header-section-number">6.3</span> Example #3</a></h2>
+<p>In this example two kernels, one adding vectors and one subtracting vectors, are executed simultaneously.</p>
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+#include &quot;coprthr.h&quot;
+
+#define SIZE 256
+
+char src_add[] = \
+    &quot;#include &lt;coprthr.h&gt;\n&quot; \
+   &quot;void my_kern( float* a, float* b, float* c) {\n&quot; \
+   &quot;  int gtid = get_global_id(0);\n&quot; \
+   &quot;  c[gtid] = a[gtid]+b[gtid];\n&quot; \
+   &quot;}\n&quot;;
+
+char src_sub[] = \
+    &quot;#include &lt;coprthr.h&gt;\n&quot; \
+   &quot;void my_kern( float* a, float* b, float* c) {\n&quot; \
+   &quot;  int gtid = get_global_id(0);\n&quot; \
+   &quot;  c[gtid] = a[gtid]-b[gtid];\n&quot; \
+   &quot;}\n&quot;;
+
+int main()
+{
+   int i;
+
+   int dd = coprthr_dopen(TEST_COPRTHR_DEVICE,COPRTHR_O_STREAM);
+
+   coprthr_program_t prg_add
+      = coprthr_dcompile(dd,src_add,sizeof(src_add),0,0);
+   coprthr_kernel_t krn_add = coprthr_getsym(prg_add,&quot;my_kern&quot;);
+
+   coprthr_program_t prg_sub
+      = coprthr_dcompile(dd,src_sub,sizeof(src_sub),0,0);
+   coprthr_kernel_t krn_sub = coprthr_getsym(prg_sub,&quot;my_kern&quot;);
+
+   size_t size = SIZE;
+   size_t size2 = SIZE/2;
+
+   float* a = (float*)malloc(size*sizeof(float));
+   float* b = (float*)malloc(size*sizeof(float));
+   float* c = (float*)malloc(size*sizeof(float));
+
+   for(i=0; i&lt;SIZE; i++) {
+      a[i] = 1.0f * i;
+      b[i] = 2.0f * i;
+      c[i] = 0.0f;
+   }
+
+   coprthr_mem_t mema1 = coprthr_dmalloc(dd,size2*sizeof(float),0);
+   coprthr_mem_t memb1 = coprthr_dmalloc(dd,size2*sizeof(float),0);
+   coprthr_mem_t memc1 = coprthr_dmalloc(dd,size2*sizeof(float),0);
+
+   coprthr_mem_t mema2 = coprthr_dmalloc(dd,size2*sizeof(float),0);
+   coprthr_mem_t memb2 = coprthr_dmalloc(dd,size2*sizeof(float),0);
+   coprthr_mem_t memc2 = coprthr_dmalloc(dd,size2*sizeof(float),0);
+
+   coprthr_dwrite(dd,mema1,0,a,size2*sizeof(float),COPRTHR_E_NOWAIT);
+   coprthr_dwrite(dd,memb1,0,b,size2*sizeof(float),COPRTHR_E_NOWAIT);
+   coprthr_dwrite(dd,memc1,0,c,size2*sizeof(float),COPRTHR_E_NOWAIT);
+
+   coprthr_dwrite(dd,mema2,0,a+size2,size2*sizeof(float),COPRTHR_E_NOWAIT);
+   coprthr_dwrite(dd,memb2,0,b+size2,size2*sizeof(float),COPRTHR_E_NOWAIT);
+   coprthr_dwrite(dd,memc2,0,c+size2,size2*sizeof(float),COPRTHR_E_NOWAIT);
+
+   unsigned int nargs = 3;
+   void* args_add[] = { &amp;mema1, &amp;memb1, &amp;memc1 };
+   void* args_sub[] = { &amp;mema2, &amp;memb2, &amp;memc2 };
+   unsigned int nthr = size2;
+
+   coprthr_kernel_t v_krn[] = { krn_add, krn_sub };
+   unsigned int v_nargs[] = { nargs, nargs };
+   void** v_args[] = { args_add, args_sub };
+   unsigned int v_nthr[] = { nthr, nthr };
+
+   coprthr_dnexec(dd,2,v_krn,v_nargs,v_args,v_nthr,0,COPRTHR_E_NOWAIT);
+
+   coprthr_dread(dd,memc1,0,c,size2*sizeof(float),COPRTHR_E_NOWAIT);
+   coprthr_dread(dd,memc2,0,c+size2,size2*sizeof(float),COPRTHR_E_NOWAIT);
+
+    coprthr_dwait(dd);
+
+   for(i=0; i&lt;SIZE; i++)
+      printf(&quot;%f + %f = %f\n&quot;,a[i],b[i],c[i]);
+
+   coprthr_dfree(dd,mema1);
+   coprthr_dfree(dd,memb1);
+   coprthr_dfree(dd,memc1);
+
+   coprthr_dfree(dd,mema2);
+   coprthr_dfree(dd,memb2);
+   coprthr_dfree(dd,memc2);
+
+   free(a);
+   free(b);
+   free(c);
+
+   coprthr_dclose(dd);
+}</code></pre>
+<hr />
+<p> </p>
+<h2 id="example-4"><a href="#example-4"><span class="header-section-number">6.4</span> Example #4</a></h2>
+<p>This example shows a simple test of the pthreads extension to co-processors. A thread is created on the co-processor that requires acquiring a mutex prior to performing a calculation. The host code aquires the same mutex prior to thread cration, thereby blocking the thread from completion. The host code then waits 3 seconds, changes the input to a trivial calculation, and then releases the mutex. The example demonstrates the use of mutexes since without proper operation the wrong value will be calulated on the device.</p>
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+#include &quot;coprthr.h&quot;
+#include &quot;coprthr_thread.h&quot;
+
+
+struct my_args {
+   void* mtx;
+   int data;
+};
+
+
+char src[] = \
+   &quot;#include &lt;coprthr.h&gt;\n&quot; \
+   &quot;typedef struct { void* mtx; int data; } my_args_t;\n&quot; \
+   &quot;__kernel void\n&quot; \
+   &quot;my_thread( void* p) {\n&quot; \
+   &quot;  my_args_t* pargs = (my_args_t*)p;\n&quot; \
+   &quot;  int data = pargs-&gt;data;\n&quot; \
+   &quot;  coprthr_mutex_lock(pargs-&gt;mtx);\n&quot; \
+   &quot;  pargs-&gt;data = pargs-&gt;data - 332211;\n&quot; \
+   &quot;  coprthr_mutex_unlock(pargs-&gt;mtx);\n&quot; \
+   &quot;}\n&quot;;
+
+int main()
+{
+   /* open device for threads */
+
+   int dd = coprthr_dopen(COPRTHR_DEVICE_E32,COPRTHR_O_THREAD);
+
+   if (dd&lt;0) {
+      printf(&quot;deice open failed\n&quot;);
+      exit(-1);
+   }
+
+
+   /* compile thread function */
+
+   char* log = 0;
+   coprthr_program_t prg = coprthr_dcompile(dd,src,sizeof(src),&quot;&quot;,&amp;log);
+   if (log) printf(&quot;%s&quot;,log);
+   coprthr_sym_t thr = coprthr_getsym(prg,&quot;my_thread&quot;);
+
+
+   /* create mutex on device */
+
+   coprthr_mutex_attr_t mtxattr;
+   coprthr_mutex_attr_init(&amp;mtxattr);
+   coprthr_mutex_attr_setdevice(&amp;mtxattr,dd);
+
+   coprthr_mutex_t mtx;
+   coprthr_mutex_init(&amp;mtx,&amp;mtxattr);
+
+   coprthr_mutex_attr_destroy(&amp;mtxattr);
+
+
+   /* allocate memory on device and write a value */
+
+   struct my_args args;
+   args.data = 997766;
+   args.mtx = coprthr_memptr( (coprthr_mem_t)mtx,0);
+   coprthr_mem_t mem = coprthr_dmalloc(dd,sizeof(struct my_args),0);
+   coprthr_dwrite(dd,mem,0,&amp;args,sizeof(struct my_args),COPRTHR_E_NOW);
+
+
+   /* lock the mutex on the device */
+
+   coprthr_mutex_lock(&amp;mtx);
+
+
+   /* create thread */
+
+   coprthr_attr_t attr;
+   coprthr_td_t td;
+   void* status;
+
+   coprthr_attr_init( &amp;attr );
+   coprthr_attr_setdetachstate(&amp;attr,COPRTHR_CREATE_JOINABLE);
+   coprthr_attr_setdevice(&amp;attr,dd);
+
+   coprthr_create( &amp;td, &amp;attr, thr, (void*)&amp;mem );
+
+   coprthr_attr_destroy( &amp;attr);
+
+
+   /* wait 3 seconds to give the thread time to work */
+
+   sleep(3);
+
+
+   /* change the value stored in memory */
+
+   args.data = 887766;
+   coprthr_dwrite(dd,mem,0,&amp;args,sizeof(struct my_args),COPRTHR_E_NOW);
+   args.data = -1;
+
+
+   /* unlock the mutex on the device */
+
+   coprthr_mutex_unlock(&amp;mtx);
+
+
+   /* join the thread */
+
+   coprthr_join(td,&amp;status);
+
+   printf(&quot;status %d\n&quot;,(int)status);
+
+
+   /* read back value from memory on device */
+
+   coprthr_dread(dd,mem,0,&amp;args,sizeof(struct my_args),COPRTHR_E_NOW);
+   fprintf(stderr,&quot;data %d 0x%x\n&quot;,args.data,args.data);
+
+
+   /* clean up */
+
+   coprthr_mutex_destroy(&amp;mtx);
+
+   coprthr_dfree(dd,mem);
+
+   coprthr_dclose(dd);
+}</code></pre>
+<hr />
+<p>Document revision 1.6.0.0</p>
+</body>
+</html>

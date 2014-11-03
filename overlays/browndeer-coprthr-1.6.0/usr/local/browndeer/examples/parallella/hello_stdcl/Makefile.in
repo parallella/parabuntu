@@ -1,0 +1,48 @@
+NAME = hello_stdcl
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+
+OPENCL_INCS = -I@OPENCL_INCLUDE@
+OPENCL_LIBS = -L@OPENCL_LIB@ -l@OPENCL_LIBNAME@
+
+STDCL_INCS = -I@includedir@
+STDCL_LIBS = -L@libdir@ -lstdcl
+
+INCS = $(OPENCL_INCS) $(STDCL_INCS)
+LIBS = $(OPENCL_LIBS) $(STDCL_LIBS) 
+
+F90 = gfortran44
+
+CCFLAGS += -O3
+F90FLAGS = 
+
+BUILD_OS = $(shell uname -s)
+
+ifeq ($(BUILD_OS),Linux)
+OBJS += ocl_kernels.o
+endif
+
+all: $(NAME).x 
+
+$(NAME).x: $(NAME).o $(OBJS) 
+	$(CC) $(CCFLAGS) $(INCS) -o $(NAME).x $(NAME).o $(OBJS) $(LIBS) 
+
+ocl_kernels.o: matvecmult.cl
+	clcc -c -o ocl_kernels.o matvecmult.cl
+
+fortran: $(OBJS) 
+	$(F90) $(F90FLAGS) $(INCS) -o $(NAME)_fortran.x $(NAME)_fortran.f90 \
+		$(OBJS) $(LIBS)
+
+.SUFFIXES:
+.SUFFIXES: .c .o
+
+.c.o:
+	$(CC) $(CCFLAGS) $(INCS) -c $<
+
+clean:
+	rm -f *.o 
+
+distclean: clean 
+	rm -f *.x

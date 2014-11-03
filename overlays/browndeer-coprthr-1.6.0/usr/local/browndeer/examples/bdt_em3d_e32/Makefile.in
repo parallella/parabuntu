@@ -1,0 +1,44 @@
+NAME = bdt_em3d
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+
+OPENCL_INCS = -I@OPENCL_INCLUDE@
+OPENCL_LIBS = -L@OPENCL_LIB@ -l@OPENCL_LIBNAME@
+
+STDCL_INCS = -I@includedir@
+STDCL_LIBS = -L@libdir@ -lstdcl
+
+INCS = $(OPENCL_INCS) $(STDCL_INCS)
+LIBS = $(OPENCL_LIBS) $(STDCL_LIBS)
+
+DEFS = -DENABLE_CL
+
+OBJS = Timer.o em3d_fdtd_gpu_cl_display.o 
+
+
+##### It should NOT be necessary to modify lines below #####
+#LIBS += -lglut -lGLEW
+LIBS += -L/usr/local/atistream/lib/x86_64  -lglut -lGLEW
+
+CXXFLAGS += -O3
+
+all: $(NAME).x 
+
+$(NAME).x: $(NAME).o $(OBJS)
+	$(CXX) $(CXXFLAGS) $(INCS) -o $(NAME).x $(NAME).o $(OBJS) $(LIBS)
+
+.SUFFIXES:
+.SUFFIXES: .cpp .o
+
+.cpp.o:
+	$(CXX) $(CXXFLAGS) $(DEFS) $(INCS) -c $<
+
+clean:
+	rm -f *.o 
+	rm -f *.ll
+
+distclean: clean
+	rm -f *.x
+	rm -f *.vti
+

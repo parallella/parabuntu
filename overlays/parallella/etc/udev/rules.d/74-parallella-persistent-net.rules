@@ -1,0 +1,3 @@
+# Always map Parallella network interface to eth0
+SUBSYSTEM=="net", ACTION=="add", DEVPATH=="/devices/amba.1/e000b000.eth/*", DRIVERS=="?*", KERNEL=="eth*", NAME="eth0"
+

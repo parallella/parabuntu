@@ -59,6 +59,7 @@ tar -zxvf boot-e16-7z020-v01-140528.tgz -C mnt/boot
 ```
 sudo rsync -ap overlays/parallella/ mnt/rootfs/
 sudo rsync -ap overlays/browndeer-coprthr-1.6.0/ mnt/rootfs/
+sudo rsync -ap overlays/openmpi-1.8.3 /mnt/rootfs/
 ```
 
 ### 8. Enable devtmpfs and make SD card accessible from Parallella
@@ -153,14 +154,16 @@ echo "dash dash/sh boolean false" | sudo debconf-set-selections
 sudo -E DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
 ```
 
-### 29. [TODO] Fix when we have final. Installing Epiphany SDK
+### Installing Epiphany SDK to overlay
+This is *only* needed when a new version is available
+
 ```
-sudo apt-get install libmpfr-dev libmpc-dev libgmp3-dev
-sudo mkdir -p /opt/adapteva/
+mkdir -p overlay/esdk-20XX.YY[.Z]/opt/adapteva
 wget http://downloads.parallella.org/esdk/esdk.5.13.09.10_linux_armv7l.tgz
-sudo tar xzf esdk.5.13.09.10_linux_armv7l.tgz -C /opt/adapteva/
-sudo ln -sTf /opt/adapteva/esdk.5.13.09.10 /opt/adapteva/esdk
-sudo ln -s /usr/lib/arm-linux-gnueabihf/libmpc.so.3.0.0 /usr/lib/arm-linux-gnueabihf/libmpc.so.2 #HACK!
+tar xzf esdk.20XX.YY[.Z]_linux_armv7l.tgz -C overlays/esdk.20XX.YY[.Z]/opt/adapteva/
+sudo ln -sTfr overlays/esdk.20XX.YY[.Z]/opt/adapteva/esdk.20XX.YY[.Z] overlays/esdk.20XX.YY[.Z]/opt/adapteva/esdk
+#sudo ln -s /usr/lib/arm-linux-gnueabihf/libmpc.so.3.0.0 /usr/lib/arm-linux-gnueabihf/libmpc.so.2 #HACK!
+# TODO move to /etc/environment
 echo 'setenv EPIPHANY_HOME      /opt/adapteva/esdk' >> ${HOME}/.cshrc
 echo 'source ${EPIPHANY_HOME}/setup.csh' >> ${HOME}/.cshrc
 echo 'EPIPHANY_HOME=/opt/adapteva/esdk' >> ${HOME}/.bashrc
@@ -215,12 +218,12 @@ echo 'setenv LD_LIBRARY_PATH /usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY
 
 ### 31. MPI Installation from source
 
-[Longterm TODO: There's only 1.6 .deb source packages so install from source for now]
-
+[Longterm TODO: There's only 1.6 .deb source packages so install from source for now]  
+This is *only* necessary if a newer OpenMPI version than 1.8.3 is available
 ```
-wget http://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.3.tar.gz
-tar -zxvf openmpi-1.8.1.tar.gz
-cd openmpi-1.8.1
+wget http://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.X.tar.gz
+tar -zxvf openmpi-1.8.X.tar.gz
+cd openmpi-1.8.X
 ./configure --prefix=~/usr \
             --enable-mpirun-prefix-by-default \
             --enable-static 
@@ -229,6 +232,7 @@ sudo make install
 rm -rf openmpi*
 ```
 
+Copy over to overlay
 
 
 ### 17. Sync the file system and power off the board

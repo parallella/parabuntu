@@ -56,6 +56,7 @@ sudo tar --strip-components 1 -xvzpf linaro-trusty-nano-20141024-684.tar.gz -C m
 tar -zxvf boot-e16-7z020-v01-140528.tgz -C mnt/boot
 ```
 ### 7. rsync overlays over rootfs
+[ TODO: Use tarballs for everything but parallella? ]
 ```
 sudo rsync -ap overlays/parallella/ mnt/rootfs/
 sudo rsync -ap overlays/browndeer-coprthr-1.6.0/ mnt/rootfs/
@@ -122,21 +123,43 @@ sudo apt-get install avahi-daemon
 Reboot so we get sane time.
 
 
-### 13. Copy package files over to Parallella from 2nd computer
-```
-scp -r packages.basic.txt packages linaro@linaro-nano.local:~
-```
 
 ### 14. SSH into Parallella from 2nd computer
 
 ```
 ssh linaro@linaro-nano.local
 ```
+Copy skel files:
+```
+cp -r /etc/skel/. .
+```
+Logout and login again to get new environment:
+
+```
+exit
+ssh linaro@linaro-nano.local
+```
+
+
+### 13. Copy package and test files over to Parallella from 2nd computer
+```
+scp -r packages.basic.txt packages tests linaro@linaro-nano.local:~
+```
+
 
 ### 15. Install basic packages
 ```
-sudo apt-get install -y $(cat packages.basic.txt | grep -v "^#" | sed 's,\s\s*,\n,g' | grep -v "^\s*$)
+sudo apt-get install $(cat packages.basic.txt | grep -v "^#" | sed 's,\s\s*,\n,g' | grep -v "^\s*$ | xargs echo )
 sudo dpkg -i $(ls packages | grep -v -- "-dbg_")
+```
+
+### 16. Run tests
+```
+cd tests
+```
+for all tests cd into directory and:  
+```
+./test.sh
 ```
 
 ### 16. Remove packages

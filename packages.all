@@ -1,0 +1,68 @@
+### 17. Install a windows manager
+lxde
+xinit
+
+### 19. Install other essential Packages
+
+### "Must haves"
+less tcsh emacs nano ftp synaptic tkcvs wish screen putty
+feh lsb-release
+fake-hwclock ntp
+
+### Compiling/Building
+build-essential git curl m4 flex bison gawk pkg-config
+
+### Ubuntu package tools
+devscripts dpkg-dev
+
+### Packages for Epiphany SDK
+# TODO: Do we really need these?
+libmpfr-dev libmpc-dev libgmp3-dev
+
+### Networking
+ethtool iperf ifplugd
+network-manager
+
+### Linux Tools
+xutils-dev device-tree-compiler usbutils
+
+### Media
+firefox smplayer evince gimp
+
+### Programming
+octave scratch
+
+### Scientific
+python-numpy python-scipy python-matplotlib
+ipython ipython-notebook python-pandas python-sympy python-nose
+r-base r-base-dev
+
+### Erlang ###
+erlang-mini
+
+### Sound
+gstreamer0.10-alsa alsa-base alsa-utils libasound2-plugins
+
+### For Demos
+libdrm-dev libasound2-dev libx11-dev
+libfluidsynth-dev fluidsynth fluid-soundfont-gm
+
+### Camera
+camorama guvcview
+
+### Wifi
+linux-firmware
+
+### Screen sharing
+tightvncserver
+
+### Other
+boinc-client boinc-manager
+libreoffice
+openvpn
+synergy
+vlc
+
+# Language Packs (Fix utf8 & get rid of Ubuntu's annoying locale warings)
+language-pack-en
+

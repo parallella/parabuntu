@@ -1,0 +1,56 @@
+#Basic
+bash tcsh man info less
+ssh
+ftp synaptic screen tmux bc htop
+lsb-release
+fake-hwclock
+ntp
+
+# Language Packs (Fix utf8 & get rid of Ubuntu's annoying locale warings)
+language-pack-en
+
+# Editors
+vim emacs nano
+
+# Debian packaging
+devscripts
+dpkg-dev
+
+# Compiling/building
+build-essential
+git
+curl
+m4
+flex
+bison
+gawk
+pkg-config
+strace
+texinfo
+gdb
+
+### Networking
+ethtool
+iperf
+ifplugd
+bwm-ng
+
+### Linux Tools
+device-tree-compiler
+usbutils
+
+### Wifi
+linux-firmware
+
+### Packages for Epiphany SDK
+libmpfr-dev libmpc-dev libgmp3-dev
+
+### For epiphany examples
+libdevil-dev
+libdevil1c2
+fftw3
+fftw3-dev
+
+### Packages for browndeer coprthr
+# Source packages
+

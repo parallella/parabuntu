@@ -114,6 +114,7 @@ sudo apt-get install fake-hwclock ntp
 ```
 
 #### Set up mDNS
+[TODO We want to script generating a unique hostname based on last 2 bytes in MAC address, e.g, parallella-09ab]  
 ```
 sudo apt-get install avahi-daemon
 ```

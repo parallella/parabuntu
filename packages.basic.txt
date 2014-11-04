@@ -10,7 +10,7 @@ ntp
 language-pack-en
 
 # Editors
-vim emacs nano
+vim-nox emacs-nox nano
 
 # Debian packaging
 devscripts

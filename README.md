@@ -65,7 +65,7 @@ sudo rsync -ap overlays/openmpi-1.8.3 /mnt/rootfs/
 
 #### Remove .gitkeep files
 ```
-find -name ".gitkeep" mnt/rootfs | sudo xargs rm
+find -name ".gitkeep" mnt/rootfs -delete
 ```
 
 ### 8. Enable devtmpfs and make SD card accessible from Parallella

@@ -420,7 +420,15 @@ From regular computer:
 sudo dd if=/dev/mmcblk0 of=my_backup.img bs=4M
 ```
 
-### 33. Burning another card
+### 33. Run zerofree
+Run zerofree to fill empty space with zeroes so compression of final image can
+work more efficient.
+
+```
+sudo zerofree my_backup.img
+```
+
+### 34. Burning another card
 Insert a new micro SD card into regular computer
 
 Option#1: Copying the whole image

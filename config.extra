@@ -1,0 +1,5 @@
+
+# Extra config
+CONFIG_ZSMALLOC=y
+CONFIG_ZRAM=m
+

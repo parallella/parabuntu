@@ -75,13 +75,18 @@ build_kernel () {
                 LOADADDR=0x8000 \
                 $@ >> $kernel_build_log 2>&1
         }
+        add_extra_config () {
+            [ -f $CONFIG_EXTRA ] &&
+            cat $CONFIG_EXTRA >> $KERNEL_BUILD_DIR/.config &&
+            helper 1 olddefconfig ||
+            true
+        }
         cd $PARALLELLA_LINUX &&
         make distclean &&
         helper 1 distclean &&
         helper 1 mrproper &&
         helper 1 parallella_defconfig &&
-        cat $CONFIG_EXTRA >> $KERNEL_BUILD_DIR/.config &&
-        helper 1 olddefconfig &&
+        add_extra_config &&
         helper $jobs "" &&
         helper 1 uImage &&
         helper 1 zynq-parallella1-headless.dtb &&

@@ -7,7 +7,7 @@ This is work in progress. The goal is to automate as much as possible.
 
 ### 1. Clone the repository
 ```
-git clone git@github.com/parallella/parallella-ubuntu
+git clone git@github.com/parallella/pubuntu
 export WORKSPACE=$(readlink -e parallella-ubuntu)
 cd $WORKSPACE
 ```

@@ -1,0 +1,3 @@
+echo cc -g -I..//include -o test.x test.c  -lm -L/usr/local/browndeer/lib -locl
+cc -g -I..//include -o test.x test.c  -lm -L/usr/local/browndeer/lib -locl
+

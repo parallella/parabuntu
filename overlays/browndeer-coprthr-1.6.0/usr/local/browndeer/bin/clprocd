@@ -1,0 +1,56 @@
+#!/bin/bash
+
+args=`getopt m:d: $*`
+
+set -- $args
+
+cmin=5
+dir=/var/clproc
+
+for i
+do
+   case $i in
+	--) shift; break
+   ;;
+   -m) shift; cmin=$1;
+   ;;
+	-d) shift; dir=$1;
+	;;
+   *) shift
+   esac
+done
+
+while :
+do
+
+#pids=`ls /var/clproc`
+pids=`ls $dir`
+
+#echo $pids
+
+for p in $pids
+do
+
+ps -p $p > /dev/null 2>&1
+
+if ! [ $? -ne 0 ]; then
+#	echo "process " $p " is running";
+	test -e /proc/$p/cmdline && cp -f /proc/$p/cmdline $dir/$p/cmdline
+fi
+
+if [ $(find $dir/$p -cmin +$cmin -type f -name state ) ];then
+#	echo "$p is old"
+	test ! -e $dir/$p/state ||unlink $dir/$p/state
+	test ! -e $dir/$p/cmdline ||unlink $dir/$p/cmdline
+	rmdir $dir/$p
+#else
+#	echo "$p is new"
+fi
+
+done
+
+sleep  2
+#echo tic
+
+done
+

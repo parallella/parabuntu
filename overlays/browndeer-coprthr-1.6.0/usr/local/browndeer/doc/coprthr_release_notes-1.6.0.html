@@ -1,0 +1,281 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Copyright © 2014 Brown Deer Technology, LLC" />
+  <title>Release Notes for the COPRTHR® SDK version 1.6</title>
+</head>
+<body>
+<img src="./bdt_logo.jpg">
+<div id="header">
+<h1 class="title">Release Notes for the COPRTHR<sup>®</sup> SDK version 1.6</h1>
+<h2 class="author">Copyright © 2014 Brown Deer Technology, LLC</h2>
+<h3 class="date"><em>Verbatim copying and distribution of this entire document is permitted in any medium, provided this notice is preserved.</em></h3>
+</div>
+<div id="TOC">
+<ul>
+<li><a href="#comments-on-the-freewill-release-of-the-coprthr-sdk"><span class="toc-section-number">1</span> Comments on the &quot;Freewill&quot; release of the COPRTHR SDK</a></li>
+<li><a href="#new-in-version-1.6-freewill-release"><span class="toc-section-number">2</span> New In Version 1.6 (&quot;Freewill&quot;) Release</a></li>
+<li><a href="#support_and_requirements"><span class="toc-section-number">3</span> Support and Requirements</a></li>
+<li><a href="#installation"><span class="toc-section-number">4</span> Installation</a><ul>
+<li><a href="#installation-overview"><span class="toc-section-number">4.1</span> Installation Overview</a></li>
+<li><a href="#download-the-release"><span class="toc-section-number">4.2</span> Download the Release</a></li>
+<li><a href="#linux-and-freebsd-installation"><span class="toc-section-number">4.3</span> Linux and FreeBSD Installation</a></li>
+<li><a href="#windows-7-installation"><span class="toc-section-number">4.4</span> Windows 7 Installation</a></li>
+<li><a href="#configure-options"><span class="toc-section-number">4.5</span> Configure Options</a></li>
+<li><a href="#suggested-system-specific-configurations"><span class="toc-section-number">4.6</span> Suggested System-Specific Configurations</a></li>
+</ul></li>
+<li><a href="#important-notes"><span class="toc-section-number">5</span> Important Notes</a></li>
+<li><a href="#more-information"><span class="toc-section-number">6</span> More Information</a></li>
+</ul>
+</div>
+<hr />
+<p>The CO-PRocessing THReads<sup>®</sup> SDK provides libraries and tools for application developers targeting multi-core and many-core parallel co-processing computer platforms.</p>
+<hr />
+<h1 id="comments-on-the-freewill-release-of-the-coprthr-sdk"><a href="#comments-on-the-freewill-release-of-the-coprthr-sdk"><span class="header-section-number">1</span> Comments on the &quot;Freewill&quot; release of the COPRTHR SDK</a></h1>
+<p>The COPRTHR SDK version 1.6 (Freewill) is released just over 4 years after the original design of the key components such as the STDCL<sup>®</sup> API for compute offload accelerators (once synonymous with GPUs). During this time various APIs for heterogeneous computing including &quot;industry standards&quot; have been promoted by vendors. Nevertheless, the community has failed to reach a consensus around a single approach to the fundamental task of developing portable code for heterogeneous platforms with accelerators. The relatively recent hardware entry of Intel Xeon Phi has compounded the confusion and lack of a clear path toward portable performant code.</p>
+<p>The COPRTHR SDK continues to provide unique capabilities for programming accelerators. STDCL provides an intuitive API that is superior in many ways to the few alternatives that exist today. Code written years ago in STDCL remains as portable and stable today as code written using other &quot;industry standards&quot;. If anything, applications written using STDCL have &quot;aged&quot; better than many popular alternatives.</p>
+<p>The COPRTHR clcc compiler tools support a standard compilation model for pre-compiled executables and libraries reflecting the normal workflow for most application developers. The combination of clcc with STDCL provides a powerful and efficient development tool for writing concise portable code for accelerators within a a traditional workflow.</p>
+<p>The COPRTHR SDK also provides innovative software technology like CLRPC for networked devices and CLETE for expression template based automatic acceleration. With the Freewill release we add a new low-level API based on the logical extension of pthreads for co-processors in an effort to address new requriements for co-processor architectures with fully divergent cores and other capabilities not found with traditional GPUs.</p>
+<p>We continue to push forward with the COPRTHR SDK because we believe it provides a valuble tool for code development targeting accelerators and co-processors.</p>
+<p><strong><code>DAR</code></strong></p>
+<hr />
+<p> </p>
+<h1 id="new-in-version-1.6-freewill-release"><a href="#new-in-version-1.6-freewill-release"><span class="header-section-number">2</span> New In Version 1.6 (&quot;Freewill&quot;) Release</a></h1>
+<ul>
+<li><p><em>New capabilities in the COPRTHR compiler <code>clcc</code></em></p>
+<p>Support for a standard compilation model targeting heterogeneous systems of processors and co-processors is enhanced with several new capabilities</p>
+<ul>
+<li><p>Strong binding of kernel symbols targeting a new STDCL dynamic linker</p></li>
+<li><p>Pre-compiled kernels linkable with shared libraries or executables</p></li>
+<li><p>Cross-compiler support for Android and MIC</p></li>
+<li><p>Pre-compiled kernel support extended to FreeBSD</p></li>
+</ul></li>
+<li><p><em>New support for Intel MIC architecture</em></p>
+<ul>
+<li><p>STDCL and OpenCL APIs for offload of native execution</p></li>
+<li><p>CLRPC server support for MIC accelerators enabling networked topologies</p></li>
+</ul></li>
+<li><p><em>New low-level COPRTHR API including &quot;pthreads for co-processors&quot;</em></p>
+<ul>
+<li>Simple interface to co-processors used to support higher level APIs like STDCL and OpenCL</li>
+</ul></li>
+<li><p>Includes logical extension of Pthreads for co-processors</p>
+<ul>
+<li>Support for architectures with divergent cores and capabilities not accessible with APIs like OpenCL</li>
+</ul></li>
+<li><p><em>Updated support for Epiphany/Parallella platforms</em></p>
+<ul>
+<li>Updated support for production Parallella platforms using the Epiphany SDK version 5</li>
+</ul></li>
+</ul>
+<hr />
+<p> </p>
+<h1 id="support_and_requirements"><a href="#support_and_requirements"><span class="header-section-number">3</span> Support and Requirements</a></h1>
+<p>Full SDK support is provided for Linux, Ubuntu, and FreeBSD operating systems. Additionally, the STDCL API is supported for Windows 7.</p>
+<p>Supported hardware includes AMD and Nvidia GPUs, Intel and AMD x86 multicore CPUs, Intel MIC accelerators, ARM multicore CPUs, and Epiphany multicore processors. The COPRTHR SDK leverages vendor OpenCL implementations for portability and also provides OpenCL implementions for multicore processors to provide truly cross-vendor/cross-device support for heterogeneous computing platforms.</p>
+<p>Package dependencies (O=Optional, R=Required)</p>
+<ol style="list-style-type: decimal">
+<li>libelf-0.8.13 <a href="http://www.mr511.de/software/libelf-0.8.13.tar.gz">www.mr511.de/software/libelf-0.8.13.tar.gz</a> [Required]</li>
+<li>libconfig-1.4.8 or later <a href="http://www.hyperrealm.com/libconfig/libconfig-1.4.9.tar.gz">www.hyperrealm.com/libconfig/libconfig-1.4.9.tar.gz</a> [Required]</li>
+<li>libevent-2.0.18 or later <a href="https://github.com/downloads/libevent/libevent/libevent-2.0.21-stable.tar.gz">github.com/downloads/libevent/libevent/libevent-2.0.21-stable.tar.gz</a> [Required]</li>
+<li>GCC 4.6 or later [Required]</li>
+</ol>
+<p>Vendor support is needed for certain specific OpenCL devices</p>
+<ol start="5" style="list-style-type: decimal">
+<li>AMD APP <a href="developer.amd.com/sdks/AMDAPPSDK/downloads">developer.amd.com/sdks/AMDAPPSDK/downloads</a> [Optional]</li>
+<li>Nvidia CUDA 4 <a href="developer.nvidia.com/cuda-toolkit-40">developer.nvidia.com/cuda-toolkit-40</a> [Optional]</li>
+<li>Intel OCL 1.5 <a href="software.intel.com/en-us/articles/vcsource-tools-opencl-sdk">software.intel.com/en-us/articles/vcsource-tools-opencl-sdk</a> [Optional]</li>
+<li>Adapteva Epiphany SDK for Epiphany and Parallella support [Optional]</li>
+</ol>
+<p>Please take note that libelf 1.x branch found on most Linux distributions is <em>not a valid substitute</em> for libelf-0.8.13 since they lack the required features and exhibit undocumented broken behavior.</p>
+<hr />
+<p> </p>
+<h1 id="installation"><a href="#installation"><span class="header-section-number">4</span> Installation</a></h1>
+<h2 id="installation-overview"><a href="#installation-overview"><span class="header-section-number">4.1</span> Installation Overview</a></h2>
+<p>The COPRTHR SDK may be installed from pre-compiled binaries for selected platforms or built from source. It may be necessary to install one or more 3rd-party packages as part of the installation process as described above in the previous section [Support and Requirements)(#support_and_requirements).</p>
+<p>For Linux and FreeBSD installation a configure script is provided to customize the package. Detailed descriptions of the various options are described at the end of this section.</p>
+<h2 id="download-the-release"><a href="#download-the-release"><span class="header-section-number">4.2</span> Download the Release</a></h2>
+<p>Source and binary releases of the COPRTHR SDK are available from the <a href="http://www.browndeertechnology.com/coprthr_download.html">download page</a>.</p>
+<p>Alternatively, the latest updates and development branch may be found on the <a href="http://www.github.com/browndeer/coprthr">github project page</a>.</p>
+<h2 id="linux-and-freebsd-installation"><a href="#linux-and-freebsd-installation"><span class="header-section-number">4.3</span> Linux and FreeBSD Installation</a></h2>
+<p>The following generic steps can be used to install the COPRTHR SDK on typical Linux and FreeBSD systems. For a full description of configure options and suggested system-specific configurations, see section 2.5 and 2.6. Additionally, details for more complex platform configurations can be found in in specific Application Notes.</p>
+<ol style="list-style-type: decimal">
+<li><p>From the root coprthr directory, type,</p>
+<p>./configure [options]</p></li>
+<li><p>Build the package, type,</p>
+<p>gmake</p></li>
+<li><p>Install the package, type,</p>
+<p>gmake install</p></li>
+<li><p>Set the appropriate paths to use the headers and libraries when building your own applications.</p></li>
+</ol>
+<p> </p>
+<h2 id="windows-7-installation"><a href="#windows-7-installation"><span class="header-section-number">4.4</span> Windows 7 Installation</a></h2>
+<p>Run the Windows installer (libstdcl-1.4.0-win7-install.msi) and set the appropriate paths to use the headers and library from your application.</p>
+<p> </p>
+<h2 id="configure-options"><a href="#configure-options"><span class="header-section-number">4.5</span> Configure Options</a></h2>
+<p>When building from source the configure script supports the following options:</p>
+<dl>
+<dt>--prefix=/path/to/target-install-dir</dt>
+<dd>set the root directory for
+</dd>
+</dl>
+<p>installation</p>
+<dl>
+<dt>--enable-clgl</dt>
+<dd><p>enable clgl support (default=yes)</p>
+</dd>
+<dt>--enable-clete</dt>
+<dd><p>enable clete expression template acceleration (default=yes)</p>
+</dd>
+<dt>--enable-debug-libs</dt>
+<dd><p>enable building debug versions of librarires (default=yes)</p>
+</dd>
+<dt>--enable-clcc</dt>
+<dd><p>enable building clcc tools (default=yes)</p>
+</dd>
+<dt>--enable-libcoprthr</dt>
+<dd><p>enable libcoprthr (default=yes)</p>
+</dd>
+<dt>--enable-libcoprthrcc</dt>
+<dd><p>enable libcoprthrcc (default=yes)</p>
+</dd>
+<dt>--enable-libocl</dt>
+<dd><p>enable libocl (default=yes)</p>
+</dd>
+<dt>--enable-libclrpc</dt>
+<dd><p>enable libclrpc (default=yes)</p>
+</dd>
+<dt>--enable-libcoprthr-ncpu</dt>
+<dd><p>enable libcoprthr ncpu (default=yes)</p>
+</dd>
+<dt>--enable-fortran</dt>
+<dd><p>enable fortran bindings (default=no)</p>
+</dd>
+<dt>--enable-silent</dt>
+<dd><p>enable silent build (default=no)</p>
+</dd>
+<dt>--enable-debug</dt>
+<dd><p>enable debug messages (default=no)</p>
+</dd>
+<dt>--enable-epiphany</dt>
+<dd><p>enable epiphany support (default=no)</p>
+</dd>
+<dt>--enable-libocl-hook</dt>
+<dd><p>enable libocl hook support (default=no)</p>
+</dd>
+<dt>--enable-emek-build</dt>
+<dd><p>enable build for Epiphany EMEK (default=no)</p>
+</dd>
+<dt>--enable-old-esdk</dt>
+<dd><p>enable old eSDK API for Epiphany (default=no)</p>
+</dd>
+<dt>--enable-user-install</dt>
+<dd><p>enable installation by user without roo permission (default=no)</p>
+</dd>
+<dt>--enable-android-cross-compile</dt>
+<dd><p>enable cross-compile for Android (default=no)</p>
+</dd>
+<dt>--enable-mic-cross-compile</dt>
+<dd><p>enable cross-compile for MIC (default=no)</p>
+</dd>
+<dt>--with-opencl-platform=NAMELIST</dt>
+<dd><p>specify default platform selection as a comma seperated list</p>
+</dd>
+<dt>--with-opencl-include=DIR</dt>
+<dd><p>specify OpenCL include path</p>
+</dd>
+<dt>--with-opencl-lib=DIR</dt>
+<dd><p>specify OpenCL lib path</p>
+</dd>
+<dt>--with-fortran=PROG</dt>
+<dd><p>Use fortran compiler PROG</p>
+</dd>
+<dt>--with-lib=DIR</dt>
+<dd><p>set path for prerequisite libs</p>
+</dd>
+<dt>--with-libelf=DIR</dt>
+<dd><p>specify path to libelf</p>
+</dd>
+<dt>--with-opencl-icd-path=DIR</dt>
+<dd><p>set custom path for ICD files</p>
+</dd>
+<dt>--with-libevent=DIR</dt>
+<dd><p>set path for libevent</p>
+</dd>
+<dt>--with-libconfig=DIR</dt>
+<dd><p>set path for libconfig</p>
+</dd>
+<dt>--with-max-clmesg-level=LEVEL</dt>
+<dd><p>set max clmesg level</p>
+</dd>
+<dt>--with-default-clmesg-level=LEVEL</dt>
+<dd><p>set default clmesg level</p>
+</dd>
+<dt>--with-esdk=DIR</dt>
+<dd><p>set path for esdk</p>
+</dd>
+<dt>--with-android-ndk=DIR</dt>
+<dd><p>set path for android NDK</p>
+</dd>
+<dt>--with-android-platform=DIR</dt>
+<dd><p>set path for android platform</p>
+</dd>
+<dt>--with-android-arch=DIR</dt>
+<dd><p>set path for android arch</p>
+</dd>
+<dt>--with-lib-mic=DIR</dt>
+<dd><p>set path for MIC libraries</p>
+</dd>
+</dl>
+<p> </p>
+<h2 id="suggested-system-specific-configurations"><a href="#suggested-system-specific-configurations"><span class="header-section-number">4.6</span> Suggested System-Specific Configurations</a></h2>
+<p>The following are just a few examples of common system-specific configurations to be used as a guide for installing COPRTHR SDK on your specific platform. In very many cases, simply using ./configure will work if you have installed 3rd-party software in standard locations.</p>
+<dl>
+<dt>Linux using only AMD APP SDK for CPU/GPU</dt>
+<dd><pre><code>
+./configure --with-opencl-platform=amdapp</code></pre>
+</dd>
+<dt>Linux using AMD APP SDK for CPU/GPU and COPRTHR OpenCL for CPU also</dt>
+<dd><pre><code>
+./configure --enable-libcoprthr --with-opencl-platform=amdapp,coprthr</code></pre>
+</dd>
+<dt>Linux using only Nvidia OCL for GPU</dt>
+<dd><pre><code>
+./configure --enable-libcoprthr --with-opencl-platform=nvidia </code></pre>
+</dd>
+<dt>Linux using only Intel OCL for CPU/GPU</dt>
+<dd><pre><code>
+./configure --with-opencl-platform=intel</code></pre>
+</dd>
+<dt>Linux or FreeBSD standalone installation with COPRTHR OCL for CPU (x86)</dt>
+<dd><pre><code>
+./configure --enable-libcoprthr</code></pre>
+</dd>
+<dt>Linux standalone installation with COPRTHR OCL for CPU (ARM)</dt>
+<dd><pre><code>
+./configure --enable-libcoprthr </code></pre>
+</dd>
+<dt>Parallella/Epiphany support</dt>
+<dd><pre><code>
+./configure --enable-epiphany</code></pre>
+</dd>
+</dl>
+<hr />
+<h1 id="important-notes"><a href="#important-notes"><span class="header-section-number">5</span> Important Notes</a></h1>
+<ul>
+<li><p>This release has been updated to use the Epiphany SDK version 5 and supports production Parallella platforms.</p></li>
+<li><p>On Windows 7 platforms the function init_stdcl() must be called to initialize the STDCL API. This call is unnecessary for Linux and FreeBSD, but there is no harm in including it since it will default to an empty macro.</p></li>
+<li><p>The version of the boost library (1.47.0) used here for development unfortunately has a very minor bug that prevents it from working with MSVS 2010. A fix to the boost package is provided in this release. Just follow the instructions under the <code>msvs2010/boost_1_47_0-multi_array-iterator-fix/</code> directory. (All you need to do is copy over a replacement for iterator.hpp.)</p></li>
+<li><p>Some example kernels include the stdcl.h header. Including this header for OpenCL kernels allows the use of alternate syntax that avoids breaking C. Programmers are encouraged to begin this practice now. A future release will formalize syntax corrections to OpenCL to produce a C compliant language for programming thread functions (kernels). The alternate syntax will be completely backward compatable with OpenCL.</p></li>
+</ul>
+<hr />
+<p> </p>
+<h1 id="more-information"><a href="#more-information"><span class="header-section-number">6</span> More Information</a></h1>
+<p>Additional information and examples may be found in the COPRTHR Primer version 1.6.</p>
+<hr />
+<p>Document revision 1.6.0.0</p>
+</body>
+</html>

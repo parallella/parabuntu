@@ -1,0 +1,38 @@
+NAME = clmulti_array_example
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+
+OPENCL_INCS = -I@OPENCL_INCLUDE@
+OPENCL_LIBS = -L@OPENCL_LIB@ -l@OPENCL_LIBNAME@
+
+STDCL_INCS = -I@includedir@
+STDCL_LIBS = -L@libdir@ -lstdcl
+
+INCS = $(STDCL_INCS) $(OPENCL_INCS)
+LIBS = $(STDCL_LIBS) $(OPENCL_LIBS)
+
+CXXFLAGS += -O3
+
+OBJS = ocl_kernels.o
+
+all: $(NAME).x
+
+$(NAME).x: $(NAME).o $(OBJS)
+	$(CXX) $(CXXFLAGS) $(INCS) -o $(NAME).x $(NAME).o $(OBJS) $(LIBS)
+
+ocl_kernels.o: 
+	clcc -o ocl_kernels.o matvecmult.cl
+
+.SUFFIXES:
+.SUFFIXES: .cpp .o
+
+.cpp.o:
+	$(CXX) $(CXXFLAGS) $(INCS) -c $<
+
+clean:
+	rm -f *.o
+
+distclean: clean
+	rm -f *.x
+

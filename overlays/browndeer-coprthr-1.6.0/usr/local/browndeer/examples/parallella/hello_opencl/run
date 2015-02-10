@@ -1,0 +1,16 @@
+#!/bin/bash
+
+export PATH=/usr/local/browndeer/bin:$PATH
+export PATH=/opt/INSTALL-2012-11-29-1434/bin:$PATH
+
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/usr/local/browndeer/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/usr/local/adapteva/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/opt/INSTALL-2012-11-29-1434/lib:$LD_LIBRARY_PATH
+
+echo $1
+
+cldebug -t /home/linaro/needham/bdt-code/coprthr/examples/hello_opencl/temp $1
+
+#chmod -R a+rwX temp
+

@@ -1,0 +1,4 @@
+# Parallella PPA
+deb http://ppa.launchpad.net/parallella/snapshots/ubuntu trusty main
+deb-src http://ppa.launchpad.net/parallella/snapshots/ubuntu trusty main
+

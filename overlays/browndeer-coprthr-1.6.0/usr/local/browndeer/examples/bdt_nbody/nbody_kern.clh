@@ -1,0 +1,19 @@
+
+#ifndef _NBODY_KERN_CLH
+#define _NBODY_KERN_CLH
+
+#include <CL/cl.h>
+
+void
+nbody_kern(
+	int n,
+	cl_float gdt,
+	cl_float es,
+	cl_float* pp,
+	cl_float* vv,
+	cl_float* pp2,
+	cl_float* pblock
+);
+
+#endif
+

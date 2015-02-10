@@ -1,0 +1,4 @@
+deb http://ports.ubuntu.com/ubuntu-ports/ trusty-updates main universe
+deb-src http://ports.ubuntu.com/ubuntu-ports/ trusty-updates main universe
+deb http://packages.erlang-solutions.com/ubuntu trusty contrib
+

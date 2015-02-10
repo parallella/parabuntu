@@ -1,230 +1,320 @@
-## Parallella Ubuntu Image Creation 
+# Parallella Ubuntu Image Creation 
 
-### 1. Format a blank SD Card
+**TODO: We need to remove generated SSH host certificates after we are done**
+
+This is work in progress. The goal is to automate as much as possible. 
+
+
+### 1. Clone the repository
+[TODO: Move over to official parallella github eventually]  
+```
+git clone git@github.com/olajep/parallella-ubuntu workspace --branch 14.10-wip-dont-pull
+export WORKSPACE=$(readlink -e workspace)
+cd $WORKSPACE
+```
+
+For all commands issued on PC it is assumed that `$WORKSPACE` is the current working directory.
+
+
+### 2. Format a blank SD Card
 
 ```
 sudo gparted
 ```
 
-* Create a 256 MB FAT32 partition named 'BOOT'
-* Create an EXT4 partition named 'rootfs' (ideally larger then 4GB)
+* Create a 100 MiB FAT32 partition named 'BOOT'
+* Create an 3700 MiB EXT4 partition named 'rootfs' (so the image fits in a 4GB SD card)
+* Apply changes
+* Set 'boot' flag for 'BOOT' partition. (Might not be necessary). 
 
-### 2. Download Ubuntu distribution
-
-```
-wget http://releases.linaro.org/14.07/ubuntu/trusty-images/nano/linaro-trusty-nano-20140727-680.tar.gz
-```
-
-### 3. Download firmware files for BOOT partition
-```
-wget http://downloads.parallella.org/boot/boot-e16-7z020-v01-140528.tgz
-```
-
-### 4. Copy files to SD card
+### 3. Download Ubuntu distribution
 
 ```
-sudo tar -zxvf linaro-trusty-nano-20140522-661.tar.gz
-cd binary
-sudo rsync -a --progress ./ /media/aolofsson/rootfs
-tar -zxvf boot-e16-7z020-v01-140528.tgz -C /media/aolofsson/BOOT
+wget http://releases.linaro.org/14.10/ubuntu/trusty-images/nano/linaro-trusty-nano-20141024-684.tar.gz
 ```
 
-### 5. Configure ethernet configuraiton on sd-card from host computer
-
-/media/$USER/rootfs/etc/network/interfaces:
+### [FIXME] 4. Download firmware files for BOOT partition
 ```
-auto lo
-iface lo inet loopback
-
-auto eth0
-iface eth0 inet dhcp
+wget http://downloads.parallella.org/boot/TBD
 ```
 
-### 6. Disable the auto-generation of rule for interface names
-
+### 5. Mount partitions
 ```
-sudo mv /media/$USER/rootfs/lib/udev/rules.d/75-persistent-net-generator.rules /media/$USER/rootfs/lib/udev/rules.d/75-persistent-net-generator.rules.bak
-```
-
-### 7. Enable devtmpfs and make SD card accessible from Parallella
-```
-cd /media/$USER/rootfs/dev
-sudo mknod -m 660 mmcblk0 b 179 0
-sudo mknod -m 660 mmcblk0p1 b 179 1
-sudo mknod -m 660 mmcblk0p2 b 179 2
+mkdir -p mnt/{boot,rootfs}
+sudo mount /dev/mmcblk0p1 mnt/boot
+sudo mount /dev/mmcblk0p2 mnt/rootfs
 ```
 
-### 8. Unmount uSD card from host computer
+### 6. Copy files to SD card
+
+```
+sudo tar --strip-components 1 -xvzpf linaro-trusty-nano-20141024-684.tar.gz -C mnt/rootfs/
+```
+
+[FIXME]  
+```
+tar -zxvf boot-e16-7z020-v01-140528.tgz -C mnt/boot
+```
+### 7. rsync overlays over rootfs
+[ TODO: Use tarballs for everything but parallella? ]
+```
+sudo rsync -ap overlays/parallella/ mnt/rootfs/
+sudo rsync -ap overlays/browndeer-coprthr-1.6.0/ mnt/rootfs/
+sudo rsync -ap overlays/openmpi-1.8.3 /mnt/rootfs/
+```
+
+#### Remove .gitkeep files
+```
+find mnt/rootfs -name ".gitkeep" -delete
+```
+
+### 8. Enable devtmpfs and make SD card accessible from Parallella
+```
+sudo ./scripts/10-create-device-files.sh
+```
+
+### 9. Fix file permissions
+Currently only ping & ping6 setuid
+```
+sudo ./scripts/20-fix-permissions.sh
+```
+[TODO] Do we need to add `/dev/dri` and `/dev/input` ???
+
+### [TODO] 10. Copy kernel modules over
+TODO. Might be a good idea to integrate parallella-root-image.git into this...  
+
+### 11. Unmount uSD card from host computer
 
 ```
 sync
-umount /media/aolofsson/rootfs/
-umount /media/aolofsson/BOOT
+sudo umount mnt/rootfs
+sudo umount mnt/boot
 ```
 
-### 9. First boot (with screen/keyboard/mouse or serial port attached)
+### [TODO] Boot with QEMU instead 
+
+
+### 12. First boot (with screen/keyboard/mouse or serial port attached)
 
 * User=linaro
 * Password=linaro
 
-### 10. Install ssh
 
+### 13. Basic setup
+
+#### Make sure we'll get the latest packages available
 ```
 sudo apt-get update
+```
+
+#### Install ssh
+
+```
 sudo apt-get install ssh
-ifconfig
 ```
 
-### 11. SSH into Parallella from 2nd computer
-
+#### Fix time
 ```
-ssh linaro@<parallella-ip-address>
-```
-
-### 12. Fix issues with Ubuntu
-
-Work around ping permision limitation:
-```
-sudo chmod u+s `which ping`
-``` 
-
-Ubuntu 14.04 packaging bug:
-```
-sudo emacs /var/lib/dpkg/info/libpam-systemd:armhf.postinst
-#comment out the following line
-#invoke-rc.d systemd-logind start || exit $?"
+sudo apt-get install fake-hwclock ntp
 ```
 
-Slow boot time without ethernet cable:
+#### Set up mDNS
+[TODO We want to script generating a unique hostname based on last 2 bytes in MAC address, e.g, parallella-09ab]  
 ```
-sudo emacs /etc/init/failsafe.conf
-#Change sleep values to 4 seconds (when there is no network detected)
+sudo apt-get install avahi-daemon
 ```
 
-### 13. Sync the file system and power off the board
+#### Reboot
+
+Reboot so we get sane time.
+
+
+
+### 14. SSH into Parallella from 2nd computer
+
+```
+ssh linaro@linaro-nano.local
+```
+Copy skel files:
+```
+cp -r /etc/skel/. .
+```
+Logout and login again to get new environment:
+
+```
+exit
+ssh linaro@linaro-nano.local
+```
+
+
+### 13. Copy package and test files over to Parallella from 2nd computer
+```
+scp -r packages.basic.txt packages tests linaro@linaro-nano.local:~
+```
+
+
+### 15. Install basic packages
+```
+sudo apt-get install $(cat packages.basic.txt | grep -v "^#" | sed 's,\s\s*,\n,g' | grep -v "^\s*$ | xargs echo )
+sudo dpkg -i $(ls packages | grep -v -- "-dbg_")
+```
+
+### 16. Run tests
+```
+cd tests
+```
+for all tests cd into directory and:  
+```
+./test.sh
+```
+
+### 16. Remove packages
+Try to keep the minimal image minimal.
+
+```
+rm -rf packages*
+```
+
+### 16. Fix annoying Ubuntu shell defaults
+
+```
+#Replace dash default shell with bash
+echo "dash dash/sh boolean false" | sudo debconf-set-selections
+sudo -E DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
+```
+
+### Installing Epiphany SDK to overlay
+This is *only* needed when a new version is available
+
+```
+mkdir -p overlay/esdk-20XX.YY[.Z]/opt/adapteva
+wget http://downloads.parallella.org/esdk/esdk.5.13.09.10_linux_armv7l.tgz
+tar xzf esdk.20XX.YY[.Z]_linux_armv7l.tgz -C overlays/esdk.20XX.YY[.Z]/opt/adapteva/
+sudo ln -sTfr overlays/esdk.20XX.YY[.Z]/opt/adapteva/esdk.20XX.YY[.Z] overlays/esdk.20XX.YY[.Z]/opt/adapteva/esdk
+#sudo ln -s /usr/lib/arm-linux-gnueabihf/libmpc.so.3.0.0 /usr/lib/arm-linux-gnueabihf/libmpc.so.2 #HACK!
+# TODO move to /etc/environment
+echo 'setenv EPIPHANY_HOME      /opt/adapteva/esdk' >> ${HOME}/.cshrc
+echo 'source ${EPIPHANY_HOME}/setup.csh' >> ${HOME}/.cshrc
+echo 'EPIPHANY_HOME=/opt/adapteva/esdk' >> ${HOME}/.bashrc
+echo '. ${EPIPHANY_HOME}/setup.sh' >> ${HOME}/.bashrc
+```    
+
+### 30. Setup COPRTHR
+
+### Install dependencies
+This step is needed *only* if for some reason were unable to install the .deb packages in `packages`
+
+[TODO]: Verify that this works
+```
+mkdir /var/tmp/builddeb
+cd /var/tmp/builddeb
+sudo apt-get build-dep libelf libelf-dev libevent libevent-dev libconfig libconfig-dev
+sudo apt-get --build source libelf libevent libconfig
+sudo dpkg -i $(ls *.deb | grep -v -- "-dbg_")
+```
+Copy over .deb packages. We can probably use them throughout the Linaro 14.** series without any problems.
+```
+cd ~
+rm -rf /var/tmp/builddeb
+```
+
+
+###Install parallella opencl package
+This step is *only* necessary if there is a newer release than 1.6.0 available.
+```
+sudo rm -rf /usr/local/browndeer /etc/OpenCL/vendors/coprthr.icd
+wget http://www.browndeertechnology.com/code/coprthr-1.6.X-parallella.tgz
+tar -zxvf coprthr-1.6.0-parallella.tgz
+sudo ./browndeer/scripts/install_coprthr_parallella.sh
+rm -rf coprthr-1.6.0-parallella.tgz browndeer
+```
+
+```
+### Add paths to .bashrc
+echo 'export PATH=/usr/local/browndeer/bin:$PATH' >> ~/.bashrc
+echo 'export LD_LIBRARY_PATH=/usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
+
+### Add paths to root .bashrc
+sudo su
+echo 'export PATH=/usr/local/browndeer/bin:$PATH' >> ~/.bashrc
+echo 'export LD_LIBRARY_PATH=/usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
+
+### Add paths to .cshrc
+echo 'setenv PATH /usr/local/bin:$PATH' >> ~/.cshrc
+echo 'setenv LD_LIBRARY_PATH /usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH' >> ~/.cshrc
+
+```
+
+### 31. MPI Installation from source
+
+[Longterm TODO: There's only 1.6 .deb source packages so install from source for now]  
+This is *only* necessary if a newer OpenMPI version than 1.8.3 is available
+```
+wget http://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.X.tar.gz
+tar -zxvf openmpi-1.8.X.tar.gz
+cd openmpi-1.8.X
+./configure --prefix=~/usr \
+            --enable-mpirun-prefix-by-default \
+            --enable-static 
+make all
+sudo make install
+rm -rf openmpi*
+```
+
+Copy over to overlay
+
+
+### 17. Sync the file system and power off the board
 ```
 sync
+shutdown -h now
 ```
+
 Remove power.
 
-### 14. Create minimal headless Parallella backup image (from host)
+
+### 15. Create minimal headless Parallella backup image (from host)
+
+[TODO] Don't we want same rootfs for everything? Easier maintenance. We could just disable X/LXDE autostart as final step in headless. 
 
 Insert micro-sd card into external host
 ```
 sudo dd if=/dev/mmcblk0 of=<headless.img> bs=4M
 ```
 
-### 15. Reboot the Parallella (ssh into computer or use as regular desktop)
+### 16. Reboot the Parallella (ssh into computer or use as regular desktop)
 
+### 17. Install desktop packages
 
-### 16. Install a windows manager
+####Copy over desktop package list from 2nd computer:  
 ```
-sudo apt-get install lxde 
-sudo apt-get install xinit
+scp packages.desktop.txt linaro@linaro-nano.local:~
 ```
-
-### 18. Install other essential Packages
-
+#### SSH into Parallella board from 2nd computer
 ```
-### "Must haves"
-sudo apt-get install less tcsh emacs nano ftp synaptic tkcvs wish screen putty
-sudo apt-get install feh lsb-release
-sudo apt-get install fake-hwclock ntp
-
-### Compiling/Building
-sudo apt-get install build-essential git curl m4 flex bison gawk
-
-### Networking
-sudo apt-get install ethtool iperf ifplugd
-sudo apt-get install network-manager
-
-### Linux Tools
-sudo apt-get install xutils-dev device-tree-compiler usbutils
-
-### Media
-sudo apt-get install firefox 
-sudo apt-get install smplayer
-sudo apt-get install evince
-sudo apt-get install gimp
-
-### Programming
-sudo apt-get install octave
-sudo apt-get install scratch
-
-### Scientific
-sudo apt-get install python-numpy python-scipy python-matplotlib 
-sudo apt-get install ipython ipython-notebook python-pandas python-sympy python-nose
-sudo apt-get install r-base r-base-dev
-
-### Erlang ###
-sudo apt-get install erlang-mini
-
-### Sound
-sudo apt-get install gstreamer0.10-alsa alsa-base alsa-utils libasound2-plugins 
-
-### For Demos
-sudo apt-get install libdrm-dev libasound2-dev libx11-dev
-sudo apt-get install libfluidsynth-dev fluidsynth fluid-soundfont-gm
-
-### Camera
-sudo apt-get install camorama guvcview
-
-### Wifi
-sudo apt-get install linux-firmware
-
-### Screen sharing
-sudo apt-get install tightvncserver
+ssh linaro@linaro-nano.local:~
 ```
+#### Installation
 ```
-sudo apt-get install boinc-client boinc-manager
-sudo apt-get install libreoffice
-sudo apt-get install openvpn
-sudo apt-get install synergy
-sudo apt-get install vlc
+sudo apt-get install -y $(cat packages.desktop.txt | grep -v "^#" | sed 's,\s\s*,\n,g' | grep -v "^\s*$)
 ```
 
-### 19.  Install Erlang
 
-
-### 20. Getting list of all packages installed
+### 18. Get list of installed packages
 ```
 dpkg --get-selections > my.packages
 ```
 
-### 21. Purging bad packages
+### 22. Purging bad packages
+TODO: ISTR I've seen a fix for pulseaudio. It was something with tsched... 
+Longterm TODO: We shouldn't need this  
 ```
 sudo apt-get purge xscreensaver pulseaudio
 ```
 
-### 22. Create xorg.conf file
-```
-sudo emacs /etc/X11/xorg.conf
-```
+### 24. Create ~/.asoundrc config file
 
-xorg.conf:
-```
-Section "Device"
-  Identifier "Card0"
-  Driver "modesetting"
-  Option "ShadowFB" "True"
-  Option "SWCursor" "True"
-  Option "HWCursor" "False"
-EndSection
-Section "Screen"
-  Identifier "Screen0"
-  Device "Card0"
-  SubSection "Display"
-#---- Uncomment your preferred mode ----
-    #Modes "1920x1200"
-    #Modes "1920x1080"
-    #Modes "1280x720"
-    #Modes "640x480"
-  EndSubSection
-EndSection
-```
-
-
-### 23. Create ~/.asoundrc config file
+Longterm TODO: We shouldn't need to do this  
 
 ```
 pcm.!default {
@@ -265,12 +355,12 @@ ctl.dmixer {
 }
 ```
 
-### 24. Fix GCONF permission
+### 25. Fix GCONF permission
 ```
 sudo chown -R linaro:linaro ~/.gconf
 ```
 
-### 24. Trying to solve firefox instability problem
+### 26. Trying to solve firefox instability problem
 
 sudo emacs /etc/fstab
 ```
@@ -288,24 +378,9 @@ Creating Parallella background:
 ```
 sudo emacs /etc/xdg/lxsession/LXDE/autostart
 #add @feh --bg-fill /home/linaro/background.png
-
-### 25. Fix annoying Ubuntu shell defaults
-
-```
-#Replace dash default shell with bash
-sudo ln -sTf /bin/bash /bin/sh
-##Edit password file and replace bash with tcsh
-sudo emacs /etc/passwd
 ```
 
-Edit /etc/apt/sources.list:
-```
-deb http://ports.ubuntu.com/ubuntu-ports/ trusty-updates main universe
-deb-src http://ports.ubuntu.com/ubuntu-ports/ trusty-updates main universe
-deb http://packages.erlang-solutions.com/ubuntu trusty contrib
-```
-
-### 26. Customizing the ~/.cshrc
+### 28. Customizing the ~/.cshrc
 
 ```
 setenv HISTSIZE 1000
@@ -331,90 +406,29 @@ alias rsh       'rsh -X'
 alias less      'less -X'
 ```
 
-### 27. Installing Epiphany SDK
-```
-sudo apt-get install libmpfr-dev libmpc-dev libgmp3-dev
-sudo mkdir -p /opt/adapteva/
-wget http://downloads.parallella.org/esdk/esdk.5.13.09.10_linux_armv7l.tgz
-sudo tar xzf esdk.5.13.09.10_linux_armv7l.tgz -C /opt/adapteva/
-sudo ln -sTf /opt/adapteva/esdk.5.13.09.10 /opt/adapteva/esdk
-sudo ln -s /usr/lib/arm-linux-gnueabihf/libmpc.so.3.0.0 /usr/lib/arm-linux-gnueabihf/libmpc.so.2 #HACK!
-echo 'setenv EPIPHANY_HOME      /opt/adapteva/esdk' >> ${HOME}/.cshrc
-echo 'source ${EPIPHANY_HOME}/setup.csh' >> ${HOME}/.cshrc
-echo 'EPIPHANY_HOME=/opt/adapteva/esdk' >> ${HOME}/.bashrc
-echo '. ${EPIPHANY_HOME}/setup.sh' >> ${HOME}/.bashrc
-```    
 
-### 28. Setup COPRTHR
 
-```    
-###Libelf prerequisite
-wget www.mr511.de/software/libelf-0.8.13.tar.gz
-tar -zxvf libelf-0.8.13.tar.gz
-cd libelf-0.8.13
-./configure
-sudo make install
-cd ../
 
-###Libevent prerequisite
-wget github.com/downloads/libevent/libevent/libevent-2.0.18-stable.tar.gz
-tar -zxvf libevent-2.0.18-stable.tar.g
-cd libevent-2.0.18-stable
-./configure
-sudo make install
-cd ../
-
-###Libconfig prerequisite
-wget www.hyperrealm.com/libconfig/libconfig-1.4.8.tar.gz
-tar -zxvf libconfig-1.4.8.tar.gz
-cd libconfig-1.4.8
-./configure
-sudo make install
-cd ../
-
-###Install parallella opencl package
-wget http://www.browndeertechnology.com/code/coprthr-1.6.0-parallella.tgz
-tar -zxvf coprthr-1.6.0-parallella.tgz
-sudo ./browndeer/scripts/install_coprthr_parallella.sh
-
-### Add paths to .bashrc
-echo 'export PATH=/usr/local/browndeer/bin:$PATH' >> ~/.bashrc
-echo 'export LD_LIBRARY_PATH=/usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
-
-### Add paths to root .bashrc
-sudo su
-echo 'export PATH=/usr/local/browndeer/bin:$PATH' >> ~/.bashrc
-echo 'export LD_LIBRARY_PATH=/usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
-
-### Add paths to .cshrc
-echo 'setenv PATH /usr/local/bin:$PATH' >> ~/.cshrc
-echo 'setenv LD_LIBRARY_PATH /usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH' >> ~/.cshrc
-
-```
-
-### 29. MPI Installation from source
-```
-wget http://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.1.tar.gz
-tar -zxvf openmpi-1.8.1.tar.gz
-cd openmpi-1.8.1
-./configure --prefix=~/usr \
-            --enable-mpirun-prefix-by-default \
-            --enable-static 
-make all
-sudo make install
-```
-
-### 30. Backing up the complete file system
+### 32. Backing up the complete file system
 From Parallella:
 ```
 sync
 ```
+
 From regular computer:
 ```
 sudo dd if=/dev/mmcblk0 of=my_backup.img bs=4M
 ```
 
-### 31. Burning another card
+### 33. Run zerofree
+Run zerofree to fill empty space with zeroes so compression of final image can
+work more efficient.
+
+```
+sudo zerofree my_backup.img
+```
+
+### 34. Burning another card
 Insert a new micro SD card into regular computer
 
 Option#1: Copying the whole image
@@ -436,5 +450,15 @@ sudo rsync -a --progress /media/aolofsson/rootfs ./
 ```
 #sudo emacs /etc/NetworkManager/NetworkManger.conf
 #comment out line "dns=dnsmasq"
+```
+
+### 99. Remove SSH host keys 
+* Remove SSH host keys. Will result in SSH regenerates keys on reboot*
+```
+rm -rf mnt/rootfs/etc/ssh/ssh_host*
+```
+Verify that this line is present in mnt/rootfs/etc/rc.local
+```
+test -f /etc/ssh/ssh_host_dsa_key || dpkg-reconfigure openssh-server
 ```
 

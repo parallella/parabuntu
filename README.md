@@ -6,10 +6,9 @@ This is work in progress. The goal is to automate as much as possible.
 
 
 ### 1. Clone the repository
-[TODO: Move over to official parallella github eventually]  
 ```
-git clone git@github.com/olajep/parallella-ubuntu workspace --branch 14.10-wip-dont-pull
-export WORKSPACE=$(readlink -e workspace)
+git clone git@github.com/parallella/parallella-ubuntu
+export WORKSPACE=$(readlink -e parallella-ubuntu)
 cd $WORKSPACE
 ```
 

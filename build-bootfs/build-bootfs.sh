@@ -53,34 +53,47 @@ build_kernel () {
     version=$(basename $PARALLELLA_LINUX)
     jobs=$(echo $[ 1 + $( nproc || echo 1 ) ] )
     KERNEL_BUILD_DIR=$PWD/build/$version
+    MODULES_INSTALL_DIR=$PWD/modules
+    CONFIG_EXTRA=$PWD/config.extra
     kernel_build_log=$PWD/build/$version.log
 
     mkdir -p $KERNEL_BUILD_DIR
+    mkdir -p $MODULES_INSTALL_DIR
     rm -f $kernel_build_log
     echo "Building kernel..."
     echo kernel: logfile $kernel_build_log
     (
         set -e
         helper () {
-            echo kernel: make $2
-            make -j $1 \
+            j=$1
+            shift
+            echo kernel: make $@
+            make -j $j \
                 O=$KERNEL_BUILD_DIR \
                 ARCH=arm \
                 CROSS_COMPILE=$CROSS_COMPILE \
                 LOADADDR=0x8000 \
-                $2 >> $kernel_build_log 2>&1
+                $@ >> $kernel_build_log 2>&1
         }
-        cd $PARALLELLA_LINUX
-        make distclean
-        helper 1 distclean
-        helper 1 mrproper
-        helper 1 parallella_defconfig
-        helper $jobs ""
-        helper $jobs modules
-        helper 1 uImage
-        helper 1 zynq-parallella1-headless.dtb
-        helper 1 zynq-parallella1-hdmi.dtb
-    ) && echo kernel: build OK
+        add_extra_config () {
+            [ -f $CONFIG_EXTRA ] &&
+            cat $CONFIG_EXTRA >> $KERNEL_BUILD_DIR/.config &&
+            helper 1 olddefconfig ||
+            true
+        }
+        cd $PARALLELLA_LINUX &&
+        make distclean &&
+        helper 1 distclean &&
+        helper 1 mrproper &&
+        helper 1 parallella_defconfig &&
+        add_extra_config &&
+        helper $jobs "" &&
+        helper 1 uImage &&
+        helper 1 zynq-parallella1-headless.dtb &&
+        helper 1 zynq-parallella1-hdmi.dtb &&
+        helper $jobs modules &&
+        helper 1 INSTALL_MOD_PATH=$MODULES_INSTALL_DIR modules_install
+    ) && echo kernel: build OK && return 0
 
     echo kernel: build FAILED
     exit 1

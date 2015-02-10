@@ -89,6 +89,12 @@ printf("\n******************\nTEST PLATFORM %d\n*************\n\n",iplat);
 		clrpc_dptr* tmp = ((_xobj_t*)devices[i])->obj;
 		clGetDeviceInfo(devices[i],CL_DEVICE_NAME,1023,buffer,&sz);
 		printf(  "CL_DEVICE_NAME |%s|\n",buffer);
+		cl_platform_id tmpid;
+		clGetDeviceInfo(devices[i],CL_DEVICE_PLATFORM,sizeof(tmpid),&tmpid,&sz);
+		printf("%p\n",platforms[iplat]); fflush(stdout);
+		printf("%p\n",tmpid); fflush(stdout);
+		clGetPlatformInfo(tmpid,CL_PLATFORM_NAME,1023,buffer,&sz);
+		printf(  "\n [%d] CL_PLATFORM_NAME|%ld:%s|\n",i,sz,buffer);
 	}
 
 	cl_context_properties ctxprop[] = { 

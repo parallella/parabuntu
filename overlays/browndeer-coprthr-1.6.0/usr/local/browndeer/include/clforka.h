@@ -142,6 +142,9 @@ inline static
 void __clarg_set( CLCONTEXT* cp, cl_kernel krn, unsigned int ia, cl_float a)
 { ::clarg_set(cp,krn,ia,(a)); }
 inline static
+void __clarg_set( CLCONTEXT* cp, cl_kernel krn, unsigned int ia, cl_double a)
+{ ::clarg_set(cp,krn,ia,(a)); }
+inline static
 void __clarg_set( CLCONTEXT* cp, cl_kernel krn, unsigned int ia, cl_int2 a)
 { ::clarg_set(cp,krn,ia,(a)); }
 inline static
@@ -149,6 +152,9 @@ void __clarg_set( CLCONTEXT* cp, cl_kernel krn, unsigned int ia, cl_uint2 a)
 { ::clarg_set(cp,krn,ia,(a)); }
 inline static
 void __clarg_set( CLCONTEXT* cp, cl_kernel krn, unsigned int ia, cl_float2 a)
+{ ::clarg_set(cp,krn,ia,(a)); }
+inline static
+void __clarg_set( CLCONTEXT* cp, cl_kernel krn, unsigned int ia, cl_double2 a)
 { ::clarg_set(cp,krn,ia,(a)); }
 inline static
 void __clarg_set( CLCONTEXT* cp, cl_kernel krn, unsigned int ia, cl_int4 a)
@@ -169,12 +175,16 @@ void __clarg_set( CLCONTEXT* cp, cl_kernel krn, unsigned int ia, void* a)
 ({ \
 __iftype_clarg_set(cp,krn,ia,a,cl_int) \
 else __iftype_clarg_set(cp,krn,ia,a,cl_char) \
+else __iftype_clarg_set(cp,krn,ia,a,cl_long) \
 else __iftype_clarg_set(cp,krn,ia,a,cl_uchar) \
 else __iftype_clarg_set(cp,krn,ia,a,cl_uint) \
+else __iftype_clarg_set(cp,krn,ia,a,cl_ulong) \
 else __iftype_clarg_set(cp,krn,ia,a,cl_float) \
 else __iftype_clarg_set(cp,krn,ia,a,cl_double) \
 else __iftype_clarg_set(cp,krn,ia,a,cl_int2) \
+else __iftype_clarg_set(cp,krn,ia,a,cl_long2) \
 else __iftype_clarg_set(cp,krn,ia,a,cl_uint2) \
+else __iftype_clarg_set(cp,krn,ia,a,cl_ulong2) \
 else __iftype_clarg_set(cp,krn,ia,a,cl_float2) \
 else __iftype_clarg_set(cp,krn,ia,a,cl_double2) \
 else __iftype_clarg_set(cp,krn,ia,a,cl_int4) \

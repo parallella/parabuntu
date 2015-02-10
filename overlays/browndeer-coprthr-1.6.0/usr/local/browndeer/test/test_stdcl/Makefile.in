@@ -11,8 +11,8 @@ USE_OPENCL_LIBS=-L@OPENCL_LIB@ -l@OPENCL_LIBNAME@
 USE_STDCL_INCS=-I@includedir@
 USE_STDCL_LIBS=-L@libdir@ -lstdcl
 
-LIBELF_INC = @libelf_inc@
-LIBELF_LIB = @libelf_lib@
+LIBELF_INC = @LIBELF_INC@
+LIBELF_LIB = @LIBELF_LIB@
 
 TESTS = arg_int arg_int4 arg_float arg_float4 block_int block_float special \
 	ndev_float4
@@ -23,6 +23,7 @@ CLSRC = test_arg_int.cl test_arg_int4.cl \
 
 TOPDIR ?= ../
 
+INCS += $(LIBELF_INC)
 LIBS += -lm $(LIBELF_LIB) -lclelf
 
 #INCS = -I/usr/local/browndeer/include

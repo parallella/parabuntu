@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Copyright (c) 2013-2014 Brown Deer Technology, LLC" />
+  <title>Application Note: Building COPRTHR SDK for Epiphany/Parallella Platforms</title>
+</head>
+<body>
+<img src="./bdt_logo.jpg">
+<div id="header">
+<h1 class="title">Application Note: Building COPRTHR SDK for Epiphany/Parallella Platforms</h1>
+<h2 class="author">Copyright (c) 2013-2014 Brown Deer Technology, LLC</h2>
+<h3 class="date"><em>Verbatim copying and distribution of this entire document is permitted in any medium, provided this notice is preserved.</em></h3>
+</div>
+<div id="TOC">
+<ul>
+<li><a href="#overview"><span class="toc-section-number">1</span> Overview</a></li>
+<li><a href="#installation"><span class="toc-section-number">2</span> Installation</a><ul>
+<li><a href="#pre-requisites"><span class="toc-section-number">2.1</span> Pre-requisites</a></li>
+<li><a href="#installing-pre-compiled-package"><span class="toc-section-number">2.2</span> Installing pre-compiled package</a></li>
+<li><a href="#build-from-source"><span class="toc-section-number">2.3</span> Build from source</a></li>
+</ul></li>
+<li><a href="#testing"><span class="toc-section-number">3</span> Testing</a></li>
+<li><a href="#more-information"><span class="toc-section-number">4</span> More Information</a></li>
+</ul>
+</div>
+<h1 id="overview"><a href="#overview"><span class="header-section-number">1</span> Overview</a></h1>
+<p>The COPRTHR<sup>®</sup> SDK provides tools and libraries supporting Parallella and the Epiphany co-processor including STDCL<sup>®</sup>, baseline OpenCL<sup>™</sup> support, and compiler tools supporting a standard compilation model and workflow. This Application Note provides details specific to the Parallella platform for the installation of the COPRTHR SDK. The installation instructions require the version 1.6 of the COPRTHR SDK (&quot;Freewill&quot; release) and version 5 of the eSDK later than the 5.13.7.17 update.</p>
+<p> </p>
+<hr />
+<h1 id="installation"><a href="#installation"><span class="header-section-number">2</span> Installation</a></h1>
+<p>The following instructions describe the installation of the COPRTHR SDK v1.6 on Parallella using either a pre-compiled distribution or building directly from source.</p>
+<h2 id="pre-requisites"><a href="#pre-requisites"><span class="header-section-number">2.1</span> Pre-requisites</a></h2>
+<p>The following packages must be installed prior to the installation of the COPRTHR SDK. Note that the standard Linux distribution of libelf is <em>NOT</em> a substitute for the package listed below:</p>
+<p>libelf-0.8.13.tar.gz (www.mr511.de/software/libelf-0.8.13.tar.gz)</p>
+<p>libevent-2.0.18-stable.tar.gz (github.com/downloads/libevent/libevent/libevent-2.0.18-stable.tar.gz)</p>
+<p>libconfig-1.4.8.tar.gz (www.hyperrealm.com/libconfig/libconfig-1.4.8.tar.gz)</p>
+<p>In addition, the current Ubuntu image may not have the following packages installed. If you find this to be the case, they can be built in this order using the following packages.</p>
+<p>m4-1.4.16.tar.gz (http://ftp.gnu.org/gnu/m4/)</p>
+<p>flex-2.5.35.tar.gz (http://flex.sourceforge.net/)</p>
+<p>bison-2.5.tar.gz (http://ftp.gnu.org/gnu/bison/)</p>
+<p>All of these packages are easily built by unpacking the package and typing</p>
+<pre><code>] ./configure
+] sudo make install</code></pre>
+<p>These packages reflect the versions that have been used across multiple platforms. Packages available via apt-get may work just fine, but this has not yet been tested.</p>
+<h2 id="installing-pre-compiled-package"><a href="#installing-pre-compiled-package"><span class="header-section-number">2.2</span> Installing pre-compiled package</a></h2>
+<p>First obtain the correct pre-compiled package for Parallella (<code>coprthr-1.6.0-parallella.tgz</code>) from the [COPRTHR download page] (http://www.browndeertechnology.com/coprthr_download.htm).</p>
+<p>Unpacking this file will produce the directory <code>browndeer/</code>. Do <em>NOT</em> cd into the directory. As root, run the uninstall script to remove any previous installation,</p>
+<pre><code>sudo ./browndeer/scripts/uninstall_coprthr_parallella.sh</code></pre>
+<p>Then, as root, run the install script,</p>
+<pre><code>sudo ./browndeer/scripts/install_coprthr_parallella.sh</code></pre>
+<p>After installing the COPRTHR SDK, it is very important to update the <code>.bashrc</code> file for <em>both root and user</em> to add the required paths in order for the software to operate properly,</p>
+<pre><code>export PATH=/usr/local/browndeer/bin:$PATH
+export LD_LIBRARY_PATH=/usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH</code></pre>
+<h2 id="build-from-source"><a href="#build-from-source"><span class="header-section-number">2.3</span> Build from source</a></h2>
+<p>Download the source code from github (github.com/browndeer/coprthr) using the latest release update for version 1.6 or the stable-1.6 branch and then build using the following steps for Parallella:</p>
+<pre><code>./configure –enable-epiphany --disable-clete
+make
+sudo make install</code></pre>
+<p>After installing the COPRTHR SDK, it is very important to update the <code>.bashrc</code> file for <em>both root and user</em> to add the required paths in order for the software to operate properly,</p>
+<pre><code>export PATH=/usr/local/browndeer/bin:$PATH
+export LD_LIBRARY_PATH=/usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH</code></pre>
+<hr />
+<p> </p>
+<h1 id="testing"><a href="#testing"><span class="header-section-number">3</span> Testing</a></h1>
+<p>The easiest way to test the installation and get started is to create a work directory and copy the <code>examples/</code> and <code>test/</code> directories installed with the SDK,</p>
+<pre><code>mkdir work
+cp –R /usr/local/browndeer/examples ./work
+cp –R /usr/local/browndeer/test ./work</code></pre>
+<p>Then cd into ./work/test and as root run the quicktest,</p>
+<pre><code>cd ./work/test
+su
+make quicktest</code></pre>
+<p>If these tests do not all indicate <code>[pass]</code> then something is wrong. Typical problems are forgetting to correctly update and source <code>.bashrc</code> files and also attempting to run the test as a user (incorrect) and not root (correct).</p>
+<p>Note that the test <code>test_stdcl_ndev_float4</code> for <code>stddev 1</code> is expected to fail on this platform and this is not a cause for concern.</p>
+<hr />
+<p> </p>
+<h1 id="more-information"><a href="#more-information"><span class="header-section-number">4</span> More Information</a></h1>
+<p>More information specific to programming Epiphany/Parallella can be found in the Appliction Note <a href="http://www.browndeertechnology.com/docs/app_note_programming_parallella_using_stdcl.pdf">Programming Parallella Using STDCL</a>. More information on the COPRTHR SDK and the STDCL API may be found in the <a href="http://www.browndeertechnology.com/docs/coprthr_primer-1.6.0.pdf">COPRTHR Primer</a> and the <a href="http://www.browndeertechnology.com/docs/stdcl_api_ref.pdf">STDCL API Reference</a>.</p>
+<hr />
+<p>Document revision 1.6.0.0</p>
+</body>
+</html>

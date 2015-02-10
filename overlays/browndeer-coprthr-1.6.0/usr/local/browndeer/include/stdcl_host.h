@@ -27,7 +27,9 @@
 #ifndef _STDCL_HOST_H
 #define _STDCL_HOST_H
 
+#ifndef __STDCL__
 #define __STDCL__
+#endif
 
 #ifdef _WIN64
 #include "fix_windows.h"

@@ -5,14 +5,14 @@ prefix=/usr/local/browndeer
 exec_prefix=${prefix}
 
 ### select OpenCL implementation to use if not already defined
-USE_OPENCL_INCS=-I/home/linaro/bdt-code/stable-1.6/coprthr/include
-USE_OPENCL_LIBS=-L/home/linaro/bdt-code/stable-1.6/coprthr/src/libocl -locl
+USE_OPENCL_INCS=-I/home/parallella/coprthr/include
+USE_OPENCL_LIBS=-L/home/parallella/coprthr/src/libocl -locl
 
 USE_STDCL_INCS=-I${prefix}/include
 USE_STDCL_LIBS=-L${exec_prefix}/lib -lstdcl
 
-LIBELF_INC = -I/usr/local/include
-LIBELF_LIB = -L/usr/local/lib -lelf
+LIBELF_INC = 
+LIBELF_LIB = -lelf
 
 TESTS = arg_int arg_int4 arg_float arg_float4 block_int block_float special \
 	ndev_float4
@@ -23,6 +23,7 @@ CLSRC = test_arg_int.cl test_arg_int4.cl \
 
 TOPDIR ?= ../
 
+INCS += $(LIBELF_INC)
 LIBS += -lm $(LIBELF_LIB) -lclelf
 
 #INCS = -I/usr/local/browndeer/include

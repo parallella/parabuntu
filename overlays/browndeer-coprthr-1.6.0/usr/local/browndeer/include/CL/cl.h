@@ -28,6 +28,8 @@
 
 #ifdef __APPLE__
 #include <OpenCL/cl_platform.h>
+#elif defined(__ompi__)
+#include <CL/cl_platform_scalar.h>
 #else
 #include <CL/cl_platform.h>
 #endif	

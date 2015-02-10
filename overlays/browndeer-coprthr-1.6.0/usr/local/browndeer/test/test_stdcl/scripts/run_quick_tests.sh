@@ -7,8 +7,7 @@ run_test() {
 	for (( i=0; i<$ndev; i++ ))
 	do 
 		printf "%-68s" "$1 $2 $3 (stddev $i)"
-#		$1 --size $2 --blocksize $3 --dev $i >& /dev/null
-		$1 --size $2 --blocksize $3 --dev $i 2>1 >> log.stddev.$i
+		$1 --size $2 --blocksize $3 --dev $i >>log.stddev.$i 2>&1
 		if [ $? -eq 0 ]; then
 			printf "%10s\n" "[pass]"
 		else 
@@ -21,8 +20,7 @@ run_test() {
 	for (( i=0; i<$ndev; i++ ))
 	do 
 		printf "%-68s" "$1 $2 $3 (stdcpu $i)"
-#		$1 --size $2 --blocksize $3 --cpu $i >& /dev/null
-		$1 --size $2 --blocksize $3 --cpu $i 2>1 >> log.stdcpu.$i
+		$1 --size $2 --blocksize $3 --cpu $i >>log.stdcpu.$i 2>&1
 		if [ $? -eq 0 ]; then
 			printf "%10s\n" "[pass]"
 		else 
@@ -35,8 +33,7 @@ run_test() {
 	for (( i=0; i<$ndev; i++ ))
 	do
 		printf "%-68s" "$1 $2 $3 (stdgpu $i)"
-#		$1 --size $2 --blocksize $3 --gpu $i >& /dev/null
-		$1 --size $2 --blocksize $3 --gpu $i 2>1 >> log.stdgpu.$i
+		$1 --size $2 --blocksize $3 --gpu $i >>log.stdgpu.$i 2>&1
 		if [ $? -eq 0 ]; then
 			printf "%10s\n" "[pass]"
 		else 
@@ -49,8 +46,7 @@ run_test() {
 	for (( i=0; i<$ndev; i++ ))
 	do
 		printf "%-68s" "$1 $2 $3 (stdacc $i)"
-#		$1 --size $2 --blocksize $3 --acc $i >& /dev/null
-		$1 --size $2 --blocksize $3 --acc $i 2>1 >> log.stdacc.$i
+		$1 --size $2 --blocksize $3 --acc $i >>log.stdacc.$i 2>&1
 		if [ $? -eq 0 ]; then
 			printf "%10s\n" "[pass]"
 		else 
@@ -81,6 +77,7 @@ else
    TEST_SIZE=65536
 fi
 
+#export COPRTHR_CLMESG_LEVEL=5
 
 echo -e "\nRUNNING TESTS ...";
 

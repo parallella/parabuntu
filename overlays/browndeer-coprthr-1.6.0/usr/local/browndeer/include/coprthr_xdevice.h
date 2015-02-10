@@ -34,6 +34,8 @@ void coprthr_mutex_unlock( void* p_mtx)
 
 #warning __epiphany__ defined
 
+int __attribute__((noinline)) readi( int* p) { return p[0]; }
+
 int __attribute__((noinline)) read_h( int* p) { return p[1]; }
 
 void coprthr_mutex_lock( void* p_mtx ) 

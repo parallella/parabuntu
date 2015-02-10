@@ -2,8 +2,8 @@
 prefix=/usr/local/browndeer
 exec_prefix=${prefix}
 
-#OPENCL_INC_DIR = /home/linaro/bdt-code/stable-1.6/coprthr/include
-#OPENCL_LIB_DIR = /home/linaro/bdt-code/stable-1.6/coprthr/src/libocl
+#OPENCL_INC_DIR = /home/parallella/coprthr/include
+#OPENCL_LIB_DIR = /home/parallella/coprthr/src/libocl
 #OPENCL_LIBNAME = ocl
 OPENCL_INC_DIR = $(prefix)/include
 OPENCL_LIB_DIR = $(prefix)/lib

@@ -18,6 +18,9 @@ using namespace std;
 
 #include <stdcl.h>
 #define __CLVECTOR_FULLAUTO
+//#define __CLVECTOR_FULLAUTO_STDCPU
+//#define __CLVECTOR_FULLAUTO_STDGPU
+//#define __CLVECTOR_FULLAUTO_STDACC 
 #include <clvector.h>
 
 int main()

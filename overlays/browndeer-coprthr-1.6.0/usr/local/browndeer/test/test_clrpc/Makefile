@@ -8,10 +8,10 @@ exec_prefix=${prefix}
 ### this useless define is needed to silence useless autoconf warning
 datarootdir=${prefix}/share
 
-USE_OPENCL_INCLUDES = -I/home/linaro/bdt-code/stable-1.6/coprthr/include
+USE_OPENCL_INCLUDES = -I/home/parallella/coprthr/include
 
-#LIBELF_INC = -I/usr/local/include
-#LIBELF_LIB = -L/usr/local/lib -lelf
+#LIBELF_INC = @libelf_inc@
+#LIBELF_LIB = @libelf_lib@
 
 ### enable build of debug version if not already defined
 #ifeq (,1)
@@ -37,14 +37,14 @@ DEFS = -DHAVE_CONFIG_H
 
 INCS += -I../../include $(USE_OPENCL_INCLUDES) -I../libocl 
 INCS += -I$(INSTALL_INCLUDE_DIR)
-INCS += -I/usr/local/include
+INCS += -I/include
 
 LIBS += $(USE_OPENCL_LIBS)
 
 #INCS += $(LIBELF_INC)
 #LIBS += $(LIBELF_LIB)
 
-ifeq (freebsd,$(patsubst freebsd%,freebsd,linux-gnu))
+ifeq (freebsd,$(patsubst freebsd%,freebsd,linux-gnueabihf))
 LIBS += -lpthread -lc -lrt 
 else
 LIBS += -lpthread -ldl -lrt 

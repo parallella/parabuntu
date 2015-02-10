@@ -2,7 +2,7 @@
 EXAMPLES = hello_stdcl image2d_example mpi_lock_example clopen_example \
 	clvector_example clmulti_array_example \
 	clete_clmulti_array_example clete_clvector_example \
-	bdt_em3d bdt_nbody bdt_nbody_tutorial bdt_nbody_tutorial_2 \
+	bdt_em3d bdt_nbody bdt_nbody_e32 bdt_nbody_tutorial bdt_nbody_tutorial_2 \
 	parallella
 
 #	bdt_em3d_e32 bdt_nbody_e32 

@@ -3,8 +3,8 @@ PROG = clopen_example1.x clopen_example2.x clopen_example3.x
 prefix=/usr/local/browndeer
 exec_prefix=${prefix}
 
-OPENCL_INCS = -I/home/linaro/bdt-code/stable-1.6/coprthr/include
-OPENCL_LIBS = -L/home/linaro/bdt-code/stable-1.6/coprthr/src/libocl -locl
+OPENCL_INCS = -I/home/parallella/coprthr/include
+OPENCL_LIBS = -L/home/parallella/coprthr/src/libocl -locl
 
 STDCL_INCS = -I${prefix}/include
 STDCL_LIBS = -L${exec_prefix}/lib -lstdcl

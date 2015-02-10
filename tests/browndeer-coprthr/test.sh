@@ -1,11 +1,11 @@
 #!/bin/bash
 set -e
-
 rm -rf browndeer &&
-cp -r /usr/local/browndeer . &&
-cd browndeer/examples &&
-make &&
-echo Verify results manually &&
+cp -R /usr/local/browndeer/examples ./browndeer &&
+cp -R /usr/local/browndeer/test ./browndeer &&
+cd browndeer/test &&
+make quicktest &&
+echo Test returned ok but you should verify the results manually &&
 exit 0
 
 echo FAIL

@@ -1,5 +1,5 @@
 # newer versions of the distribution.
 deb-src http://archive.ubuntu.com/ubuntu/ trusty main restricted
 deb-src http://archive.ubuntu.com/ubuntu/ trusty main universe
-#deb-src http://archive.ubuntu.com/ubuntu/ trusty main multiverse
+deb-src http://archive.ubuntu.com/ubuntu/ trusty main multiverse
 

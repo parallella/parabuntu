@@ -53,4 +53,16 @@ fftw3-dev
 
 ### Packages for browndeer coprthr
 # Source packages
+ocl-icd-dev
+ocl-icd-opencl-dev
+clinfo
+libclc-dev
+opencl-headers
+libelfg0
+libelfg0-dev
+
+# Needed for parallella-utils xtemp
+libx11
+libx11-dev
+i2c-tools
 

@@ -1,5 +1,15 @@
-
 # Extra config
-#CONFIG_ZSMALLOC=y
-#CONFIG_ZRAM=m
+CONFIG_ZSMALLOC=y
+CONFIG_ZRAM=y
+
+#
+CONFIG_EPIPHANY=m
+CONFIG_REGULATOR_ISL9305=y
+CONFIG_DEBUG_KERNEL=y
+CONFIG_DEBUG_INFO=y
+
+# No local version. So you don't have rsync over new modules every time
+# you do a git commit since version magic doesn't match...
+CONFIG_LOCALVERSION=""
+CONFIG_LOCALVERSION_AUTO=n
 

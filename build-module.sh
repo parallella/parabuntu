@@ -86,21 +86,21 @@ build_kernel () {
         }
         cd $PARALLELLA_LINUX &&
         #make distclean &&
-        helper 1 distclean &&
-        helper 1 mrproper &&
-        helper 1 multi_v7_defconfig &&
-        add_extra_config &&
-        helper $jobs "" &&
+        #helper 1 distclean &&
+        #helper 1 mrproper &&
+        #helper 1 multi_v7_defconfig &&
+        #add_extra_config &&
+        #helper $jobs "" &&
         #helper 1 V=1 "" &&
-        #helper 1 V=1 M=drivers/misc "" &&
+        helper $jobs V=1 M=drivers/misc "" &&
         #helper 1 V=1 "" &&
-        helper $jobs uImage &&
+        helper 1 uImage &&
         helper 1 zynq-parallella-headless.dtb &&
         helper 1 zynq-parallella-microserver.dtb &&
         helper 1 zynq-parallella.dtb &&
-        helper $jobs modules &&
+        #helper $jobs modules &&
         helper 1 INSTALL_MOD_PATH=$MODULES_INSTALL_DIR modules_install &&
-        helper 1 INSTALL_HDR_PATH=$HEADERS_INSTALL_DIR headers_install &&
+        #helper 1 INSTALL_HDR_PATH=$HEADERS_INSTALL_DIR headers_install &&
         true
     ) && echo kernel: build OK && return 0
 

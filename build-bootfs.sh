@@ -8,10 +8,11 @@ PARALLELLA_HW_REVISION=${PARALLELLA_HW_REVISION:-master}
 CROSS_COMPILE=${CROSS_COMPILE:-arm-linux-gnueabihf-}
 
 CONFIGURATIONS="\
-parallella_e16_hdmi_gpiose_7010.bit.bin,zynq-parallella1-hdmi.dtb \
-parallella_e16_hdmi_gpiose_7020.bit.bin,zynq-parallella1-hdmi.dtb \
-parallella_e16_headless_gpiose_7010.bit.bin,zynq-parallella1-headless.dtb \
-parallella_e16_headless_gpiose_7020.bit.bin,zynq-parallella1-headless.dtb"
+parallella_e16_hdmi_gpiose_7010.bit.bin,zynq-parallella.dtb \
+parallella_e16_hdmi_gpiose_7020.bit.bin,zynq-parallella.dtb \
+parallella_e16_headless_gpiose_7010.bit.bin,zynq-parallella-headless.dtb \
+parallella_e16_headless_gpiose_7020.bit.bin,zynq-parallella-headless.dtb"
+
 
 #No new bitstream for Epiphany-IV atm.
 #parallella_e64_hdmi_gpiose_7020.bit.bin,zynq-parallella1-hdmi.dtb \
@@ -96,8 +97,8 @@ build_kernel () {
         #helper 1 V=1 M=drivers/misc "" &&
         #helper 1 V=1 "" &&
         helper $jobs uImage &&
-        helper 1 zynq-parallella1-headless.dtb &&
-        helper 1 zynq-parallella1-hdmi.dtb &&
+        helper 1 zynq-parallella-headless.dtb &&
+        helper 1 zynq-parallella.dtb &&
         helper $jobs modules &&
         helper 1 INSTALL_MOD_PATH=$MODULES_INSTALL_DIR modules_install &&
         helper 1 INSTALL_HDR_PATH=$HEADERS_INSTALL_DIR headers_install &&

@@ -13,4 +13,9 @@ cat << EOF > md5sum.txt
 ##
 ##
 EOF
-find . -type f -exec md5sum '{}' ';' >> md5sum.txt || echo "$0: Fail" && exit 1
+find . -type f -exec md5sum '{}' ';' >> md5sum.txt
+
+if [ $? -ne 0 ]; then
+	echo "$0: Fail"
+	exit 1
+fi

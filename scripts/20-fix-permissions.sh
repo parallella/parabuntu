@@ -10,7 +10,7 @@ fix_permissions () {
     chmod 640 mnt/rootfs/etc/shadow
 }
 
-fix_permissions || echo "$0: Fail" && exit 1
-
-
-
+if ! fix_permissions; then
+	echo "$0: Fail"
+	exit 1
+fi

@@ -5,6 +5,7 @@ ftp synaptic screen tmux bc htop
 lsb-release
 fake-hwclock
 ntp
+avahi-daemon
 
 # Language Packs (Fix utf8 & get rid of Ubuntu's annoying locale warings)
 language-pack-en
@@ -65,4 +66,3 @@ libelfg0-dev
 libx11
 libx11-dev
 i2c-tools
-

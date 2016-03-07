@@ -1,5 +1,5 @@
 # Disabled because newer 'linaro-overlay-minimal' images breaks
 # boot console. (Assumes systemd).
-#deb http://repo.linaro.org/ubuntu/linaro-overlay trusty main
-#deb-src http://repo.linaro.org/ubuntu/linaro-overlay trusty main
+#deb http://repo.linaro.org/ubuntu/linaro-overlay vivid main
+#deb-src http://repo.linaro.org/ubuntu/linaro-overlay vivid main
 

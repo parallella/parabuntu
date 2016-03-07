@@ -1,2 +1,3 @@
 # Set appropriate permissions on the epiphany device node
 KERNEL=="epiphany", MODE="0666"
+KERNEL=="epiphany/*", MODE="0666"

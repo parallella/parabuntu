@@ -1,5 +1,5 @@
 #Basic
-bash tcsh man info less
+bash tcsh man-db info less
 ssh
 ftp synaptic screen tmux bc htop
 lsb-release
@@ -49,8 +49,8 @@ libmpfr-dev libmpc-dev libgmp3-dev
 ### For epiphany examples
 libdevil-dev
 libdevil1c2
-fftw3
-fftw3-dev
+libfftw3-3
+libfftw3-dev
 
 ### Packages for browndeer coprthr
 # Source packages
@@ -63,6 +63,6 @@ libelfg0
 libelfg0-dev
 
 # Needed for parallella-utils xtemp
-libx11
+libx11-6
 libx11-dev
 i2c-tools

@@ -9,8 +9,7 @@ cd ${top}
 
 . ${top}/settings.inc.sh
 
-bootdev=
-rootdev=
+root_dev=
 
 cleanup () {
 	echo Cleaning up
@@ -22,15 +21,13 @@ cleanup () {
 	umount ${root_mnt}/tmp || true
 	umount ${root_mnt}/dev/pts || true
 	umount ${root_mnt} || true
-	#umount ${boot_mnt} || true
 	sync
 
-	zerofree -v ${rootdev} || true
+	zerofree -v ${root_dev} || true
 
 	sync
 
-	[ x"${bootdev}" != x ] && losetup -d ${bootdev}
-	[ x"${rootdev}" != x ] && losetup -d ${rootdev}
+	[ x"${root_dev}" != x ] && losetup -d ${root_dev}
 }
 
 trap 'cleanup' EXIT
@@ -52,25 +49,19 @@ fi
 echo Removing old files
 rm -rf ${top}/out/*
 
-echo Creating image file
+echo Creating rootfs image file
 mkdir -p ${top}/out
-dd if=/dev/zero of=${image_file} bs=1M count=${image_size}
-
-echo Creating partition table
-fdisk < ${top}/fdisk-cmd.txt ${image_file}
+# TODO: Can we create a sparse file instead?
+dd if=/dev/zero of=${root_image} bs=1024 count=$[${root_size}/1024]
 
 echo Setting up loopback
-bootdev=$(losetup -o ${boot_offset} --sizelimit ${boot_size} -f --show ${image_file})
-rootdev=$(losetup -o ${root_offset} --sizelimit ${root_size} -f --show ${image_file})
+root_dev=$(losetup -o 0 --sizelimit ${root_size} -f --show ${root_image})
 
 echo Creating filesystems
-mkfs.vfat -n BOOT ${bootdev}
-mkfs.ext4 -L root ${rootdev}
+mkfs.ext4 -L root ${root_dev}
 
-echo Mounting filesystems
-# Wait w/ bootfs. Many combos
-mount ${rootdev} ${root_mnt}
-#umount ${boot_mnt}
+echo Mounting root filesystem
+mount ${root_dev} ${root_mnt}
 
 echo Unpacking linaro tarball
 tar xfzp ${linaro_tarball} -C ${root_mnt} --strip-components 1

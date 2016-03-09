@@ -79,9 +79,10 @@ build_kernel () {
 
     if [ "${clean}" = "yes" ]; then
         rm -fr ${KERNEL_BUILD_DIR}
-        rm -fr ${HEADERS_INSTALL_DIR}
-        rm -fr ${KERNEL_BUILD_DIR}
     fi
+
+    rm -fr ${MODULES_INSTALL_DIR}
+    rm -fr ${HEADERS_INSTALL_DIR}
 
     mkdir -p ${KERNEL_BUILD_DIR}
     mkdir -p ${MODULES_INSTALL_DIR}

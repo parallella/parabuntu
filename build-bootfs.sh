@@ -90,7 +90,8 @@ build_kernel () {
         #make distclean &&
         helper 1 distclean &&
         helper 1 mrproper &&
-        helper 1 parallella_defconfig &&
+        helper 1 multi_v7_defconfig
+        #helper 1 parallella_defconfig &&
         add_extra_config &&
         helper $jobs "" &&
         #helper 1 V=1 "" &&

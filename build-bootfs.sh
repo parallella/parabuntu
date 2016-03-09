@@ -1,18 +1,21 @@
 #!/bin/bash
-
 set -e
-
+set -o pipefail
+set -u
 
 PARALLELLA_HW_REVISION=${PARALLELLA_HW_REVISION:-master}
 
 CROSS_COMPILE=${CROSS_COMPILE:-arm-linux-gnueabihf-}
+DEBUG=${DEBUG:-no}
+PARALLELLA_LINUX=${PARALLELLA_LINUX:-}
 
 CONFIGURATIONS="\
-parallella_e16_hdmi_gpiose_7010.bit.bin,zynq-parallella.dtb \
-parallella_e16_hdmi_gpiose_7020.bit.bin,zynq-parallella.dtb \
 parallella_e16_headless_gpiose_7010.bit.bin,zynq-parallella-headless.dtb \
 parallella_e16_headless_gpiose_7020.bit.bin,zynq-parallella-headless.dtb"
 
+#Disabled (lacks bitstream)
+#parallella_e16_hdmi_gpiose_7010.bit.bin,zynq-parallella.dtb \
+#parallella_e16_hdmi_gpiose_7020.bit.bin,zynq-parallella.dtb \
 
 #No new bitstream for Epiphany-IV atm.
 #parallella_e64_hdmi_gpiose_7020.bit.bin,zynq-parallella1-hdmi.dtb \
@@ -48,6 +51,19 @@ clone_kernel () {
 }
 
 
+clean=yes
+if [ $# -gt 1 ]; then
+    echo "Usage: ${0} [--no-clean]"
+    exit 1
+elif [ $# -eq 1 ]; then
+    if [ "$1" != "--no-clean" ]; then
+        echo "Usage: ${0} [--no-clean]"
+        exit 1
+    else
+        clean=no
+    fi
+fi
+
 # TODO
 # $1 [in] bootargs
 build_kernel () {
@@ -61,8 +77,15 @@ build_kernel () {
     CONFIG_EXTRA=$PWD/config.extra
     kernel_build_log=$PWD/build/$version.log
 
-    mkdir -p $KERNEL_BUILD_DIR
-    mkdir -p $MODULES_INSTALL_DIR
+    if [ "${clean}" = "yes" ]; then
+        rm -fr ${KERNEL_BUILD_DIR}
+        rm -fr ${HEADERS_INSTALL_DIR}
+        rm -fr ${KERNEL_BUILD_DIR}
+    fi
+
+    mkdir -p ${KERNEL_BUILD_DIR}
+    mkdir -p ${MODULES_INSTALL_DIR}
+    mkdir -p ${HEADERS_INSTALL_DIR}
     rm -f $kernel_build_log
     echo "Building kernel..."
     echo kernel: logfile $kernel_build_log
@@ -80,30 +103,30 @@ build_kernel () {
                 $@ 2>&1 | tee -a $kernel_build_log
         }
         add_extra_config () {
-            [ -f $CONFIG_EXTRA ] &&
-            cat $CONFIG_EXTRA >>  $KERNEL_BUILD_DIR/.config &&
-            sed -i 's/(CONFIG_.*DEBUG.*)=y/\\1=n/g' $KERNEL_BUILD_DIR/.config &&
-            helper 1 olddefconfig ||
-            true
+            if [ -f $CONFIG_EXTRA ]; then
+                cat $CONFIG_EXTRA >>  $KERNEL_BUILD_DIR/.config
+            fi
+            if [ "x${DEBUG}" = "n" -o "x${DEBUG}" = "x" ]; then
+                echo "Disabling DEBUG options. Set DEBUG=y environment variable to override"
+                sed -i 's/(CONFIG_.*DEBUG.*)=y/\\1=n/g' $KERNEL_BUILD_DIR/.config
+            fi
+            helper 1 olddefconfig
         }
-        cd $PARALLELLA_LINUX &&
-        #make distclean &&
-        helper 1 distclean &&
-        helper 1 mrproper &&
-        helper 1 multi_v7_defconfig
-        #helper 1 parallella_defconfig &&
-        add_extra_config &&
-        helper $jobs "" &&
-        #helper 1 V=1 "" &&
-        #helper 1 V=1 M=drivers/misc "" &&
-        #helper 1 V=1 "" &&
-        helper $jobs uImage &&
-        helper 1 zynq-parallella-headless.dtb &&
-        helper 1 zynq-parallella.dtb &&
-        helper $jobs modules &&
-        helper 1 INSTALL_MOD_PATH=$MODULES_INSTALL_DIR modules_install &&
-        helper 1 INSTALL_HDR_PATH=$HEADERS_INSTALL_DIR headers_install &&
-        true
+        cd $PARALLELLA_LINUX
+        if [ "x${clean}" != "xno" ]; then
+            helper 1 distclean
+            helper 1 mrproper
+            helper 1 multi_v7_defconfig
+            #helper 1 parallella_defconfig
+        fi
+        add_extra_config
+        helper $jobs ""
+        helper $jobs uImage
+        helper 1 zynq-parallella-headless.dtb
+        helper 1 zynq-parallella.dtb
+        helper $jobs modules
+        helper 1 INSTALL_MOD_PATH=$MODULES_INSTALL_DIR modules_install
+        helper 1 INSTALL_HDR_PATH=$HEADERS_INSTALL_DIR headers_install
     ) && echo kernel: build OK && return 0
 
     echo kernel: build FAILED
@@ -178,6 +201,3 @@ main () {
 
 
 main $@
-
-
-

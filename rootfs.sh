@@ -9,6 +9,18 @@ cd ${top}
 
 . ${top}/settings.inc.sh
 
+if [ $# -ne 1 ]; then
+	echo usage: $0 ESDK_PATH
+	exit 1
+fi
+
+esdk_path=$(echo $1 | sed s,/*$,,g) # strip trailing /
+esdk_name=$(basename ${esdk_path})
+if ! [ -d ${esdk_path} ]; then
+	echo $0: Not a directory: ${esdk_path}
+	exit 1
+fi
+
 root_dev=
 
 cleanup () {
@@ -72,6 +84,14 @@ for d in $(ls ${top}/overlays | sort -g); do
 	echo Applying overlay $d
 	rsync -ap --no-owner --no-group ${top}/overlays/$d/ ${root_mnt}
 done
+
+echo Copying ESDK to rootfs
+mkdir -p ${root_mnt}/opt/adapteva
+rsync -ap --no-owner --no-group ${esdk_path} ${root_mnt}/opt/adapteva/
+if [ ${esdk_name} != "esdk" ]; then
+	echo Symlinking esdk to ${esdk_name}
+	(cd ${root_mnt}/opt/adapteva && ln -s ${esdk_name} esdk || exit 1)
+fi
 
 find ${root_mnt} -name ".gitkeep" -delete
 

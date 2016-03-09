@@ -3,20 +3,26 @@ set -e
 set -o pipefail
 set -u
 
-LINARO_URL="http://releases.linaro.org/15.06/ubuntu/vivid-images/nano/linaro-vivid-nano-20150618-705.tar.gz"
-LINARO_TARBALL_NAME=linaro-nano.tgz
+script=$(readlink -f "$0")
+top=$(dirname "$script")
+cd ${top}
+
+. ${top}/settings.inc.sh
+
+bootdev=
+rootdev=
 
 cleanup () {
 	echo Cleaning up
-	rm -f ${rootmnt}/usr/sbin/policy-rc.d
-	rm -f ${rootmnt}/etc/resolv.conf
-	rm -f ${rootmnt}/qemu-arm-static
-	umount ${rootmnt}/proc || true
-	umount ${rootmnt}/sys || true
-	umount ${rootmnt}/tmp || true
-	umount ${rootmnt}/dev/pts || true
-	umount ${rootmnt} || true
-	#umount ${bootmnt} || true
+	rm -f ${root_mnt}/usr/sbin/policy-rc.d
+	rm -f ${root_mnt}/etc/resolv.conf
+	rm -f ${root_mnt}/qemu-arm-static
+	umount ${root_mnt}/proc || true
+	umount ${root_mnt}/sys || true
+	umount ${root_mnt}/tmp || true
+	umount ${root_mnt}/dev/pts || true
+	umount ${root_mnt} || true
+	#umount ${boot_mnt} || true
 	sync
 
 	zerofree -v ${rootdev} || true
@@ -27,19 +33,7 @@ cleanup () {
 	[ x"${rootdev}" != x ] && losetup -d ${rootdev}
 }
 
-script=$(readlink -f "$0")
-top=$(dirname "$script")
-rootmnt=${top}/mnt/rootfs
-bootmnt=${top}/mnt/boot
-bootdev=
-rootdev=
-linaro_tarball=${top}/${LINARO_TARBALL_NAME}
-image_size=3600
-image_file=${top}/out/image
-
 trap 'cleanup' EXIT
-
-cd $top
 
 unset LC_TIME
 export LC_ALL="en_US.UTF-8"
@@ -56,40 +50,39 @@ if ! md5sum -c md5sum.txt; then
 fi
 
 echo Removing old files
-rm -rf ${top}/out
+rm -rf ${top}/out/*
 
 echo Creating image file
-mkdir ${top}/out
+mkdir -p ${top}/out
 dd if=/dev/zero of=${image_file} bs=1M count=${image_size}
 
 echo Creating partition table
 fdisk < ${top}/fdisk-cmd.txt ${image_file}
 
 echo Setting up loopback
-# Offset and size hardcoded. See fdisk-cmd.txt
-bootdev=$(losetup -o $[2048*512]   --sizelimit $[102400*512*2]  -f --show ${image_file})
-rootdev=$(losetup -o $[206848*512] --sizelimit $[3582976*512*2] -f --show ${image_file})
+bootdev=$(losetup -o ${boot_offset} --sizelimit ${boot_size} -f --show ${image_file})
+rootdev=$(losetup -o ${root_offset} --sizelimit ${root_size} -f --show ${image_file})
 
 echo Creating filesystems
-mkfs.vfat -n BOOT   ${bootdev}
-mkfs.ext4 -L rootfs ${rootdev}
+mkfs.vfat -n BOOT ${bootdev}
+mkfs.ext4 -L root ${rootdev}
 
 echo Mounting filesystems
 # Wait w/ bootfs. Many combos
-mount ${rootdev} ${rootmnt}
-#umount ${bootmnt}
+mount ${rootdev} ${root_mnt}
+#umount ${boot_mnt}
 
 echo Unpacking linaro tarball
-tar xfzp ${linaro_tarball} -C ${rootmnt} --strip-components 1
+tar xfzp ${linaro_tarball} -C ${root_mnt} --strip-components 1
 
 echo Applying overlays
 #TODO: Use tarballs (for owner/group)?
 for d in $(ls ${top}/overlays | sort -g); do
 	echo Applying overlay $d
-	rsync -ap --no-owner --no-group ${top}/overlays/$d/ ${rootmnt}
+	rsync -ap --no-owner --no-group ${top}/overlays/$d/ ${root_mnt}
 done
 
-find ${rootmnt} -name ".gitkeep" -delete
+find ${root_mnt} -name ".gitkeep" -delete
 
 echo Running scripts
 for s in $(ls ${top}/scripts | sort -g); do
@@ -101,44 +94,44 @@ done
 echo Preparing ARM qemu bootstrap
 
 echo Bind mounting proc sys and pts in chroot
-mount --bind /proc    ${rootmnt}/proc
-mount --bind /sys     ${rootmnt}/sys
-mount --bind /dev/pts ${rootmnt}/dev/pts
+mount --bind /proc    ${root_mnt}/proc
+mount --bind /sys     ${root_mnt}/sys
+mount --bind /dev/pts ${root_mnt}/dev/pts
 
 echo Mounting tmp in chroot
-mount none -t tmpfs -o size=104857600 ${rootmnt}/tmp
+mount none -t tmpfs -o size=104857600 ${root_mnt}/tmp
 
 echo Copying qemu-arm-static
-cp $(which qemu-arm-static) ${rootmnt}
+cp $(which qemu-arm-static) ${root_mnt}
 
 echo Creating resolv.conf
-cat << EOF > ${rootmnt}/etc/resolv.conf
+cat << EOF > ${root_mnt}/etc/resolv.conf
 nameserver 8.8.8.8
 nameserver 8.8.4.4
 EOF
 
 echo Configuring chroot apt to not start/restart services
 #https://wiki.debian.org/chroot
-cat > ${rootmnt}/usr/sbin/policy-rc.d <<EOF
+cat > ${root_mnt}/usr/sbin/policy-rc.d <<EOF
 #!/bin/sh
 exit 101
 EOF
-chmod a+x ${rootmnt}/usr/sbin/policy-rc.d
+chmod a+x ${root_mnt}/usr/sbin/policy-rc.d
 
 
 # Assume ischroot works
 # See: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=685034
 
 echo Copying arm bootstrap files
-cp ${top}/run-arm.sh ${rootmnt}/tmp
-cp -r packages.basic.txt ${rootmnt}/tmp
+cp ${top}/run-arm.sh ${root_mnt}/tmp
+cp -r packages.basic.txt ${root_mnt}/tmp
 
 echo Copying tests
 #TODO: Move to Parallella overlay?
-cp -r tests ${rootmnt}/home/parallella/
+cp -r tests ${root_mnt}/home/parallella/
 
 echo Starting ARM chroot
-chroot ${rootmnt} ./tmp/run-arm.sh
-#chroot ${rootmnt}
+chroot ${root_mnt} ./tmp/run-arm.sh
+#chroot ${root_mnt}
 
 echo Done

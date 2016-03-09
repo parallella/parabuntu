@@ -42,7 +42,7 @@ cleanup () {
 	[ x"${root_dev}" != x ] && losetup -d ${root_dev}
 }
 
-trap 'cleanup' EXIT
+trap 'cleanup; exit 1' EXIT
 
 unset LC_TIME
 export LC_ALL="en_US.UTF-8"
@@ -144,5 +144,8 @@ cp -r tests ${root_mnt}/home/parallella/
 echo Starting ARM chroot
 chroot ${root_mnt} ./tmp/rootfs-arm.sh
 #chroot ${root_mnt}
+
+cleanup
+trap - EXIT
 
 echo Done

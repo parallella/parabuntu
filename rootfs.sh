@@ -44,8 +44,8 @@ cleanup () {
 
 trap 'cleanup; exit 1' EXIT
 
+unset LC_ALL
 unset LC_TIME
-export LC_ALL="en_US.UTF-8"
 
 if ! [ -e ${linaro_tarball} ]; then
 	echo Downloading linaro tarball

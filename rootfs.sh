@@ -114,7 +114,7 @@ chmod a+x ${root_mnt}/usr/sbin/policy-rc.d
 # See: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=685034
 
 echo Copying arm bootstrap files
-cp ${top}/run-arm.sh ${root_mnt}/tmp
+cp ${top}/rootfs-arm.sh ${root_mnt}/tmp
 cp -r packages.basic.txt ${root_mnt}/tmp
 
 echo Copying tests
@@ -122,7 +122,7 @@ echo Copying tests
 cp -r tests ${root_mnt}/home/parallella/
 
 echo Starting ARM chroot
-chroot ${root_mnt} ./tmp/run-arm.sh
+chroot ${root_mnt} ./tmp/rootfs-arm.sh
 #chroot ${root_mnt}
 
 echo Done

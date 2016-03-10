@@ -183,9 +183,9 @@ build_boot_filesystem () {
 build_boot_filesystems () {
     local IFS c
     (for c in $CONFIGURATIONS; do IFS=,; set $c; build_boot_filesystem $1 $2; done)
-    rm -rf out/*
     mkdir -p out
-    cp stage/*.tar.gz out/
+    rm -rf out/*_bootfs.tar.gz
+    cp stage/*bootfs.tar.gz out/
 }
 
 main () {

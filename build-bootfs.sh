@@ -45,6 +45,23 @@ download_fpga_bitfiles () {
     (for c in $CONFIGURATIONS; do IFS=,; set $c; download_fpga_bitfile $1; done)
 }
 
+check_fpga_bitfile () {
+    if [ -f fpga_bitfiles/$1 ]; then
+        echo $1: ok
+    else
+        echo $1: No such file!
+        exit 1
+    fi
+}
+
+check_fpga_bitfiles () {
+    local IFS c
+
+    echo Checking bit files...
+    (for c in $CONFIGURATIONS; do IFS=,; set $c; check_fpga_bitfile $1 || exit 1; done)
+}
+
+
 clone_kernel () {
     git clone https://github.com/parallella/parallella-linux.git
     PARALLELLA_LINUX=$(readlink -e parallella-linux)
@@ -181,6 +198,8 @@ main () {
     check_toolchain || exit 1
 
     #download_fpga_bitfiles
+
+    check_fpga_bitfiles
 
     if [ "x" != "x$PARALLELLA_LINUX" ]; then
         if ! [ -d "$PARALLELLA_LINUX" ]; then

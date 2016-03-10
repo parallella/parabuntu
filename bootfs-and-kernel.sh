@@ -91,7 +91,7 @@ build_kernel () {
     KERNEL_BUILD_DIR=$PWD/build/$version
     MODULES_INSTALL_DIR=$PWD/modules
     HEADERS_INSTALL_DIR=$PWD/headers
-    CONFIG_EXTRA=$PWD/config.extra
+    CONFIG_EXTRA=$PWD/kernel.config
     kernel_build_log=$PWD/build/$version.log
 
     if [ "${clean}" = "yes" ]; then

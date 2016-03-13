@@ -57,6 +57,9 @@ tar xf ${boot_tarball} -C ${boot_mnt} --no-same-owner --no-same-permissions --st
 umount ${boot_mnt}
 [ x"${boot_dev}" != x ] && losetup -d ${boot_dev}
 
+echo Copying rootfs image
+dd if=${root_image} of=${image_file} seek=$[${root_offset}/512] bs=512
+
 trap - EXIT
 
 echo Compressing image

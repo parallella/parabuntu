@@ -10,14 +10,15 @@ cd ${top}
 . ${top}/settings.inc.sh
 
 if [ $# -ne 1 ]; then
-	echo usage: $0 ESDK_PATH
+	echo usage: $0 ESDK_TARBALL
 	exit 1
 fi
 
-esdk_path=$(echo $1 | sed s,/*$,,g) # strip trailing /
-esdk_name=$(basename ${esdk_path})
-if ! [ -d ${esdk_path} ]; then
-	echo $0: Not a directory: ${esdk_path}
+esdk_tarball="$1"
+esdk_name=$(echo $esdk_tarball | sed -e 's/\.t[a]\?[r]\?[.]\?[bgx]z[2]\?$//g' |
+	xargs basename)
+if ! [ -f ${esdk_tarball} ]; then
+	echo $0: Not a file: ${esdk_tarball}
 	exit 1
 fi
 
@@ -84,16 +85,16 @@ for d in $(ls ${top}/overlays | sort -g); do
 	echo Applying overlay $d
 	rsync -ap --no-owner --no-group ${top}/overlays/$d/ ${root_mnt}
 done
+find ${root_mnt} -name ".gitkeep" -delete
 
-echo Copying ESDK to rootfs
+echo Extracting ESDK tarball to rootfs
 mkdir -p ${root_mnt}/opt/adapteva
-rsync -ap --no-owner --no-group ${esdk_path} ${root_mnt}/opt/adapteva/
+tar xf ${esdk_tarball} -C ${root_mnt}/opt/adapteva
+chown -R root:root ${root_mnt}/opt/adapteva
 if [ ${esdk_name} != "esdk" ]; then
 	echo Symlinking esdk to ${esdk_name}
 	(cd ${root_mnt}/opt/adapteva && ln -s ${esdk_name} esdk || exit 1)
 fi
-
-find ${root_mnt} -name ".gitkeep" -delete
 
 echo Running scripts
 for s in $(ls ${top}/scripts | sort -g); do

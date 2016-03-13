@@ -145,6 +145,7 @@ build_kernel () {
         helper $jobs modules
         helper 1 INSTALL_MOD_PATH=$MODULES_INSTALL_DIR modules_install
         helper 1 INSTALL_HDR_PATH=$HEADERS_INSTALL_DIR headers_install
+        find ${HEADERS_INSTALL_DIR} -name ".*install*" -delete
     ) && echo kernel: build OK && return 0
 
     echo kernel: build FAILED

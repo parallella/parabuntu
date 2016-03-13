@@ -96,6 +96,12 @@ if [ ${esdk_name} != "esdk" ]; then
 	(cd ${root_mnt}/opt/adapteva && ln -s ${esdk_name} esdk || exit 1)
 fi
 
+echo Copying kernel modules to rootfs
+rsync -ap --no-owner --no-group  modules/ mnt/rootfs/
+
+echo Copying kernel headers to rootfs
+rsync -ap --no-owner --no-group  headers/ mnt/rootfs/usr/
+
 echo Running scripts
 for s in $(ls ${top}/scripts | sort -g); do
 	echo Running $s

@@ -27,3 +27,22 @@ export PARALLELLA_LINUX=/path/to/parallella-linux
 ./image.sh out/parallella_e16_headless_gpiose_7010_bootfs.tar.gz parallella_e16_headless_gpiose_7010.img
 ./image.sh out/parallella_e16_headless_gpiose_7020_bootfs.tar.gz parallella_e16_headless_gpiose_7020.img
 ```
+
+---
+
+## Building coprthr
+
+```
+git clone https://github.com/parallella/coprthr --branch esdk-2016.3
+cd coprthr
+./configure
+make
+sudo make install
+```
+
+### Copy these files to overlay
+
+- /etc/OpenCL/
+- /var/clproc (permission 1777)
+- /usr/local/browndeer
+

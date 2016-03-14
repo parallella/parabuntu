@@ -43,7 +43,7 @@ echo Creating partition table
 fdisk < ${top}/fdisk-cmd.txt ${image_file}
 
 echo Setting up loopback for boot
-boot_dev=$(losetup -o ${boot_offset} --sizelimit ${boot_size} -f --show ${root_image})
+boot_dev=$(losetup -o ${boot_offset} --sizelimit ${boot_size} -f --show ${image_file})
 
 echo Creating boot filesystem
 mkfs.vfat -n BOOT ${boot_dev}

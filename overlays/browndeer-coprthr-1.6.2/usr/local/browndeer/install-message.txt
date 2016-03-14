@@ -1,0 +1,44 @@
+
+                 COPRTHR SDK v1.6.2 (Freewill) release
+
+
+*** IMPORTANT ***
+
+Please ensure that  /usr/local/browndeer/bin  is added to PATH
+if it is not in the standard search path for executables.  For example:
+
+   export PATH=/usr/local/browndeer/bin:$PATH
+
+Please ensure that /usr/local/browndeer/lib is added to  LD_LIBRARY_PATH
+if it is not in the standard search path for libraries.  For example:
+
+   export LD_LIBRARY_PATH=/usr/local/browndeer/lib:$LD_LIBRARY_PATH
+
+Note that you should also have already added /usr/local/lib after the
+installation of libelf-0.8.13.
+
+Please ensure that /usr/local/browndeer/man is added to  MANPATH
+
+In order to test the installation, make a copy of the test/ directory and type:
+
+   make quicktest
+
+When compiling programs that use libstcl include the following:
+
+   INCS += -I/usr/local/browndeer/include
+   LIBS += -L/usr/local/browndeer/lib -lstdcl
+
+When compiling programs that use libocl include the following:
+
+   INCS += -I/usr/local/browndeer/include
+   LIBS += -L/usr/local/browndeer/lib -locl
+
+Further documentation can be found in the directory /usr/local/browndeer/doc/
+
+Examples can be found in the directory /usr/local/browndeer/examples/ 
+
+Examples specifically for Parallella can be found in the directory 
+/usr/local/browndeer/examples/parallella/
+
+/* DAR */
+

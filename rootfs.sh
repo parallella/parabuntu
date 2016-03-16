@@ -59,8 +59,8 @@ if ! md5sum -c md5sum.txt; then
 	exit 1
 fi
 
-echo Removing old files
-rm -rf ${top}/out/*
+echo Removing old rootfs image
+rm -rf ${root_image}
 
 echo Creating rootfs image file
 mkdir -p ${top}/out

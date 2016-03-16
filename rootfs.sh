@@ -93,7 +93,7 @@ tar xf ${esdk_tarball} -C ${root_mnt}/opt/adapteva
 chown -R root:root ${root_mnt}/opt/adapteva
 if [ ${esdk_name} != "esdk" ]; then
 	echo Symlinking esdk to ${esdk_name}
-	(cd ${root_mnt}/opt/adapteva && ln -s ${esdk_name} esdk || exit 1)
+	(cd ${root_mnt}/opt/adapteva && rm -f esdk && ln -s ${esdk_name} esdk || exit 1)
 fi
 
 echo Copying kernel modules to rootfs

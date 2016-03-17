@@ -35,7 +35,7 @@ export PARALLELLA_LINUX=/path/to/parallella-linux
 ```
 git clone https://github.com/parallella/coprthr --branch esdk-2016.3
 cd coprthr
-./configure
+./configure --enable-epiphany
 make
 sudo make install
 ```

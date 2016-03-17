@@ -54,8 +54,15 @@
 
 #if defined(__coprthr_host__)
 #elif defined(__coprthr_device__)
-#include <e_coreid.h>
-#include <e_common.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include <e-lib.h>
+#ifdef __cplusplus
+}
+#endif
+
 #else
 #error must be compiled with either __coprthr_host__ or __coprthr_device__
 #endif

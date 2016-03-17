@@ -9,7 +9,7 @@ ifeq (1,1)
 TESTS += test_libcoprthr_opencl
 endif
 
-#ifeq (0,1)
+#ifeq (1,1)
 #TESTS += test_libcoprthr-e
 #endif
 

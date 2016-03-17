@@ -24,11 +24,14 @@
 #ifndef _e32_opencl_ext_h
 #define _e32_opencl_ext_h
 
-#include <e_coreid.h>
-#include <e_common.h>
-#include "e_mutex.h"
-#include <e_dma.h>
-#include <e_regs.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include <e-lib.h>
+#ifdef __cplusplus
+}
+#endif
+
 #include <string.h>
 
 //#include "e32pth_mem_if.h"

@@ -43,10 +43,17 @@ volatile extern struct core_local_data_struct core_local_data;
 
 #if defined(__coprthr_host__)
 #elif defined(__coprthr_device__)
-#include <e_coreid.h>
-#include <e_common.h>
-#include <e_dma.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include <e-lib.h>
+#ifdef __cplusplus
+}
+#endif
+
 #include <string.h>
+
 #else
 #error must be compiled with either __coprthr_host__ or __coprthr_device__
 #endif

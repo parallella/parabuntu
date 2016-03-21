@@ -79,6 +79,10 @@ mount ${root_dev} ${root_mnt}
 echo Unpacking linaro tarball
 tar xfzp ${linaro_tarball} -C ${root_mnt} --strip-components 1
 
+echo Renaming linaro user to parallella
+[ -d ${top}/mnt/rootfs/home/parallella ] || mv ${top}/mnt/rootfs/home/linaro ${top}/mnt/rootfs/home/parallella
+sed -i 's/linaro/parallella/g' ${top}/mnt/rootfs/etc/{group,shadow,passwd}
+
 echo Applying overlays
 #TODO: Use tarballs (for owner/group)?
 for d in $(ls ${top}/overlays | sort -g); do

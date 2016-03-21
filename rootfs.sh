@@ -97,10 +97,20 @@ if [ ${esdk_name} != "esdk" ]; then
 fi
 
 echo Copying kernel modules to rootfs
-rsync -ap --no-owner --no-group  modules/ mnt/rootfs/
+rsync -ap --no-owner --no-group  modules/ ${top}/mnt/rootfs/
+echo Improving module source+build symlinks
+(
+	for d in ${top}/mnt/rootfs/lib/modules/*; do
+		cd $d &&
+		rm -f source build &&
+		ln -sf /usr/src/parallella-linux source &&
+		ln -sf /usr/src/parallella-linux build ||
+		exit 1
+	done
+)
 
 echo Copying kernel headers to rootfs
-rsync -ap --no-owner --no-group  headers/ mnt/rootfs/usr/
+rsync -ap --no-owner --no-group  headers/ ${top}/mnt/rootfs/usr/
 
 echo Running scripts
 for s in $(ls ${top}/scripts | sort -g); do

@@ -36,7 +36,7 @@ trap 'cleanup; exit 1' EXIT
 
 echo Creating image file
 mkdir -p ${top}/out
-rm -f ${image_file}
+rm -f ${image_file} ${image_file}.gz
 dd if=/dev/zero of=${image_file} bs=1M count=${image_size}
 
 echo Creating partition table

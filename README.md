@@ -36,9 +36,11 @@ make
 sudo make install
 ```
 
-### Copy these files to overlay
+### Copy these files/directories to overlay
 
+- /etc/ocl.conf
 - /etc/OpenCL/
 - /var/clproc (permission 1777)
 - /usr/local/browndeer
+
 

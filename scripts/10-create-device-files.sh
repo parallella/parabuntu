@@ -12,7 +12,7 @@ create_devices () {
     rm_and_mknod -m 660 mnt/rootfs/dev/mmcblk0p2 b 179 2
 }
 
-create_devices || echo "$0: Fail" && exit 1
-
-
-
+if ! create_devices; then
+	echo "$0: Fail"
+	exit 1
+fi

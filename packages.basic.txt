@@ -1,10 +1,12 @@
 #Basic
-bash tcsh man info less
+bash tcsh man-db info less
 ssh
 ftp synaptic screen tmux bc htop
 lsb-release
 fake-hwclock
 ntp
+avahi-daemon
+lm-sensors
 
 # Language Packs (Fix utf8 & get rid of Ubuntu's annoying locale warings)
 language-pack-en
@@ -48,8 +50,8 @@ libmpfr-dev libmpc-dev libgmp3-dev
 ### For epiphany examples
 libdevil-dev
 libdevil1c2
-fftw3
-fftw3-dev
+libfftw3-3
+libfftw3-dev
 
 ### Packages for browndeer coprthr
 # Source packages
@@ -60,9 +62,10 @@ libclc-dev
 opencl-headers
 libelfg0
 libelfg0-dev
+'libconfig++9' 'libconfig++-dev' libconfig-dev libconfig9  libelfg0-dev
+libelfg0 libevent-2.0 libevent-dev
 
 # Needed for parallella-utils xtemp
-libx11
+libx11-6
 libx11-dev
 i2c-tools
-

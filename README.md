@@ -1,13 +1,9 @@
 # Parallella Image scripts
 
-WORK IN PROGRESS  
-THINGS ARE BROKEN  
-
 ## TODO
 
-- Install modules to rootfs
-- Install headers to rootfs
 - TEST
+- ??? Add bitstream scripts to flow
 
 ## Flow
 

@@ -85,10 +85,16 @@ sed -i 's/linaro/parallella/g' ${top}/mnt/rootfs/etc/{group,shadow,passwd}
 
 echo Applying overlays
 #TODO: Use tarballs (for owner/group)?
-for d in $(ls ${top}/overlays | sort -g); do
+for d in $(find ${top}/overlays -mindepth 1 -maxdepth 1 -type d | sort -g); do
 	echo Applying overlay $d
-	rsync -ap --no-owner --no-group ${top}/overlays/$d/ ${root_mnt}
+	rsync -ap --no-owner --no-group $d/ ${root_mnt}
 done
+for f in $(find ${top}/overlays -mindepth 1 -maxdepth 1 -type f -name *.tar.gz | sort -g); do
+	echo Applying overlay tarball $f
+	tar xfp $f -C ${root_mnt}
+done
+
+
 find ${root_mnt} -name ".gitkeep" -delete
 
 echo Extracting ESDK tarball to rootfs

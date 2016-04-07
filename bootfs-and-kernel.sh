@@ -118,6 +118,7 @@ build_kernel () {
                 ARCH=arm \
                 CROSS_COMPILE=$CROSS_COMPILE \
                 LOADADDR=0x8000 \
+                EXTRA_CFLAGS="${EXTRA_CFLAGS:-}" \
                 $@ 2>&1 | tee -a $kernel_build_log
         }
         add_extra_config () {

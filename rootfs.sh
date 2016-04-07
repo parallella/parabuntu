@@ -60,7 +60,7 @@ if ! md5sum -c md5sum.txt; then
 fi
 
 echo Removing old rootfs image
-rm -rf ${root_image}
+rm -rf ${root_image} ${root_image}.gz
 
 echo Creating rootfs image file
 mkdir -p ${top}/out
@@ -168,5 +168,8 @@ chroot ${root_mnt} ./tmp/rootfs-arm.sh
 
 cleanup
 trap - EXIT
+
+echo Compressing root image
+gzip ${root_image}
 
 echo Done

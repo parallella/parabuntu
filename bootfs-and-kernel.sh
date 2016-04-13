@@ -135,14 +135,15 @@ build_kernel () {
         if [ "x${clean}" != "xno" ]; then
             helper 1 distclean
             helper 1 mrproper
-            helper 1 multi_v7_defconfig
-            #helper 1 parallella_defconfig
+            #helper 1 multi_v7_defconfig
+            helper 1 parallella_defconfig
         fi
         add_extra_config
         helper $jobs ""
         helper $jobs uImage
         helper 1 zynq-parallella-headless.dtb
         helper 1 zynq-parallella.dtb
+        helper 1 zynq-parallella-headless-ad9361-fmcomms2-3.dtb
         helper $jobs modules
         helper 1 INSTALL_MOD_PATH=$MODULES_INSTALL_DIR modules_install
         helper 1 INSTALL_HDR_PATH=$HEADERS_INSTALL_DIR headers_install

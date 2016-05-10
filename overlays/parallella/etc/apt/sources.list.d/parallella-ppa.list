@@ -1,4 +1,5 @@
 # Parallella PPA
-deb http://ppa.launchpad.net/parallella/snapshots/ubuntu vivid main
-deb-src http://ppa.launchpad.net/parallella/snapshots/ubuntu vivid main
+# No Vivid packages
+#deb http://ppa.launchpad.net/parallella/snapshots/ubuntu vivid main
+#deb-src http://ppa.launchpad.net/parallella/snapshots/ubuntu vivid main
 

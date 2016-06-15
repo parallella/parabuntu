@@ -143,6 +143,8 @@ build_kernel () {
         helper $jobs uImage
         helper 1 zynq-parallella-headless.dtb
         helper 1 zynq-parallella.dtb
+        helper 1 zynq-parallella-oh-spi.dtb
+        helper 1 zynq-parallella-oh-mio.dtb
         helper $jobs modules
         helper 1 INSTALL_MOD_PATH=$MODULES_INSTALL_DIR modules_install
         helper 1 INSTALL_HDR_PATH=$HEADERS_INSTALL_DIR headers_install

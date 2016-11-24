@@ -91,6 +91,7 @@ build_kernel () {
     KERNEL_BUILD_DIR=$PWD/build/$version
     MODULES_INSTALL_DIR=$PWD/modules
     HEADERS_INSTALL_DIR=$PWD/headers
+    KERNELTOOLS_DESTDIR=$PWD/overlays/perf
     CONFIG_EXTRA=$PWD/kernel.config
     kernel_build_log=$PWD/build/$version.log
 
@@ -146,6 +147,10 @@ build_kernel () {
         helper $jobs modules
         helper 1 INSTALL_MOD_PATH=$MODULES_INSTALL_DIR modules_install
         helper 1 INSTALL_HDR_PATH=$HEADERS_INSTALL_DIR headers_install
+        helper 1 -C tools/perf all
+        mkdir -p $KERNELTOOLS_DESTDIR/usr/bin
+        helper 1 -C tools/perf  DESTDIR=$KERNELTOOLS_DESTDIR V=1 install
+#        cp $KERNEL_BUILD_DIR/tools/perf/perf $KERNELTOOLS_DESTDIR/usr/bin
         find ${HEADERS_INSTALL_DIR} -name ".*install*" -delete
     ) && echo kernel: build OK && return 0
 

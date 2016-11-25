@@ -121,3 +121,6 @@ export PATH=/opt/openmpi/bin:$PATH
 export LD_LIBRARY_PATH=/opt/openmpi/lib:$LD_LIBRARY_PATH
 export EPIPHANY_HOME=/opt/adapteva/esdk
 [ -e $EPIPHANY_HOME ] && . $EPIPHANY_HOME/setup.sh || echo Epiphany SDK not installed.
+
+#EPYTHON
+export PYTHONPATH=/usr/include/epython/modules:$PYTHONPATH

@@ -123,4 +123,4 @@ export EPIPHANY_HOME=/opt/adapteva/esdk
 [ -e $EPIPHANY_HOME ] && . $EPIPHANY_HOME/setup.sh || echo Epiphany SDK not installed.
 
 #EPYTHON
-export PYTHONPATH=/usr/include/epython/modules:$PYTHONPATH
+export EPYTHONPATH=/usr/include/epython/modules:$EPYTHONPATH

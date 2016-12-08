@@ -63,7 +63,7 @@ check_fpga_bitfiles () {
 
 
 clone_kernel () {
-    git clone https://github.com/parallella/parallella-linux.git
+    git clone https://github.com/parallella/parallella-linux.git -b parallella-linux-2016.11
     PARALLELLA_LINUX=$(readlink -e parallella-linux)
 }
 
@@ -136,8 +136,8 @@ build_kernel () {
         if [ "x${clean}" != "xno" ]; then
             helper 1 distclean
             helper 1 mrproper
-            helper 1 multi_v7_defconfig
-            #helper 1 parallella_defconfig
+            #helper 1 multi_v7_defconfig
+            helper 1 parallella_defconfig
         fi
         add_extra_config
         helper $jobs ""

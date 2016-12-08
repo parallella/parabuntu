@@ -1,0 +1,9 @@
+# Uncomment to use pulseaudio for alsa applications
+#pcm.default pulse
+#ctl.default pulse
+#pcm.pulse {
+#type pulse
+#}
+#ctl.pulse {
+#type pulse
+#}

@@ -11,7 +11,11 @@ PARALLELLA_LINUX=${PARALLELLA_LINUX:-}
 
 CONFIGURATIONS="\
 parallella_e16_headless_gpiose_7010.bit.bin,zynq-parallella-headless.dtb \
-parallella_e16_headless_gpiose_7020.bit.bin,zynq-parallella-headless.dtb"
+parallella_e16_headless_gpiose_7020.bit.bin,zynq-parallella-headless.dtb \
+parallella_e16_headless_noelink_gpiose_7010.bit.bin,zynq-parallella-headless-noelink.dtb \
+parallella_e16_headless_noelink_gpiose_7020.bit.bin,zynq-parallella-headless-noelink.dtb \
+parallella_e16_hdmi_gpiose_7010.bit.bin,zynq-parallella.dtb \
+parallella_e16_hdmi_gpiose_7020.bit.bin,zynq-parallella.dtb"
 
 #Disabled (lacks bitstream)
 #parallella_e16_hdmi_gpiose_7010.bit.bin,zynq-parallella.dtb \
@@ -143,6 +147,7 @@ build_kernel () {
         helper $jobs ""
         helper $jobs uImage
         helper 1 zynq-parallella-headless.dtb
+        helper 1 zynq-parallella-headless-noelink.dtb
         helper 1 zynq-parallella.dtb
         helper $jobs modules
         helper 1 INSTALL_MOD_PATH=$MODULES_INSTALL_DIR modules_install
@@ -206,7 +211,7 @@ main () {
 
     #download_fpga_bitfiles
 
-    check_fpga_bitfiles
+    check_fpga_bitfiles || exit 1
 
     if [ "x" != "x$PARALLELLA_LINUX" ]; then
         if ! [ -d "$PARALLELLA_LINUX" ]; then

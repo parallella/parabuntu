@@ -41,3 +41,5 @@ echo parallella:parallella | chpasswd
 echo Set bash to default shell
 echo "dash dash/sh boolean false" | debconf-set-selections
 DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
+
+sync

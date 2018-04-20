@@ -5,6 +5,15 @@
 - TEST
 - ??? Add bitstream scripts to flow
 
+## Requirements
+
+The scripts require qemu-arm-static and binfmt being set up properly.
+
+```sh
+sudo apt-get update
+sudo apt-get install qemu binfmt-support qemu binfmt-support qemu-user-static
+```
+
 ## Flow
 
 - Build bitstreams and place in fpga_bitfiles/  

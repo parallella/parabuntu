@@ -1,6 +1,25 @@
 ### 17. Install a windows manager
 lxde
+lxsession
+lxsession-data
+lxsession-edit
+lxsession-logout
 xinit
+xserver-xorg-video-fbdev
+
+# Keyboard data
+xkb-data
+xkb-data-i18n
+x11-xkb-utils
+libxkbcommon-x11-0
+
+# Pulseaudio
+pulseaudio
+pavucontrol
+paprefs
+xmms2-plugin-pulse
+gstreamer0.10-pulseaudio
+gstreamer1.0-pulseaudio
 
 ### 19. Install other essential Packages
 

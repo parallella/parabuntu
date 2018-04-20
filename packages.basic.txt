@@ -36,6 +36,7 @@ ethtool
 iperf
 ifplugd
 bwm-ng
+nfs-common
 
 ### Linux Tools
 device-tree-compiler

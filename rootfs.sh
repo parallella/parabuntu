@@ -28,7 +28,7 @@ cleanup () {
 	echo Cleaning up
 	rm -f ${root_mnt}/usr/sbin/policy-rc.d
 	rm -f ${root_mnt}/etc/resolv.conf
-	rm -f ${root_mnt}/qemu-arm-static
+	rm -f ${root_mnt}/usr/bin/qemu-arm-static
 	umount ${root_mnt}/proc || true
 	umount ${root_mnt}/sys || true
 	umount ${root_mnt}/tmp || true
@@ -48,9 +48,9 @@ trap 'cleanup; exit 1' EXIT
 unset LC_ALL
 unset LC_TIME
 
-if ! [ -e ${linaro_tarball} ]; then
-	echo Downloading linaro tarball
-	wget ${LINARO_URL} -O ${linaro_tarball}
+if ! [ -e ${ubuntu_tarball} ]; then
+	echo Downloading Ubuntu Base tarball
+	wget ${UBUNTU_URL} -O ${ubuntu_tarball}
 fi
 
 echo Checking md5sums
@@ -76,12 +76,12 @@ mkfs.ext4 -L root ${root_dev}
 echo Mounting root filesystem
 mount ${root_dev} ${root_mnt}
 
-echo Unpacking linaro tarball
-tar xfzp ${linaro_tarball} -C ${root_mnt} --strip-components 1
+echo Unpacking Ubuntu tarball
+tar xfzp ${ubuntu_tarball} -C ${root_mnt} --strip-components 0
 
-echo Renaming linaro user to parallella
-[ -d ${top}/mnt/rootfs/home/parallella ] || mv ${top}/mnt/rootfs/home/linaro ${top}/mnt/rootfs/home/parallella
-sed -i 's/linaro/parallella/g' ${top}/mnt/rootfs/etc/{group,shadow,passwd}
+#echo Renaming linaro user to parallella
+#[ -d ${top}/mnt/rootfs/home/parallella ] || mv ${top}/mnt/rootfs/home/linaro ${top}/mnt/rootfs/home/parallella
+#sed -i 's/linaro/parallella/g' ${top}/mnt/rootfs/etc/{group,shadow,passwd}
 
 echo Applying overlays
 #TODO: Use tarballs (for owner/group)?
@@ -140,7 +140,7 @@ echo Mounting tmp in chroot
 mount none -t tmpfs -o size=104857600 ${root_mnt}/tmp
 
 echo Copying qemu-arm-static
-cp $(which qemu-arm-static) ${root_mnt}
+cp $(which qemu-arm-static) ${root_mnt}/usr/bin/
 
 echo Creating resolv.conf
 cat << EOF > ${root_mnt}/etc/resolv.conf

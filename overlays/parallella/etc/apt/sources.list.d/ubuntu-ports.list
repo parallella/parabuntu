@@ -1,5 +1,0 @@
-deb http://ports.ubuntu.com/ubuntu-ports/ vivid-updates main universe
-deb-src http://ports.ubuntu.com/ubuntu-ports/ vivid-updates main universe
-#No arm packages for Vivid
-#deb http://packages.erlang-solutions.com/ubuntu vivid contrib
-

@@ -67,7 +67,7 @@ check_fpga_bitfiles () {
 
 
 clone_kernel () {
-    git clone https://github.com/parallella/parallella-linux.git -b parallella-linux-2016.11
+    git clone --depth=1 https://github.com/parallella/parallella-linux.git -b parallella-linux-2016.11
     PARALLELLA_LINUX=$(readlink -e parallella-linux)
 }
 

@@ -1,0 +1,5 @@
+# Parallella PPA
+# No Bionic packages
+#deb http://ppa.launchpad.net/parallella/snapshots/ubuntu bionic main
+#deb-src http://ppa.launchpad.net/parallella/snapshots/ubuntu bionic main
+

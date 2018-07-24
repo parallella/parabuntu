@@ -7,16 +7,12 @@ fake-hwclock
 ntp
 avahi-daemon
 lm-sensors
-systemd udev sudo nano
-
-##Fix debconf: unable to initialize frontend: Dialog
-dialog
 
 # Language Packs (Fix utf8 & get rid of Ubuntu's annoying locale warings)
-#language-pack-en
+language-pack-en
 
 # Editors
-#vim-nox emacs-nox nano
+vim-nox emacs-nox nano
 
 # Debian packaging
 devscripts
@@ -24,34 +20,33 @@ dpkg-dev
 
 # Compiling/building
 build-essential
-#git
-#curl
-#m4
-#flex
-#bison
-#gawk
-#pkg-config
-#strace
-#texinfo
+git
+curl
+m4
+flex
+bison
+gawk
+pkg-config
+strace
+texinfo
 gdb
 
 ### Networking
 ethtool
-net-tools
-#iperf
+iperf
 ifplugd
-#bwm-ng
-#nfs-common
+bwm-ng
+nfs-common
 
 ### Linux Tools
-#device-tree-compiler
+device-tree-compiler
 usbutils
 
 ### Wifi
-#linux-firmware
+linux-firmware
 
 ### Packages for Epiphany SDK
-#libmpfr-dev libmpc-dev libgmp3-dev
+libmpfr-dev libmpc-dev libgmp3-dev
 
 ### For epiphany examples
 libdevil-dev
@@ -66,12 +61,10 @@ ocl-icd-opencl-dev
 clinfo
 libclc-dev
 opencl-headers
-#libelfg0
-#libelfg0-dev
-##https://superuser.com/questions/1091984/how-to-install-libelfg0-dev-on-ubuntu-16-04-lts-64bit-version
-libelf-dev
-'libconfig++9v5' 'libconfig++-dev' libconfig-dev libconfig9
-libevent-2.1.6 libevent-dev
+libelfg0
+libelfg0-dev
+'libconfig++9' 'libconfig++-dev' libconfig-dev libconfig9  libelfg0-dev
+libelfg0 libevent-2.0 libevent-dev
 
 # Needed for parallella-utils xtemp
 libx11-6

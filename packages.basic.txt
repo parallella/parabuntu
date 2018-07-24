@@ -8,6 +8,9 @@ ntp
 avahi-daemon
 lm-sensors
 
+##init system
+systemd udev 
+
 # Language Packs (Fix utf8 & get rid of Ubuntu's annoying locale warings)
 language-pack-en
 

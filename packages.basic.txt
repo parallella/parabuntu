@@ -37,6 +37,7 @@ iperf
 ifplugd
 bwm-ng
 nfs-common
+net-tools
 
 ### Linux Tools
 device-tree-compiler

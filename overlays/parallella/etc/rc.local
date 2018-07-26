@@ -14,4 +14,8 @@
 # Generate the SSH keys if non-existent
 test -f /etc/ssh/ssh_host_dsa_key || dpkg-reconfigure openssh-server
 
+# DNS configure rely on DHCP
+#https://wiki.archlinux.org/index.php/systemd-networkd
+test -f /etc/resolv.conf || ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+
 exit 0

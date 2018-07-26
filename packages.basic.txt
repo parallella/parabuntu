@@ -8,6 +8,14 @@ ntp
 avahi-daemon
 lm-sensors
 
+##init system
+systemd udev 
+
+sudo
+
+##Fix debconf: unable to initialize frontend: Dialog
+dialog
+
 # Language Packs (Fix utf8 & get rid of Ubuntu's annoying locale warings)
 language-pack-en
 
@@ -37,6 +45,7 @@ iperf
 ifplugd
 bwm-ng
 nfs-common
+net-tools
 
 ### Linux Tools
 device-tree-compiler
@@ -61,10 +70,11 @@ ocl-icd-opencl-dev
 clinfo
 libclc-dev
 opencl-headers
-libelfg0
-libelfg0-dev
-'libconfig++9' 'libconfig++-dev' libconfig-dev libconfig9  libelfg0-dev
-libelfg0 libevent-2.0 libevent-dev
+##https://superuser.com/questions/1091984/how-to-install-libelfg0-dev-on-ubuntu-16-04-lts-64bit-version
+libelf1
+libelf-dev
+'libconfig++9v5' 'libconfig++-dev' libconfig-dev libconfig9
+libevent-2.1.6 libevent-dev
 
 # Needed for parallella-utils xtemp
 libx11-6

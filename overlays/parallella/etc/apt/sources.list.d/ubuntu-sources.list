@@ -1,5 +1,0 @@
-# newer versions of the distribution.
-deb-src http://archive.ubuntu.com/ubuntu/ vivid main restricted
-deb-src http://archive.ubuntu.com/ubuntu/ vivid main universe
-deb-src http://archive.ubuntu.com/ubuntu/ vivid main multiverse
-

@@ -31,6 +31,11 @@ rm -fr /etc/ssh/*key*
 echo Copying skel to parallella user
 cp -r /etc/skel/. /home/parallella/
 
+echo Add user group
+useradd parallella
+addgroup parallella adm
+addgroup parallella sudo
+
 echo Fixing user permissions
 chown -R parallella:parallella /home/parallella
 chown -R root:root /root

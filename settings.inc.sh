@@ -5,7 +5,7 @@ set -u
 
 mkdir -p ${top}/out
 
-UBUNTU_URL="http://cdimage.ubuntu.com/ubuntu-base/releases/bionic/release/ubuntu-base-18.04-base-armhf.tar.gz"
+UBUNTU_URL="http://cdimage.ubuntu.com/ubuntu-base/releases/bionic/release/ubuntu-base-18.04.1-base-armhf.tar.gz"
 UBUNTU_TARBALL_NAME=ubuntu_base.tgz
 
 root_mnt=${top}/mnt/rootfs

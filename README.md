@@ -62,6 +62,10 @@ sudo make install
 [adapteva/epiphany-sdk
 ](https://github.com/adapteva/epiphany-sdk/releases)
 
+    wget https://github.com/adapteva/epiphany-sdk/releases/download/esdk-2016.11/esdk.2016.11.armv7l.tar.gz -O esdk.2016.11.tar.gz
+
+*.tar.gz file name muse be the same as the folder name inside *.tar.gz.
+
 ## Cross Compiler Toolchain
 [GCC 6](https://releases.linaro.org/components/toolchain/binaries/latest-6/)
 

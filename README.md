@@ -12,6 +12,7 @@ The scripts require qemu-arm-static and binfmt being set up properly.
 ```sh
 sudo apt-get update
 sudo apt-get install qemu binfmt-support qemu binfmt-support qemu-user-static
+sudo apt-get install flex bison zerofree u-boot-tools
 ```
 
 ## Flow
@@ -57,4 +58,15 @@ sudo make install
 - /var/clproc (permission 1777)
 - /usr/local/browndeer
 
+## ESDK 
+[adapteva/epiphany-sdk
+](https://github.com/adapteva/epiphany-sdk/releases)
 
+## Cross Compiler Toolchain
+[GCC 6](https://releases.linaro.org/components/toolchain/binaries/latest-6/)
+
+Set PATH for Toolchain: 
+
+    export PATH=[**THE TOOLCHAIN PATH ON YOUR PC**]gcc-linaro-6.4.1-2018.05-x86_64_arm-linux-gnueabihf/bin:$PATH
+    
+GCC 7 works for generating kernel uImage, but it doesn't work for building tools/perf. Why we need tools/perf??

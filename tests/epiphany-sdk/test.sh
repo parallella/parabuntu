@@ -2,7 +2,7 @@
 set -e
 
 rm -rf epiphany-examples &&
-git clone https://github.com/adapteva/epiphany-examples.git --branch 2016.11 &&
+git clone https://github.com/adapteva/epiphany-examples.git --branch 2019.1 &&
 cd epiphany-examples &&
 ./scripts/build_and_test_all.sh &&
 echo Verify results manually &&

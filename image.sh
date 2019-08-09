@@ -37,7 +37,7 @@ trap 'cleanup; exit 1' EXIT
 echo Creating image file
 mkdir -p ${top}/out
 rm -f ${image_file} ${image_file}.gz
-dd if=/dev/zero of=${image_file} bs=1M count=${image_size}
+truncate -s ${image_size}M ${image_file}
 
 echo Creating partition table
 fdisk < ${top}/fdisk-cmd.txt ${image_file}

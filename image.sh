@@ -40,7 +40,7 @@ rm -f ${image_file} ${image_file}.gz
 truncate -s ${image_size}M ${image_file}
 
 echo Creating partition table
-fdisk < ${top}/fdisk-cmd.txt ${image_file}
+sfdisk ${image_file} < ${top}/sfdisk-script.txt
 
 echo Setting up loopback for boot
 boot_dev=$(losetup -o ${boot_offset} --sizelimit ${boot_size} -f --show ${image_file})

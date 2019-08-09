@@ -1,0 +1,6 @@
+label: dos
+device: parabuntu
+unit: sectors
+
+BOOT : start=        2048, size=      204800, type=b, bootable
+root : start=      206848, size=    14536704, type=83

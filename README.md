@@ -43,8 +43,10 @@ sudo ./image.sh out/parallella_e16_headless_gpiose_7020_bootfs.tar.gz parallella
 
 This step needs to be done on a Parallella board.
 
+**TODO: Currently broken. Needs missing (deprecated) libelf**  
+
 ```
-git clone https://github.com/parallella/coprthr --branch esdk-2016.3
+git clone https://github.com/parallella/coprthr --branch esdk-2019.1
 cd coprthr
 ./configure --enable-epiphany
 make
@@ -59,15 +61,18 @@ sudo make install
 - /usr/local/browndeer
 
 ## ESDK 
-[adapteva/epiphany-sdk
-](https://github.com/adapteva/epiphany-sdk/releases)
+[adapteva/epiphany-sdk](https://github.com/adapteva/epiphany-sdk/releases)
 
-    wget https://github.com/adapteva/epiphany-sdk/releases/download/esdk-2016.11/esdk.2016.11.armv7l.tar.gz -O esdk.2016.11.tar.gz
+**TODO: Not released yet. Need to build from git**  
+
+    wget https://github.com/adapteva/epiphany-sdk/releases/download/esdk-2019.1/esdk.2019.1.armv7l.tar.gz -O esdk.2019.1.tar.gz
 
 *.tar.gz file name muse be the same as the folder name inside *.tar.gz.
 
 ## Cross Compiler Toolchain
 [GCC 6](https://releases.linaro.org/components/toolchain/binaries/latest-6/)
+
+**TODO: Remove section / Old version. We use arm-linux-gnueabihf-gcc 7.3 that comes with Ubuntu 18.04**  
 
 Set PATH for Toolchain: 
 

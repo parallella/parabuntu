@@ -14,6 +14,10 @@ trap 'cleanup' EXIT
 
 cd $top
 
+# Set Zonedata so the interactive prompt won't pop up while installing packages
+sudo ln -fs /usr/share/zoneinfo/US/Eastern /etc/localtime
+sudo dpkg-reconfigure -f noninteractive tzdata
+
 echo Updating packages
 apt-get update -yy || true
 apt-get dist-upgrade -yy

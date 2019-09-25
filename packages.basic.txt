@@ -80,3 +80,9 @@ libevent-2.1.6 libevent-dev
 libx11-6
 libx11-dev
 i2c-tools
+
+# OpenMPI
+libopenmpi-dev
+libopenmpi2
+openmpi-bin
+openmpi-common

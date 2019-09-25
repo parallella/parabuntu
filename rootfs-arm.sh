@@ -25,13 +25,13 @@ echo fixing libelf symlink for coprthr
 #HACK HACK HACK
 (cd /usr/lib/arm-linux-gnueabihf/ && ln -sf libelf.so.0.8.13 libelf.so)
 
+echo Updating packages
+apt-get update -yy || true
 
 # Set Zonedata so the interactive prompt won't pop up while installing packages
 sudo ln -fs /usr/share/zoneinfo/US/Eastern /etc/localtime
 sudo dpkg-reconfigure -f noninteractive tzdata
 
-echo Updating packages
-apt-get update -yy || true
 echo Upgrading packages
 apt-get dist-upgrade -yy
 apt-get upgrade -yy

@@ -34,6 +34,12 @@ ln -fs /usr/share/zoneinfo/US/Eastern /etc/localtime
 apt-get install -yy tzdata
 dpkg-reconfigure -f noninteractive tzdata
 
+echo Install dhcp client keeping our dhcp config
+# https://raphaelhertzog.com/2010/09/21/debian-conffile-configuration-file-managed-by-dpkg/
+touch /etc/dhcp/dhclient.conf
+apt-get install -o Dpkg::Options::="--force-confold" -o Dpkg::Options::="--force-confdef" --force-yes -yy \
+	isc-dhcp-client isc-dhcp-common
+
 echo Upgrading packages
 apt-get dist-upgrade -yy
 apt-get upgrade -yy

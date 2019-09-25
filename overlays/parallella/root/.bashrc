@@ -100,7 +100,5 @@ fi
 
 export PATH=/usr/local/browndeer/bin:$PATH
 export LD_LIBRARY_PATH=/usr/local/browndeer/lib:/usr/local/lib:$LD_LIBRARY_PATH
-export PATH=/opt/openmpi/bin:$PATH
-export LD_LIBRARY_PATH=/opt/openmpi/lib:$LD_LIBRARY_PATH
 export EPIPHANY_HOME=/opt/adapteva/esdk
 [ -e $EPIPHANY_HOME ] && . $EPIPHANY_HOME/setup.sh || echo Epiphany SDK not installed.

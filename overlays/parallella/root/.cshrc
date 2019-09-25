@@ -21,15 +21,15 @@ alias rsh       'rsh -X'
 alias less      'less -X'
 
 if ( $?PATH ) then
-	setenv PATH /opt/openmpi/bin:/usr/local/browndeer/bin:${PATH}
+	setenv PATH /usr/local/browndeer/bin:${PATH}
 else
-	setenv PATH /opt/openmpi/bin:/usr/local/browndeer/bin
+	setenv PATH /usr/local/browndeer/bin
 endif
 
 if ( $?LD_LIBRARY_PATH ) then
-	setenv LD_LIBRARY_PATH /opt/openmpi/lib:/usr/local/browndeer/lib:${LD_LIBRARY_PATH}
+	setenv LD_LIBRARY_PATH /usr/local/browndeer/lib:${LD_LIBRARY_PATH}
 else
-	setenv LD_LIBRARY_PATH /opt/openmpi/lib:/usr/local/browndeer/lib
+	setenv LD_LIBRARY_PATH /usr/local/browndeer/lib
 endif
 
 setenv EPIPHANY_HOME      /opt/adapteva/esdk

@@ -1,0 +1,92 @@
+'\" t
+.\"     Title: perf-mem
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 05/27/2019
+.\"    Manual: perf Manual
+.\"    Source: perf
+.\"  Language: English
+.\"
+.TH "PERF\-MEM" "1" "05/27/2019" "perf" "perf Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+perf-mem \- Profile memory accesses
+.SH "SYNOPSIS"
+.sp
+.nf
+\fIperf mem\fR [<options>] (record [<command>] | report)
+.fi
+.SH "DESCRIPTION"
+.sp
+"perf mem record" runs a command and gathers memory operation data from it, into perf\&.data\&. Perf record options are accepted and are passed through\&.
+.sp
+"perf mem report" displays the result\&. It invokes perf report with the right set of options to display a memory access profile\&. By default, loads and stores are sampled\&. Use the \-t option to limit to loads or stores\&.
+.sp
+Note that on Intel systems the memory latency reported is the use\-latency, not the pure load (or store latency)\&. Use latency includes any pipeline queueing delays in addition to the memory subsystem latency\&.
+.SH "OPTIONS"
+.PP
+<command>\&...
+.RS 4
+Any command you can specify in a shell\&.
+.RE
+.PP
+\-t, \-\-type=
+.RS 4
+Select the memory operation type: load or store (default: load,store)
+.RE
+.PP
+\-D, \-\-dump\-raw\-samples=
+.RS 4
+Dump the raw decoded samples on the screen in a format that is easy to parse with one sample per line\&.
+.RE
+.PP
+\-x, \-\-field\-separator
+.RS 4
+Specify the field separator used when dump raw samples (\-D option)\&. By default, The separator is the space character\&.
+.RE
+.PP
+\-C, \-\-cpu\-list
+.RS 4
+Restrict dump of raw samples to those provided via this option\&. Note that the same option can be passed in record mode\&. It will be interpreted the same way as perf record\&.
+.RE
+.PP
+\-K, \-\-all\-kernel
+.RS 4
+Configure all used events to run in kernel space\&.
+.RE
+.PP
+\-U, \-\-all\-user
+.RS 4
+Configure all used events to run in user space\&.
+.RE
+.PP
+\-\-ldload
+.RS 4
+Specify desired latency for loads event\&.
+.RE
+.PP
+\-p, \-\-phys\-data
+.RS 4
+Record/Report sample physical addresses
+.RE
+.SH "SEE ALSO"
+.sp
+\fBperf-record\fR(1), \fBperf-report\fR(1)

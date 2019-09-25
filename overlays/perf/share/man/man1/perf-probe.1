@@ -1,0 +1,412 @@
+'\" t
+.\"     Title: perf-probe
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 05/27/2019
+.\"    Manual: perf Manual
+.\"    Source: perf
+.\"  Language: English
+.\"
+.TH "PERF\-PROBE" "1" "05/27/2019" "perf" "perf Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+perf-probe \- Define new dynamic tracepoints
+.SH "SYNOPSIS"
+.sp
+.nf
+\fIperf probe\fR [options] \-\-add=\fIPROBE\fR [\&...]
+or
+\fIperf probe\fR [options] PROBE
+or
+\fIperf probe\fR [options] \-\-del=\fI[GROUP:]EVENT\fR [\&...]
+or
+\fIperf probe\fR \-\-list[=[GROUP:]EVENT]
+or
+\fIperf probe\fR [options] \-\-line=\fILINE\fR
+or
+\fIperf probe\fR [options] \-\-vars=\fIPROBEPOINT\fR
+or
+\fIperf probe\fR [options] \-\-funcs
+or
+\fIperf probe\fR [options] \-\-definition=\fIPROBE\fR [\&...]
+.fi
+.SH "DESCRIPTION"
+.sp
+This command defines dynamic tracepoint events, by symbol and registers without debuginfo, or by C expressions (C line numbers, C function names, and C local variables) with debuginfo\&.
+.SH "OPTIONS"
+.PP
+\-k, \-\-vmlinux=PATH
+.RS 4
+Specify vmlinux path which has debuginfo (Dwarf binary)\&. Only when using this with \-\-definition, you can give an offline vmlinux file\&.
+.RE
+.PP
+\-m, \-\-module=MODNAME|PATH
+.RS 4
+Specify module name in which perf\-probe searches probe points or lines\&. If a path of module file is passed, perf\-probe treat it as an offline module (this means you can add a probe on a module which has not been loaded yet)\&.
+.RE
+.PP
+\-s, \-\-source=PATH
+.RS 4
+Specify path to kernel source\&.
+.RE
+.PP
+\-v, \-\-verbose
+.RS 4
+Be more verbose (show parsed arguments, etc)\&. Can not use with \-q\&.
+.RE
+.PP
+\-q, \-\-quiet
+.RS 4
+Be quiet (do not show any messages including errors)\&. Can not use with \-v\&.
+.RE
+.PP
+\-a, \-\-add=
+.RS 4
+Define a probe event (see PROBE SYNTAX for detail)\&.
+.RE
+.PP
+\-d, \-\-del=
+.RS 4
+Delete probe events\&. This accepts glob wildcards(\fI*\fR,
+\fI?\fR) and character classes(e\&.g\&. [a\-z], [!A\-Z])\&.
+.RE
+.PP
+\-l, \-\-list[=[GROUP:]EVENT]
+.RS 4
+List up current probe events\&. This can also accept filtering patterns of event names\&. When this is used with \-\-cache, perf shows all cached probes instead of the live probes\&.
+.RE
+.PP
+\-L, \-\-line=
+.RS 4
+Show source code lines which can be probed\&. This needs an argument which specifies a range of the source code\&. (see LINE SYNTAX for detail)
+.RE
+.PP
+\-V, \-\-vars=
+.RS 4
+Show available local variables at given probe point\&. The argument syntax is same as PROBE SYNTAX, but NO ARGs\&.
+.RE
+.PP
+\-\-externs
+.RS 4
+(Only for \-\-vars) Show external defined variables in addition to local variables\&.
+.RE
+.PP
+\-\-no\-inlines
+.RS 4
+(Only for \-\-add) Search only for non\-inlined functions\&. The functions which do not have instances are ignored\&.
+.RE
+.PP
+\-F, \-\-funcs[=FILTER]
+.RS 4
+Show available functions in given module or kernel\&. With \-x/\-\-exec, can also list functions in a user space executable / shared library\&. This also can accept a FILTER rule argument\&.
+.RE
+.PP
+\-D, \-\-definition=
+.RS 4
+Show trace\-event definition converted from given probe\-event instead of write it into tracing/[k,u]probe_events\&.
+.RE
+.PP
+\-\-filter=FILTER
+.RS 4
+(Only for \-\-vars and \-\-funcs) Set filter\&. FILTER is a combination of glob pattern, see FILTER PATTERN for detail\&. Default FILTER is "!\fIk???tab_* & !\fRcrc_*" for \-\-vars, and "!_*" for \-\-funcs\&. If several filters are specified, only the last filter is used\&.
+.RE
+.PP
+\-f, \-\-force
+.RS 4
+Forcibly add events with existing name\&.
+.RE
+.PP
+\-n, \-\-dry\-run
+.RS 4
+Dry run\&. With this option, \-\-add and \-\-del doesn\(cqt execute actual adding and removal operations\&.
+.RE
+.PP
+\-\-cache
+.RS 4
+(With \-\-add) Cache the probes\&. Any events which successfully added are also stored in the cache file\&. (With \-\-list) Show cached probes\&. (With \-\-del) Remove cached probes\&.
+.RE
+.PP
+\-\-max\-probes=NUM
+.RS 4
+Set the maximum number of probe points for an event\&. Default is 128\&.
+.RE
+.sp
+\-\-target\-ns=PID: Obtain mount namespace information from the target pid\&. This is used when creating a uprobe for a process that resides in a different mount namespace from the perf(1) utility\&.
+.PP
+\-x, \-\-exec=PATH
+.RS 4
+Specify path to the executable or shared library file for user space tracing\&. Can also be used with \-\-funcs option\&.
+.RE
+.PP
+\-\-demangle
+.RS 4
+Demangle application symbols\&. \-\-no\-demangle is also available for disabling demangling\&.
+.RE
+.PP
+\-\-demangle\-kernel
+.RS 4
+Demangle kernel symbols\&. \-\-no\-demangle\-kernel is also available for disabling kernel demangling\&.
+.RE
+.sp
+In absence of \-m/\-x options, perf probe checks if the first argument after the options is an absolute path name\&. If its an absolute path, perf probe uses it as a target module/target user space binary to probe\&.
+.SH "PROBE SYNTAX"
+.sp
+Probe points are defined by following syntax\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+1) Define event based on function name
+ [[GROUP:]EVENT=]FUNC[@SRC][:RLN|+OFFS|%return|;PTN] [ARG \&.\&.\&.]
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+2) Define event based on source file with line number
+ [[GROUP:]EVENT=]SRC:ALN [ARG \&.\&.\&.]
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+3) Define event based on source file with lazy pattern
+ [[GROUP:]EVENT=]SRC;PTN [ARG \&.\&.\&.]
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+4) Pre\-defined SDT events or cached event with name
+ %[sdt_PROVIDER:]SDTEVENT
+ or,
+ sdt_PROVIDER:SDTEVENT
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+\fIEVENT\fR specifies the name of new event, if omitted, it will be set the name of the probed function\&. You can also specify a group name by \fIGROUP\fR, if omitted, set \fIprobe\fR is used for kprobe and \fIprobe_<bin>\fR is used for uprobe\&. Note that using existing group name can conflict with other events\&. Especially, using the group name reserved for kernel modules can hide embedded events in the modules\&. \fIFUNC\fR specifies a probed function name, and it may have one of the following options; \fI+OFFS\fR is the offset from function entry address in bytes, \fI:RLN\fR is the relative\-line number from function entry line, and \fI%return\fR means that it probes function return\&. And \fI;PTN\fR means lazy matching pattern (see LAZY MATCHING)\&. Note that \fI;PTN\fR must be the end of the probe point definition\&. In addition, \fI@SRC\fR specifies a source file which has that function\&. It is also possible to specify a probe point by the source line number or lazy matching by using \fISRC:ALN\fR or \fISRC;PTN\fR syntax, where \fISRC\fR is the source file path, \fI:ALN\fR is the line number and \fI;PTN\fR is the lazy matching pattern\&. \fIARG\fR specifies the arguments of this probe point, (see PROBE ARGUMENT)\&. \fISDTEVENT\fR and \fIPROVIDER\fR is the pre\-defined event name which is defined by user SDT (Statically Defined Tracing) or the pre\-cached probes with event name\&. Note that before using the SDT event, the target binary (on which SDT events are defined) must be scanned by \fBperf-buildid-cache\fR(1) to make SDT events as cached events\&.
+.sp
+For details of the SDT, see below\&. \m[blue]\fBhttps://sourceware\&.org/gdb/onlinedocs/gdb/Static\-Probe\-Points\&.html\fR\m[]
+.SH "PROBE ARGUMENT"
+.sp
+Each probe argument follows below syntax\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[NAME=]LOCALVAR|$retval|%REG|@SYMBOL[:TYPE]
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+\fINAME\fR specifies the name of this argument (optional)\&. You can use the name of local variable, local data structure member (e\&.g\&. var\(->field, var\&.field2), local array with fixed index (e\&.g\&. array[1], var\(->array[0], var\(->pointer[2]), or kprobe\-tracer argument format (e\&.g\&. $retval, %ax, etc)\&. Note that the name of this argument will be set as the last member name if you specify a local data structure member (e\&.g\&. field2 for \fIvar\(->field1\&.field2\fR\&.) \fI$vars\fR and \fI$params\fR special arguments are also available for NAME, \fI$vars\fR is expanded to the local variables (including function parameters) which can access at given probe point\&. \fI$params\fR is expanded to only the function parameters\&. \fITYPE\fR casts the type of this argument (optional)\&. If omitted, perf probe automatically set the type based on debuginfo (*)\&. Currently, basic types (u8/u16/u32/u64/s8/s16/s32/s64), hexadecimal integers (x/x8/x16/x32/x64), signedness casting (u/s), "string" and bitfield are supported\&. (see TYPES for detail) On x86 systems %REG is always the short form of the register: for example %AX\&. %RAX or %EAX is not valid\&.
+.SH "TYPES"
+.sp
+Basic types (u8/u16/u32/u64/s8/s16/s32/s64) and hexadecimal integers (x8/x16/x32/x64) are integer types\&. Prefix \fIs\fR and \fIu\fR means those types are signed and unsigned respectively, and \fIx\fR means that is shown in hexadecimal format\&. Traced arguments are shown in decimal (sNN/uNN) or hex (xNN)\&. You can also use \fIs\fR or \fIu\fR to specify only signedness and leave its size auto\-detected by perf probe\&. Moreover, you can use \fIx\fR to explicitly specify to be shown in hexadecimal (the size is also auto\-detected)\&. String type is a special type, which fetches a "null\-terminated" string from kernel space\&. This means it will fail and store NULL if the string container has been paged out\&. You can specify \fIstring\fR type only for the local variable or structure member which is an array of or a pointer to \fIchar\fR or \fIunsigned char\fR type\&. Bitfield is another special type, which takes 3 parameters, bit\-width, bit\-offset, and container\-size (usually 32)\&. The syntax is;
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+b<bit\-width>@<bit\-offset>/<container\-size>
+.fi
+.if n \{\
+.RE
+.\}
+.SH "LINE SYNTAX"
+.sp
+Line range is described by following syntax\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+"FUNC[@SRC][:RLN[+NUM|\-RLN2]]|SRC[:ALN[+NUM|\-ALN2]]"
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+FUNC specifies the function name of showing lines\&. \fIRLN\fR is the start line number from function entry line, and \fIRLN2\fR is the end line number\&. As same as probe syntax, \fISRC\fR means the source file path, \fIALN\fR is start line number, and \fIALN2\fR is end line number in the file\&. It is also possible to specify how many lines to show by using \fINUM\fR\&. Moreover, \fIFUNC@SRC\fR combination is good for searching a specific function when several functions share same name\&. So, "source\&.c:100\-120" shows lines between 100th to l20th in source\&.c file\&. And "func:10+20" shows 20 lines from 10th line of func function\&.
+.SH "LAZY MATCHING"
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+The lazy line matching is similar to glob matching but ignoring spaces in both of pattern and target\&. So this accepts wildcards(\*(Aq*\*(Aq, \*(Aq?\*(Aq) and character classes(e\&.g\&. [a\-z], [!A\-Z])\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+e\&.g\&. \fIa=*\fR can matches \fIa=b\fR, \fIa = b\fR, \fIa == b\fR and so on\&.
+.sp
+This provides some sort of flexibility and robustness to probe point definitions against minor code changes\&. For example, actual 10th line of schedule() can be moved easily by modifying schedule(), but the same line matching \fIrq=cpu_rq*\fR may still exist in the function\&.)
+.SH "FILTER PATTERN"
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+The filter pattern is a glob matching pattern(s) to filter variables\&.
+In addition, you can use "!" for specifying filter\-out rule\&. You also can give several rules combined with "&" or "|", and fold those rules as one rule by using "(" ")"\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+e\&.g\&. With \-\-filter "foo* | bar*", perf probe \-V shows variables which start with "foo" or "bar"\&. With \-\-filter "!foo* & *bar", perf probe \-V shows variables which don\(cqt start with "foo" and end with "bar", like "fizzbar"\&. But "foobar" is filtered out\&.
+.SH "EXAMPLES"
+.sp
+Display which lines in schedule() can be probed:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\&./perf probe \-\-line schedule
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Add a probe on schedule() function 12th line with recording cpu local variable:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\&./perf probe schedule:12 cpu
+or
+\&./perf probe \-\-add=\*(Aqschedule:12 cpu\*(Aq
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Add one or more probes which has the name start with "schedule"\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\&./perf probe schedule*
+or
+\&./perf probe \-\-add=\*(Aqschedule*\*(Aq
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Add probes on lines in schedule() function which calls update_rq_clock()\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\&./perf probe \*(Aqschedule;update_rq_clock*\*(Aq
+or
+\&./perf probe \-\-add=\*(Aqschedule;update_rq_clock*\*(Aq
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Delete all probes on schedule()\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\&./perf probe \-\-del=\*(Aqschedule*\*(Aq
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Add probes at zfree() function on /bin/zsh
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\&./perf probe \-x /bin/zsh zfree or \&./perf probe /bin/zsh zfree
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Add probes at malloc() function on libc
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\&./perf probe \-x /lib/libc\&.so\&.6 malloc or \&./perf probe /lib/libc\&.so\&.6 malloc
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Add a uprobe to a target process running in a different mount namespace
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\&./perf probe \-\-target\-ns <target pid> \-x /lib64/libc\&.so\&.6 malloc
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Add a USDT probe to a target process running in a different mount namespace
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\&./perf probe \-\-target\-ns <target pid> \-x /usr/lib/jvm/java\-1\&.8\&.0\-openjdk\-1\&.8\&.0\&.121\-0\&.b13\&.el7_3\&.x86_64/jre/lib/amd64/server/libjvm\&.so %sdt_hotspot:thread__sleep__end
+.fi
+.if n \{\
+.RE
+.\}
+.SH "SEE ALSO"
+.sp
+\fBperf-trace\fR(1), \fBperf-record\fR(1), \fBperf-buildid-cache\fR(1)

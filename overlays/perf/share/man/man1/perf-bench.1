@@ -1,0 +1,345 @@
+'\" t
+.\"     Title: perf-bench
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 05/27/2019
+.\"    Manual: perf Manual
+.\"    Source: perf
+.\"  Language: English
+.\"
+.TH "PERF\-BENCH" "1" "05/27/2019" "perf" "perf Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+perf-bench \- General framework for benchmark suites
+.SH "SYNOPSIS"
+.sp
+.nf
+\fIperf bench\fR [<common options>] <subsystem> <suite> [<options>]
+.fi
+.SH "DESCRIPTION"
+.sp
+This \fIperf bench\fR command is a general framework for benchmark suites\&.
+.SH "COMMON OPTIONS"
+.PP
+\-r, \-\-repeat=
+.RS 4
+Specify amount of times to repeat the run (default 10)\&.
+.RE
+.PP
+\-f, \-\-format=
+.RS 4
+Specify format style\&. Current available format styles are:
+.RE
+.PP
+\fIdefault\fR
+.RS 4
+Default style\&. This is mainly for human reading\&.
+.RE
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+
+\&.ft C
+% perf bench sched pipe                      # with no style specified
+(executing 1000000 pipe operations between two tasks)
+        Total time:5\&.855 sec
+                5\&.855061 usecs/op
+                170792 ops/sec
+\&.ft
+
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+\fIsimple\fR
+.RS 4
+This simple style is friendly for automated processing by scripts\&.
+.RE
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+
+\&.ft C
+% perf bench \-\-format=simple sched pipe      # specified simple
+5\&.988
+\&.ft
+
+.fi
+.if n \{\
+.RE
+.\}
+.SH "SUBSYSTEM"
+.PP
+\fIsched\fR
+.RS 4
+Scheduler and IPC mechanisms\&.
+.RE
+.PP
+\fImem\fR
+.RS 4
+Memory access performance\&.
+.RE
+.PP
+\fInuma\fR
+.RS 4
+NUMA scheduling and MM benchmarks\&.
+.RE
+.PP
+\fIfutex\fR
+.RS 4
+Futex stressing benchmarks\&.
+.RE
+.PP
+\fIall\fR
+.RS 4
+All benchmark subsystems\&.
+.RE
+.SS "SUITES FOR \fIsched\fR"
+.PP
+\fBmessaging\fR
+.RS 4
+Suite for evaluating performance of scheduler and IPC mechanisms\&. Based on hackbench by Rusty Russell\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBOptions of messaging\fR
+.RS 4
+.PP
+\-p, \-\-pipe
+.RS 4
+Use pipe() instead of socketpair()
+.RE
+.PP
+\-t, \-\-thread
+.RS 4
+Be multi thread instead of multi process
+.RE
+.PP
+\-g, \-\-group=
+.RS 4
+Specify number of groups
+.RE
+.PP
+\-l, \-\-nr_loops=
+.RS 4
+Specify number of loops
+.RE
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBExample of messaging\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+
+\&.ft C
+% perf bench sched messaging                 # run with default
+options (20 sender and receiver processes per group)
+(10 groups == 400 processes run)
+
+      Total time:0\&.308 sec
+
+% perf bench sched messaging \-t \-g 20        # be multi\-thread, with 20 groups
+(20 sender and receiver threads per group)
+(20 groups == 800 threads run)
+
+      Total time:0\&.582 sec
+\&.ft
+
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+\fBpipe\fR
+.RS 4
+Suite for pipe() system call\&. Based on pipe\-test\-1m\&.c by Ingo Molnar\&.
+.RE
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBOptions of pipe\fR
+.RS 4
+.PP
+\-l, \-\-loop=
+.RS 4
+Specify number of loops\&.
+.RE
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBExample of pipe\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+
+\&.ft C
+% perf bench sched pipe
+(executing 1000000 pipe operations between two tasks)
+
+        Total time:8\&.091 sec
+                8\&.091833 usecs/op
+                123581 ops/sec
+
+% perf bench sched pipe \-l 1000              # loop 1000
+(executing 1000 pipe operations between two tasks)
+
+        Total time:0\&.016 sec
+                16\&.948000 usecs/op
+                59004 ops/sec
+\&.ft
+
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.SS "SUITES FOR \fImem\fR"
+.PP
+\fBmemcpy\fR
+.RS 4
+Suite for evaluating performance of simple memory copy in various ways\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBOptions of memcpy\fR
+.RS 4
+.PP
+\-l, \-\-size
+.RS 4
+Specify size of memory to copy (default: 1MB)\&. Available units are B, KB, MB, GB and TB (case insensitive)\&.
+.RE
+.PP
+\-f, \-\-function
+.RS 4
+Specify function to copy (default: default)\&. Available functions are depend on the architecture\&. On x86\-64, x86\-64\-unrolled, x86\-64\-movsq and x86\-64\-movsb are supported\&.
+.RE
+.PP
+\-l, \-\-nr_loops
+.RS 4
+Repeat memcpy invocation this number of times\&.
+.RE
+.PP
+\-c, \-\-cycles
+.RS 4
+Use perf\(cqs cpu\-cycles event instead of gettimeofday syscall\&.
+.RE
+.PP
+\fBmemset\fR
+.RS 4
+Suite for evaluating performance of simple memory set in various ways\&.
+.RE
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBOptions of memset\fR
+.RS 4
+.PP
+\-l, \-\-size
+.RS 4
+Specify size of memory to set (default: 1MB)\&. Available units are B, KB, MB, GB and TB (case insensitive)\&.
+.RE
+.PP
+\-f, \-\-function
+.RS 4
+Specify function to set (default: default)\&. Available functions are depend on the architecture\&. On x86\-64, x86\-64\-unrolled, x86\-64\-stosq and x86\-64\-stosb are supported\&.
+.RE
+.PP
+\-l, \-\-nr_loops
+.RS 4
+Repeat memset invocation this number of times\&.
+.RE
+.PP
+\-c, \-\-cycles
+.RS 4
+Use perf\(cqs cpu\-cycles event instead of gettimeofday syscall\&.
+.RE
+.RE
+.SS "SUITES FOR \fInuma\fR"
+.PP
+\fBmem\fR
+.RS 4
+Suite for evaluating NUMA workloads\&.
+.RE
+.SS "SUITES FOR \fIfutex\fR"
+.PP
+\fBhash\fR
+.RS 4
+Suite for evaluating hash tables\&.
+.RE
+.PP
+\fBwake\fR
+.RS 4
+Suite for evaluating wake calls\&.
+.RE
+.PP
+\fBwake\-parallel\fR
+.RS 4
+Suite for evaluating parallel wake calls\&.
+.RE
+.PP
+\fBrequeue\fR
+.RS 4
+Suite for evaluating requeue calls\&.
+.RE
+.PP
+\fBlock\-pi\fR
+.RS 4
+Suite for evaluating futex lock_pi calls\&.
+.RE
+.SH "SEE ALSO"
+.sp
+\fBperf\fR(1)

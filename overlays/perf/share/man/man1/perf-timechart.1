@@ -1,0 +1,258 @@
+'\" t
+.\"     Title: perf-timechart
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 05/27/2019
+.\"    Manual: perf Manual
+.\"    Source: perf
+.\"  Language: English
+.\"
+.TH "PERF\-TIMECHART" "1" "05/27/2019" "perf" "perf Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+perf-timechart \- Tool to visualize total system behavior during a workload
+.SH "SYNOPSIS"
+.sp
+.nf
+.fi
+.SH "DESCRIPTION"
+.sp
+There are two variants of perf timechart:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\*(Aqperf timechart record <command>\*(Aq to record the system level events
+of an arbitrary workload\&. By default timechart records only scheduler
+and CPU events (task switches, running times, CPU power states, etc),
+but it\*(Aqs possible to record IO (disk, network) activity using \-I argument\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\*(Aqperf timechart\*(Aq to turn a trace into a Scalable Vector Graphics file,
+that can be viewed with popular SVG viewers such as \*(AqInkscape\*(Aq\&. Depending
+on the events in the perf\&.data file, timechart will contain scheduler/cpu
+events or IO events\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+In IO mode, every bar has two charts: upper and lower\&.
+Upper bar shows incoming events (disk reads, ingress network packets)\&.
+Lower bar shows outgoing events (disk writes, egress network packets)\&.
+There are also poll bars which show how much time application spent
+in poll/epoll/select syscalls\&.
+.fi
+.if n \{\
+.RE
+.\}
+.SH "TIMECHART OPTIONS"
+.PP
+\-o, \-\-output=
+.RS 4
+Select the output file (default: output\&.svg)
+.RE
+.PP
+\-i, \-\-input=
+.RS 4
+Select the input file (default: perf\&.data unless stdin is a fifo)
+.RE
+.PP
+\-w, \-\-width=
+.RS 4
+Select the width of the SVG file (default: 1000)
+.RE
+.PP
+\-P, \-\-power\-only
+.RS 4
+Only output the CPU power section of the diagram
+.RE
+.PP
+\-T, \-\-tasks\-only
+.RS 4
+Don\(cqt output processor state transitions
+.RE
+.PP
+\-p, \-\-process
+.RS 4
+Select the processes to display, by name or PID
+.RE
+.PP
+\-\-symfs=<directory>
+.RS 4
+Look for files with symbols relative to this directory\&.
+.RE
+.PP
+\-n, \-\-proc\-num
+.RS 4
+Print task info for at least given number of tasks\&.
+.RE
+.PP
+\-t, \-\-topology
+.RS 4
+Sort CPUs according to topology\&.
+.RE
+.PP
+\-\-highlight=<duration_nsecs|task_name>
+.RS 4
+Highlight tasks (using different color) that run more than given duration or tasks with given name\&. If number is given it\(cqs interpreted as number of nanoseconds\&. If non\-numeric string is given it\(cqs interpreted as task name\&.
+.RE
+.PP
+\-\-io\-skip\-eagain
+.RS 4
+Don\(cqt draw EAGAIN IO events\&.
+.RE
+.PP
+\-\-io\-min\-time=<nsecs>
+.RS 4
+Draw small events as if they lasted min\-time\&. Useful when you need to see very small and fast IO\&. It\(cqs possible to specify ms or us suffix to specify time in milliseconds or microseconds\&. Default value is 1ms\&.
+.RE
+.PP
+\-\-io\-merge\-dist=<nsecs>
+.RS 4
+Merge events that are merge\-dist nanoseconds apart\&. Reduces number of figures on the SVG and makes it more render\-friendly\&. It\(cqs possible to specify ms or us suffix to specify time in milliseconds or microseconds\&. Default value is 1us\&.
+.RE
+.SH "RECORD OPTIONS"
+.PP
+\-P, \-\-power\-only
+.RS 4
+Record only power\-related events
+.RE
+.PP
+\-T, \-\-tasks\-only
+.RS 4
+Record only tasks\-related events
+.RE
+.PP
+\-I, \-\-io\-only
+.RS 4
+Record only io\-related events
+.RE
+.PP
+\-g, \-\-callchain
+.RS 4
+Do call\-graph (stack chain/backtrace) recording
+.RE
+.SH "EXAMPLES"
+.sp
+$ perf timechart record git pull
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[ perf record: Woken up 13 times to write data ]
+[ perf record: Captured and wrote 4\&.253 MB perf\&.data (~185801 samples) ]
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+$ perf timechart
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Written 10\&.2 seconds of trace to output\&.svg\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Record system\-wide timechart:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+$ perf timechart record
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+then generate timechart and highlight \*(Aqgcc\*(Aq tasks:
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+$ perf timechart \-\-highlight gcc
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Record system\-wide IO events:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+$ perf timechart record \-I
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+then generate timechart:
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+$ perf timechart
+.fi
+.if n \{\
+.RE
+.\}
+.SH "SEE ALSO"
+.sp
+\fBperf-record\fR(1)

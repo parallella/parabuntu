@@ -1,0 +1,59 @@
+'\" t
+.\"     Title: perf-test
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 05/27/2019
+.\"    Manual: perf Manual
+.\"    Source: perf
+.\"  Language: English
+.\"
+.TH "PERF\-TEST" "1" "05/27/2019" "perf" "perf Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+perf-test \- Runs sanity tests\&.
+.SH "SYNOPSIS"
+.sp
+.nf
+\fIperf test [<options>] [{list <test\-name\-fragment>|[<test\-name\-fragments>|<test\-numbers>]}]\fR
+.fi
+.SH "DESCRIPTION"
+.sp
+This command does assorted sanity tests, initially through linked routines but also will look for a directory with more tests in the form of scripts\&.
+.sp
+To get a list of available tests use \fIperf test list\fR, specifying a test name fragment will show all tests that have it\&.
+.sp
+To run just specific tests, inform test name fragments or the numbers obtained from \fIperf test list\fR\&.
+.SH "OPTIONS"
+.PP
+\-s, \-\-skip
+.RS 4
+Tests to skip (comma separated numeric list)\&.
+.RE
+.PP
+\-v, \-\-verbose
+.RS 4
+Be more verbose\&.
+.RE
+.PP
+\-F, \-\-dont\-fork
+.RS 4
+Do not fork child for each test, run all tests within single process\&.
+.RE

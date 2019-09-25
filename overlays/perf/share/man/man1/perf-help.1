@@ -1,0 +1,52 @@
+'\" t
+.\"     Title: perf-help
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 05/27/2019
+.\"    Manual: perf Manual
+.\"    Source: perf
+.\"  Language: English
+.\"
+.TH "PERF\-HELP" "1" "05/27/2019" "perf" "perf Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+perf-help \- display help information about perf
+.SH "SYNOPSIS"
+.sp
+\fIperf help\fR [\-a|\-\-all] [COMMAND]
+.SH "DESCRIPTION"
+.sp
+With no options and no COMMAND given, the synopsis of the \fIperf\fR command and a list of the most commonly used perf commands are printed on the standard output\&.
+.sp
+If the option \fI\-\-all\fR or \fI\-a\fR is given, then all available commands are printed on the standard output\&.
+.sp
+If a perf command is named, a manual page for that command is brought up\&. The \fIman\fR program is used by default for this purpose, but this can be overridden by other options or configuration variables\&.
+.sp
+Note that perf \-\-help \&.\&.\&. is identical to perf help \&.\&.\&. because the former is internally converted into the latter\&.
+.SH "OPTIONS"
+.PP
+\-a, \-\-all
+.RS 4
+Prints all the available commands on the standard output\&. This option supersedes any other option\&.
+.RE
+.SH "PERF"
+.sp
+Part of the \fBperf\fR(1) suite

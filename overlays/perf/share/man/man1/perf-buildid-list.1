@@ -1,0 +1,70 @@
+'\" t
+.\"     Title: perf-buildid-list
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 05/27/2019
+.\"    Manual: perf Manual
+.\"    Source: perf
+.\"  Language: English
+.\"
+.TH "PERF\-BUILDID\-LIST" "1" "05/27/2019" "perf" "perf Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+perf-buildid-list \- List the buildids in a perf\&.data file
+.SH "SYNOPSIS"
+.sp
+.nf
+\fIperf buildid\-list <options>\fR
+.fi
+.SH "DESCRIPTION"
+.sp
+This command displays the buildids found in a perf\&.data file, so that other tools can be used to fetch packages with matching symbol tables for use by perf report\&.
+.sp
+It can also be used to show the build id of the running kernel or in an ELF file using \-i/\-\-input\&.
+.SH "OPTIONS"
+.PP
+\-H, \-\-with\-hits
+.RS 4
+Show only DSOs with hits\&.
+.RE
+.PP
+\-i, \-\-input=
+.RS 4
+Input file name\&. (default: perf\&.data unless stdin is a fifo)
+.RE
+.PP
+\-f, \-\-force
+.RS 4
+Don\(cqt do ownership validation\&.
+.RE
+.PP
+\-k, \-\-kernel
+.RS 4
+Show running kernel build id\&.
+.RE
+.PP
+\-v, \-\-verbose
+.RS 4
+Be more verbose\&.
+.RE
+.SH "SEE ALSO"
+.sp
+\fBperf-record\fR(1), \fBperf-top\fR(1), \fBperf-report\fR(1)

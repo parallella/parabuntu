@@ -1,0 +1,489 @@
+'\" t
+.\"     Title: perf-top
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 05/27/2019
+.\"    Manual: perf Manual
+.\"    Source: perf
+.\"  Language: English
+.\"
+.TH "PERF\-TOP" "1" "05/27/2019" "perf" "perf Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+perf-top \- System profiling tool\&.
+.SH "SYNOPSIS"
+.sp
+.nf
+\fIperf top\fR [\-e <EVENT> | \-\-event=EVENT] [<options>]
+.fi
+.SH "DESCRIPTION"
+.sp
+This command generates and displays a performance counter profile in real time\&.
+.SH "OPTIONS"
+.PP
+\-a, \-\-all\-cpus
+.RS 4
+System\-wide collection\&. (default)
+.RE
+.PP
+\-c <count>, \-\-count=<count>
+.RS 4
+Event period to sample\&.
+.RE
+.PP
+\-C <cpu\-list>, \-\-cpu=<cpu>
+.RS 4
+Monitor only on the list of CPUs provided\&. Multiple CPUs can be provided as a comma\-separated list with no space: 0,1\&. Ranges of CPUs are specified with \-: 0\-2\&. Default is to monitor all CPUS\&.
+.RE
+.PP
+\-d <seconds>, \-\-delay=<seconds>
+.RS 4
+Number of seconds to delay between refreshes\&.
+.RE
+.PP
+\-e <event>, \-\-event=<event>
+.RS 4
+Select the PMU event\&. Selection can be a symbolic event name (use
+\fIperf list\fR
+to list all events) or a raw PMU event (eventsel+umask) in the form of rNNN where NNN is a hexadecimal event descriptor\&.
+.RE
+.PP
+\-E <entries>, \-\-entries=<entries>
+.RS 4
+Display this many functions\&.
+.RE
+.PP
+\-f <count>, \-\-count\-filter=<count>
+.RS 4
+Only display functions with more events than this\&.
+.RE
+.PP
+\-\-group
+.RS 4
+Put the counters into a counter group\&.
+.RE
+.PP
+\-F <freq>, \-\-freq=<freq>
+.RS 4
+Profile at this frequency\&.
+.RE
+.PP
+\-i, \-\-inherit
+.RS 4
+Child tasks do not inherit counters\&.
+.RE
+.PP
+\-k <path>, \-\-vmlinux=<path>
+.RS 4
+Path to vmlinux\&. Required for annotation functionality\&.
+.RE
+.PP
+\-m <pages>, \-\-mmap\-pages=<pages>
+.RS 4
+Number of mmap data pages (must be a power of two) or size specification with appended unit character \- B/K/M/G\&. The size is rounded up to have nearest pages power of two value\&.
+.RE
+.PP
+\-p <pid>, \-\-pid=<pid>
+.RS 4
+Profile events on existing Process ID (comma separated list)\&.
+.RE
+.PP
+\-t <tid>, \-\-tid=<tid>
+.RS 4
+Profile events on existing thread ID (comma separated list)\&.
+.RE
+.PP
+\-u, \-\-uid=
+.RS 4
+Record events in threads owned by uid\&. Name or number\&.
+.RE
+.PP
+\-r <priority>, \-\-realtime=<priority>
+.RS 4
+Collect data with this RT SCHED_FIFO priority\&.
+.RE
+.PP
+\-\-sym\-annotate=<symbol>
+.RS 4
+Annotate this symbol\&.
+.RE
+.PP
+\-K, \-\-hide_kernel_symbols
+.RS 4
+Hide kernel symbols\&.
+.RE
+.PP
+\-U, \-\-hide_user_symbols
+.RS 4
+Hide user symbols\&.
+.RE
+.PP
+\-\-demangle\-kernel
+.RS 4
+Demangle kernel symbols\&.
+.RE
+.PP
+\-D, \-\-dump\-symtab
+.RS 4
+Dump the symbol table used for profiling\&.
+.RE
+.PP
+\-v, \-\-verbose
+.RS 4
+Be more verbose (show counter open errors, etc)\&.
+.RE
+.PP
+\-z, \-\-zero
+.RS 4
+Zero history across display updates\&.
+.RE
+.PP
+\-s, \-\-sort
+.RS 4
+Sort by key(s): pid, comm, dso, symbol, parent, srcline, weight, local_weight, abort, in_tx, transaction, overhead, sample, period\&. Please see description of \-\-sort in the perf\-report man page\&.
+.RE
+.PP
+\-\-fields=
+.RS 4
+Specify output field \- multiple keys can be specified in CSV format\&. Following fields are available: overhead, overhead_sys, overhead_us, overhead_children, sample and period\&. Also it can contain any sort key(s)\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+By default, every sort keys not specified in \-\-field will be appended
+automatically\&.
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+\-n, \-\-show\-nr\-samples
+.RS 4
+Show a column with the number of samples\&.
+.RE
+.PP
+\-\-show\-total\-period
+.RS 4
+Show a column with the sum of periods\&.
+.RE
+.PP
+\-\-dsos
+.RS 4
+Only consider symbols in these dsos\&. This option will affect the percentage of the overhead column\&. See \-\-percentage for more info\&.
+.RE
+.PP
+\-\-comms
+.RS 4
+Only consider symbols in these comms\&. This option will affect the percentage of the overhead column\&. See \-\-percentage for more info\&.
+.RE
+.PP
+\-\-symbols
+.RS 4
+Only consider these symbols\&. This option will affect the percentage of the overhead column\&. See \-\-percentage for more info\&.
+.RE
+.PP
+\-M, \-\-disassembler\-style=
+.RS 4
+Set disassembler style for objdump\&.
+.RE
+.PP
+\-\-source
+.RS 4
+Interleave source code with assembly code\&. Enabled by default, disable with \-\-no\-source\&.
+.RE
+.PP
+\-\-asm\-raw
+.RS 4
+Show raw instruction encoding of assembly instructions\&.
+.RE
+.PP
+\-g
+.RS 4
+Enables call\-graph (stack chain/backtrace) recording\&.
+.RE
+.PP
+\-\-call\-graph [mode,type,min[,limit],order[,key][,branch]]
+.RS 4
+Setup and enable call\-graph (stack chain/backtrace) recording, implies \-g\&. See
+\-\-call\-graph
+section in perf\-record and perf\-report man pages for details\&.
+.RE
+.PP
+\-\-children
+.RS 4
+Accumulate callchain of children to parent entry so that then can show up in the output\&. The output will have a new "Children" column and will be sorted on the data\&. It requires \-g/\-\-call\-graph option enabled\&. See the \(oqoverhead calculation\(cq section for more details\&. Enabled by default, disable with \-\-no\-children\&.
+.RE
+.PP
+\-\-max\-stack
+.RS 4
+Set the stack depth limit when parsing the callchain, anything beyond the specified depth will be ignored\&. This is a trade\-off between information loss and faster processing especially for workloads that can have a very long callchain stack\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Default: /proc/sys/kernel/perf_event_max_stack when present, 127 otherwise\&.
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+\-\-ignore\-callees=<regex>
+.RS 4
+Ignore callees of the function(s) matching the given regex\&. This has the effect of collecting the callers of each such function into one place in the call\-graph tree\&.
+.RE
+.PP
+\-\-percent\-limit
+.RS 4
+Do not show entries which have an overhead under that percent\&. (Default: 0)\&.
+.RE
+.PP
+\-\-percentage
+.RS 4
+Determine how to display the overhead percentage of filtered entries\&. Filters can be applied by \-\-comms, \-\-dsos and/or \-\-symbols options and Zoom operations on the TUI (thread, dso, etc)\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+"relative" means it\*(Aqs relative to filtered entries only so that the
+sum of shown entries will be always 100%\&. "absolute" means it retains
+the original value before and after the filter is applied\&.
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+\-w, \-\-column\-widths=<width[,width\&...]>
+.RS 4
+Force each column width to the provided list, for large terminal readability\&. 0 means no limit (default behavior)\&.
+.RE
+.PP
+\-\-proc\-map\-timeout
+.RS 4
+When processing pre\-existing threads /proc/XXX/mmap, it may take a long time, because the file may be huge\&. A time out is needed in such cases\&. This option sets the time out limit\&. The default value is 500 ms\&.
+.RE
+.PP
+\-b, \-\-branch\-any
+.RS 4
+Enable taken branch stack sampling\&. Any type of taken branch may be sampled\&. This is a shortcut for \-\-branch\-filter any\&. See \-\-branch\-filter for more infos\&.
+.RE
+.PP
+\-j, \-\-branch\-filter
+.RS 4
+Enable taken branch stack sampling\&. Each sample captures a series of consecutive taken branches\&. The number of branches captured with each sample depends on the underlying hardware, the type of branches of interest, and the executed code\&. It is possible to select the types of branches captured by enabling filters\&. For a full list of modifiers please see the perf record manpage\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+The option requires at least one branch type among any, any_call, any_ret, ind_call, cond\&.
+The privilege levels may be omitted, in which case, the privilege levels of the associated
+event are applied to the branch filter\&. Both kernel (k) and hypervisor (hv) privilege
+levels are subject to permissions\&.  When sampling on multiple events, branch stack sampling
+is enabled for all the sampling events\&. The sampled branch type is the same for all events\&.
+The various filters must be specified as a comma separated list: \-\-branch\-filter any_ret,u,k
+Note that this feature may not be available on all processors\&.
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+\-\-raw\-trace
+.RS 4
+When displaying traceevent output, do not use print fmt or plugins\&.
+.RE
+.PP
+\-\-hierarchy
+.RS 4
+Enable hierarchy output\&.
+.RE
+.PP
+\-\-force
+.RS 4
+Don\(cqt do ownership validation\&.
+.RE
+.SH "INTERACTIVE PROMPTING KEYS"
+.PP
+[d]
+.RS 4
+Display refresh delay\&.
+.RE
+.PP
+[e]
+.RS 4
+Number of entries to display\&.
+.RE
+.PP
+[E]
+.RS 4
+Event to display when multiple counters are active\&.
+.RE
+.PP
+[f]
+.RS 4
+Profile display filter (>= hit count)\&.
+.RE
+.PP
+[F]
+.RS 4
+Annotation display filter (>= % of total)\&.
+.RE
+.PP
+[s]
+.RS 4
+Annotate symbol\&.
+.RE
+.PP
+[S]
+.RS 4
+Stop annotation, return to full profile display\&.
+.RE
+.PP
+[z]
+.RS 4
+Toggle event count zeroing across display updates\&.
+.RE
+.PP
+[qQ]
+.RS 4
+Quit\&.
+.RE
+.sp
+Pressing any unmapped key displays a menu, and prompts for input\&.
+.SH "OVERHEAD CALCULATION"
+.sp
+The overhead can be shown in two columns as \fIChildren\fR and \fISelf\fR when perf collects callchains\&. The \fIself\fR overhead is simply calculated by adding all period values of the entry \- usually a function (symbol)\&. This is the value that perf shows traditionally and sum of all the \fIself\fR overhead values should be 100%\&.
+.sp
+The \fIchildren\fR overhead is calculated by adding all period values of the child functions so that it can show the total overhead of the higher level functions even if they don\(cqt directly execute much\&. \fIChildren\fR here means functions that are called from another (parent) function\&.
+.sp
+It might be confusing that the sum of all the \fIchildren\fR overhead values exceeds 100% since each of them is already an accumulation of \fIself\fR overhead of its child functions\&. But with this enabled, users can find which function has the most overhead even if samples are spread over the children\&.
+.sp
+Consider the following example; there are three functions like below\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+
+\&.ft C
+void foo(void) {
+    /* do something */
+}
+
+void bar(void) {
+    /* do something */
+    foo();
+}
+
+int main(void) {
+    bar()
+    return 0;
+}
+\&.ft
+
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+In this case \fIfoo\fR is a child of \fIbar\fR, and \fIbar\fR is an immediate child of \fImain\fR so \fIfoo\fR also is a child of \fImain\fR\&. In other words, \fImain\fR is a parent of \fIfoo\fR and \fIbar\fR, and \fIbar\fR is a parent of \fIfoo\fR\&.
+.sp
+Suppose all samples are recorded in \fIfoo\fR and \fIbar\fR only\&. When it\(cqs recorded with callchains the output will show something like below in the usual (self\-overhead\-only) output of perf report:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+
+\&.ft C
+Overhead  Symbol
+\&.\&.\&.\&.\&.\&.\&.\&.  \&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.
+  60\&.00%  foo
+          |
+          \-\-\- foo
+              bar
+              main
+              __libc_start_main
+
+  40\&.00%  bar
+          |
+          \-\-\- bar
+              main
+              __libc_start_main
+\&.ft
+
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+When the \-\-children option is enabled, the \fIself\fR overhead values of child functions (i\&.e\&. \fIfoo\fR and \fIbar\fR) are added to the parents to calculate the \fIchildren\fR overhead\&. In this case the report could be displayed as:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+
+\&.ft C
+Children      Self  Symbol
+\&.\&.\&.\&.\&.\&.\&.\&.  \&.\&.\&.\&.\&.\&.\&.\&.  \&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.
+ 100\&.00%     0\&.00%  __libc_start_main
+          |
+          \-\-\- __libc_start_main
+
+ 100\&.00%     0\&.00%  main
+          |
+          \-\-\- main
+              __libc_start_main
+
+ 100\&.00%    40\&.00%  bar
+          |
+          \-\-\- bar
+              main
+              __libc_start_main
+
+  60\&.00%    60\&.00%  foo
+          |
+          \-\-\- foo
+              bar
+              main
+              __libc_start_main
+\&.ft
+
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+In the above output, the \fIself\fR overhead of \fIfoo\fR (60%) was add to the \fIchildren\fR overhead of \fIbar\fR, \fImain\fR and \fI__libc_start_main\fR\&. Likewise, the \fIself\fR overhead of \fIbar\fR (40%) was added to the \fIchildren\fR overhead of \fImain\fR and \fI\e_\e_libc_start_main\fR\&.
+.sp
+So \fI\e_\e_libc_start_main\fR and \fImain\fR are shown first since they have same (100%) \fIchildren\fR overhead (even though they have zero \fIself\fR overhead) and they are the parents of \fIfoo\fR and \fIbar\fR\&.
+.sp
+Since v3\&.16 the \fIchildren\fR overhead is shown by default and the output is sorted by its values\&. The \fIchildren\fR overhead is disabled by specifying \-\-no\-children option on the command line or by adding \fIreport\&.children = false\fR or \fItop\&.children = false\fR in the perf config file\&.
+.SH "SEE ALSO"
+.sp
+\fBperf-stat\fR(1), \fBperf-list\fR(1), \fBperf-report\fR(1)

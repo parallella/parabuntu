@@ -1,0 +1,359 @@
+'\" t
+.\"     Title: perf-trace
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 05/27/2019
+.\"    Manual: perf Manual
+.\"    Source: perf
+.\"  Language: English
+.\"
+.TH "PERF\-TRACE" "1" "05/27/2019" "perf" "perf Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+perf-trace \- strace inspired tool
+.SH "SYNOPSIS"
+.sp
+.nf
+\fIperf trace\fR
+\fIperf trace record\fR
+.fi
+.SH "DESCRIPTION"
+.sp
+This command will show the events associated with the target, initially syscalls, but other system events like pagefaults, task lifetime events, scheduling events, etc\&.
+.sp
+This is a live mode tool in addition to working with perf\&.data files like the other perf tools\&. Files can be generated using the \fIperf record\fR command but the session needs to include the raw_syscalls events (\-e \fIraw_syscalls:*\fR)\&. Alternatively, \fIperf trace record\fR can be used as a shortcut to automatically include the raw_syscalls events when writing events to a file\&.
+.sp
+The following options apply to perf trace; options to perf trace record are found in the perf record man page\&.
+.SH "OPTIONS"
+.PP
+\-a, \-\-all\-cpus
+.RS 4
+System\-wide collection from all CPUs\&.
+.RE
+.PP
+\-e, \-\-expr, \-\-event
+.RS 4
+List of syscalls and other perf events (tracepoints, HW cache events, etc) to show\&. Globbing is supported, e\&.g\&.: "epoll_*", "\fBmsg\fR", etc\&. See
+\fIperf list\fR
+for a complete list of events\&. Prefixing with ! shows all syscalls but the ones specified\&. You may need to escape it\&.
+.RE
+.PP
+\-D msecs, \-\-delay msecs
+.RS 4
+After starting the program, wait msecs before measuring\&. This is useful to filter out the startup phase of the program, which is often very different\&.
+.RE
+.PP
+\-o, \-\-output=
+.RS 4
+Output file name\&.
+.RE
+.PP
+\-p, \-\-pid=
+.RS 4
+Record events on existing process ID (comma separated list)\&.
+.RE
+.PP
+\-t, \-\-tid=
+.RS 4
+Record events on existing thread ID (comma separated list)\&.
+.RE
+.PP
+\-u, \-\-uid=
+.RS 4
+Record events in threads owned by uid\&. Name or number\&.
+.RE
+.PP
+\-\-filter\-pids=
+.RS 4
+Filter out events for these pids and for
+\fItrace\fR
+itself (comma separated list)\&.
+.RE
+.PP
+\-v, \-\-verbose=
+.RS 4
+Verbosity level\&.
+.RE
+.PP
+\-\-no\-inherit
+.RS 4
+Child tasks do not inherit counters\&.
+.RE
+.PP
+\-m, \-\-mmap\-pages=
+.RS 4
+Number of mmap data pages (must be a power of two) or size specification with appended unit character \- B/K/M/G\&. The size is rounded up to have nearest pages power of two value\&.
+.RE
+.PP
+\-C, \-\-cpu
+.RS 4
+Collect samples only on the list of CPUs provided\&. Multiple CPUs can be provided as a comma\-separated list with no space: 0,1\&. Ranges of CPUs are specified with \-: 0\-2\&. In per\-thread mode with inheritance mode on (default), Events are captured only when the thread executes on the designated CPUs\&. Default is to monitor all CPUs\&.
+.RE
+.sp
+\-\-duration: Show only events that had a duration greater than N\&.M ms\&.
+.sp
+\-\-sched: Accrue thread runtime and provide a summary at the end of the session\&.
+.sp
+\-i \-\-input Process events from a given perf data file\&.
+.sp
+\-T \-\-time Print full timestamp rather time relative to first sample\&.
+.PP
+\-\-comm
+.RS 4
+Show process COMM right beside its ID, on by default, disable with \-\-no\-comm\&.
+.RE
+.PP
+\-s, \-\-summary
+.RS 4
+Show only a summary of syscalls by thread with min, max, and average times (in msec) and relative stddev\&.
+.RE
+.PP
+\-S, \-\-with\-summary
+.RS 4
+Show all syscalls followed by a summary by thread with min, max, and average times (in msec) and relative stddev\&.
+.RE
+.PP
+\-\-tool_stats
+.RS 4
+Show tool stats such as number of times fd\(->pathname was discovered thru hooking the open syscall return + vfs_getname or via reading /proc/pid/fd, etc\&.
+.RE
+.PP
+\-F=[all|min|maj], \-\-pf=[all|min|maj]
+.RS 4
+Trace pagefaults\&. Optionally, you can specify whether you want minor, major or all pagefaults\&. Default value is maj\&.
+.RE
+.PP
+\-\-syscalls
+.RS 4
+Trace system calls\&. This options is enabled by default, disable with \-\-no\-syscalls\&.
+.RE
+.PP
+\-\-call\-graph [mode,type,min[,limit],order[,key][,branch]]
+.RS 4
+Setup and enable call\-graph (stack chain/backtrace) recording\&. See
+\-\-call\-graph
+section in perf\-record and perf\-report man pages for details\&. The ones that are most useful in
+\fIperf trace\fR
+are
+\fIdwarf\fR
+and
+\fIlbr\fR, where available, try:
+\fIperf trace \-\-call\-graph dwarf\fR\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Using this will, for the root user, bump the value of \-\-mmap\-pages to 4
+times the maximum for non\-root users, based on the kernel\&.perf_event_mlock_kb
+sysctl\&. This is done only if the user doesn\*(Aqt specify a \-\-mmap\-pages value\&.
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+\-\-kernel\-syscall\-graph
+.RS 4
+Show the kernel callchains on the syscall exit path\&.
+.RE
+.PP
+\-\-max\-stack
+.RS 4
+Set the stack depth limit when parsing the callchain, anything beyond the specified depth will be ignored\&. Note that at this point this is just about the presentation part, i\&.e\&. the kernel is still not limiting, the overhead of callchains needs to be set via the knobs in \-\-call\-graph dwarf\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Implies \*(Aq\-\-call\-graph dwarf\*(Aq when \-\-call\-graph not present on the
+command line, on systems where DWARF unwinding was built in\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Default: /proc/sys/kernel/perf_event_max_stack when present for
+         live sessions (without \-\-input/\-i), 127 otherwise\&.
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+\-\-min\-stack
+.RS 4
+Set the stack depth limit when parsing the callchain, anything below the specified depth will be ignored\&. Disabled by default\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Implies \*(Aq\-\-call\-graph dwarf\*(Aq when \-\-call\-graph not present on the
+command line, on systems where DWARF unwinding was built in\&.
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+\-\-proc\-map\-timeout
+.RS 4
+When processing pre\-existing threads /proc/XXX/mmap, it may take a long time, because the file may be huge\&. A time out is needed in such cases\&. This option sets the time out limit\&. The default value is 500 ms\&.
+.RE
+.SH "PAGEFAULTS"
+.sp
+When tracing pagefaults, the format of the trace is as follows:
+.sp
+<min|maj>fault [<ip\&.symbol>+<ip\&.offset>] \(rA <\m[blue]\fBaddr\&.dso@addr\&.offset\fR\m[]\&\s-2\u[1]\d\s+2> (<map type><addr level>)\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+min/maj indicates whether fault event is minor or major;
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ip\&.symbol shows symbol for instruction pointer (the code that generated the fault); if no debug symbols available, perf trace will print raw IP;
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+addr\&.dso shows DSO for the faulted address;
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+map type is either
+\fId\fR
+for non\-executable maps or
+\fIx\fR
+for executable maps;
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+addr level is either
+\fIk\fR
+for kernel dso or
+\fI\&.\fR
+for user dso\&.
+.RE
+.sp
+For symbols resolution you may need to install debugging symbols\&.
+.sp
+Please be aware that duration is currently always 0 and doesn\(cqt reflect actual time it took for fault to be handled!
+.sp
+When \-\-verbose specified, perf trace tries to print all available information for both IP and fault address in the form of \m[blue]\fBdso@symbol\fR\m[]\&\s-2\u[2]\d\s+2+offset\&.
+.SH "EXAMPLES"
+.sp
+Trace only major pagefaults:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+$ perf trace \-\-no\-syscalls \-F
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Trace syscalls, major and minor pagefaults:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+$ perf trace \-F all
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+1416\&.547 ( 0\&.000 ms): python/20235 majfault [CRYPTO_push_info_+0x0] => /lib/x86_64\-linux\-gnu/libcrypto\&.so\&.1\&.0\&.0@0x61be0 (x\&.)
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+As you can see, there was major pagefault in python process, from
+CRYPTO_push_info_ routine which faulted somewhere in libcrypto\&.so\&.
+.fi
+.if n \{\
+.RE
+.\}
+.SH "SEE ALSO"
+.sp
+\fBperf-record\fR(1), \fBperf-script\fR(1)
+.SH "NOTES"
+.IP " 1." 4
+addr.dso@addr.offset
+.RS 4
+\%mailto:addr.dso@addr.offset
+.RE
+.IP " 2." 4
+dso@symbol
+.RS 4
+\%mailto:dso@symbol
+.RE

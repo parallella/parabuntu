@@ -1,0 +1,529 @@
+'\" t
+.\"     Title: perf-c2c
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 05/27/2019
+.\"    Manual: perf Manual
+.\"    Source: perf
+.\"  Language: English
+.\"
+.TH "PERF\-C2C" "1" "05/27/2019" "perf" "perf Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+perf-c2c \- Shared Data C2C/HITM Analyzer\&.
+.SH "SYNOPSIS"
+.sp
+.nf
+\fIperf c2c record\fR [<options>] <command>
+\fIperf c2c record\fR [<options>] \(em [<record command options>] <command>
+\fIperf c2c report\fR [<options>]
+.fi
+.SH "DESCRIPTION"
+.sp
+C2C stands for Cache To Cache\&.
+.sp
+The perf c2c tool provides means for Shared Data C2C/HITM analysis\&. It allows you to track down the cacheline contentions\&.
+.sp
+The tool is based on x86\(cqs load latency and precise store facility events provided by Intel CPUs\&. These events provide: \- memory address of the access \- type of the access (load and store details) \- latency (in cycles) of the load access
+.sp
+The c2c tool provide means to record this data and report back access details for cachelines with highest contention \- highest number of HITM accesses\&.
+.sp
+The basic workflow with this tool follows the standard record/report phase\&. User uses the record command to record events data and report command to display it\&.
+.SH "RECORD OPTIONS"
+.PP
+\-e, \-\-event=
+.RS 4
+Select the PMU event\&. Use
+\fIperf mem record \-e list\fR
+to list available events\&.
+.RE
+.PP
+\-v, \-\-verbose
+.RS 4
+Be more verbose (show counter open errors, etc)\&.
+.RE
+.PP
+\-l, \-\-ldlat
+.RS 4
+Configure mem\-loads latency\&.
+.RE
+.PP
+\-k, \-\-all\-kernel
+.RS 4
+Configure all used events to run in kernel space\&.
+.RE
+.PP
+\-u, \-\-all\-user
+.RS 4
+Configure all used events to run in user space\&.
+.RE
+.SH "REPORT OPTIONS"
+.PP
+\-k, \-\-vmlinux=<file>
+.RS 4
+vmlinux pathname
+.RE
+.PP
+\-v, \-\-verbose
+.RS 4
+Be more verbose (show counter open errors, etc)\&.
+.RE
+.PP
+\-i, \-\-input
+.RS 4
+Specify the input file to process\&.
+.RE
+.PP
+\-N, \-\-node\-info
+.RS 4
+Show extra node info in report (see NODE INFO section)
+.RE
+.PP
+\-c, \-\-coalesce
+.RS 4
+Specify sorting fields for single cacheline display\&. Following fields are available: tid,pid,iaddr,dso (see COALESCE)
+.RE
+.PP
+\-g, \-\-call\-graph
+.RS 4
+Setup callchains parameters\&. Please refer to perf\-report man page for details\&.
+.RE
+.PP
+\-\-stdio
+.RS 4
+Force the stdio output (see STDIO OUTPUT)
+.RE
+.PP
+\-\-stats
+.RS 4
+Display only statistic tables and force stdio mode\&.
+.RE
+.PP
+\-\-full\-symbols
+.RS 4
+Display full length of symbols\&.
+.RE
+.PP
+\-\-no\-source
+.RS 4
+Do not display Source:Line column\&.
+.RE
+.PP
+\-\-show\-all
+.RS 4
+Show all captured HITM lines, with no regard to HITM % 0\&.0005 limit\&.
+.RE
+.PP
+\-f, \-\-force
+.RS 4
+Don\(cqt do ownership validation\&.
+.RE
+.PP
+\-d, \-\-display
+.RS 4
+Switch to HITM type (rmt, lcl) to display and sort on\&. Total HITMs as default\&.
+.RE
+.SH "C2C RECORD"
+.sp
+The perf c2c record command setup options related to HITM cacheline analysis and calls standard perf record command\&.
+.sp
+Following perf record options are configured by default: (check perf record man page for details)
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\-W,\-d,\-\-sample\-cpu
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Unless specified otherwise with \fI\-e\fR option, following events are monitored by default:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+cpu/mem\-loads,ldlat=30/P
+cpu/mem\-stores/P
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+User can pass any \fIperf record\fR option behind \fI\-\-\fR mark, like (to enable callchains and system wide monitoring):
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+$ perf c2c record \-\- \-g \-a
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Please check RECORD OPTIONS section for specific c2c record options\&.
+.SH "C2C REPORT"
+.sp
+The perf c2c report command displays shared data analysis\&. It comes in two display modes: stdio and tui (default)\&.
+.sp
+The report command workflow is following: \- sort all the data based on the cacheline address \- store access details for each cacheline \- sort all cachelines based on user settings \- display data
+.sp
+In general perf report output consist of 2 basic views: 1) most expensive cachelines list 2) offsets details for each cacheline
+.sp
+For each cacheline in the 1) list we display following data: (Both stdio and TUI modes follow the same fields output)
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Index
+\- zero based index to identify the cacheline
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Cacheline
+\- cacheline address (hex number)
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Total records
+\- sum of all cachelines accesses
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Rmt/Lcl Hitm
+\- cacheline percentage of all Remote/Local HITM accesses
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+LLC Load Hitm \- Total, Lcl, Rmt
+\- count of Total/Local/Remote load HITMs
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Store Reference \- Total, L1Hit, L1Miss
+  Total \- all store accesses
+  L1Hit \- store accesses that hit L1
+  L1Hit \- store accesses that missed L1
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Load Dram
+\- count of local and remote DRAM accesses
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+LLC Ld Miss
+\- count of all accesses that missed LLC
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Total Loads
+\- sum of all load accesses
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Core Load Hit \- FB, L1, L2
+\- count of load hits in FB (Fill Buffer), L1 and L2 cache
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+LLC Load Hit \- Llc, Rmt
+\- count of LLC and Remote load hits
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+For each offset in the 2) list we display following data:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+HITM \- Rmt, Lcl
+\- % of Remote/Local HITM accesses for given offset within cacheline
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Store Refs \- L1 Hit, L1 Miss
+\- % of store accesses that hit/missed L1 for given offset within cacheline
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Data address \- Offset
+\- offset address
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Pid
+\- pid of the process responsible for the accesses
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Tid
+\- tid of the process responsible for the accesses
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Code address
+\- code address responsible for the accesses
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+cycles \- rmt hitm, lcl hitm, load
+  \- sum of cycles for given accesses \- Remote/Local HITM and generic load
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+cpu cnt
+  \- number of cpus that participated on the access
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Symbol
+  \- code symbol related to the \*(AqCode address\*(Aq value
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Shared Object
+  \- shared object name related to the \*(AqCode address\*(Aq value
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Source:Line
+  \- source information related to the \*(AqCode address\*(Aq value
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Node
+  \- nodes participating on the access (see NODE INFO section)
+.fi
+.if n \{\
+.RE
+.\}
+.SH "NODE INFO"
+.sp
+The \fINode\fR field displays nodes that accesses given cacheline offset\&. Its output comes in 3 flavors: \- node IDs separated by \fI,\fR \- node IDs with stats for each ID, in following format: Node{cpus %hitms %stores} \- node IDs with list of affected CPUs in following format: Node{cpu list}
+.sp
+User can switch between above flavors with \-N option or use \fIn\fR key to interactively switch in TUI mode\&.
+.SH "COALESCE"
+.sp
+User can specify how to sort offsets for cacheline\&.
+.sp
+Following fields are available and governs the final output fields set for caheline offsets output:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+tid   \- coalesced by process TIDs
+pid   \- coalesced by process PIDs
+iaddr \- coalesced by code address, following fields are displayed:
+           Code address, Code symbol, Shared Object, Source line
+dso   \- coalesced by shared object
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+By default the coalescing is setup with \fIpid,iaddr\fR\&.
+.SH "STDIO OUTPUT"
+.sp
+The stdio output displays data on standard output\&.
+.sp
+Following tables are displayed: Trace Event Information \- overall statistics of memory accesses
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Global Shared Cache Line Event Information
+\- overall statistics on shared cachelines
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Shared Data Cache Line Table
+\- list of most expensive cachelines
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Shared Cache Line Distribution Pareto
+\- list of all accessed offsets for each cacheline
+.fi
+.if n \{\
+.RE
+.\}
+.SH "TUI OUTPUT"
+.sp
+The TUI output provides interactive interface to navigate through cachelines list and to display offset details\&.
+.sp
+For details please refer to the help window by pressing \fI?\fR key\&.
+.SH "CREDITS"
+.sp
+Although Don Zickus, Dick Fowles and Joe Mario worked together to get this implemented, we got lots of early help from Arnaldo Carvalho de Melo, Stephane Eranian, Jiri Olsa and Andi Kleen\&.
+.SH "C2C BLOG"
+.sp
+Check Joe\(cqs blog on c2c tool for detailed use case explanation: \m[blue]\fBhttps://joemario\&.github\&.io/blog/2016/09/01/c2c\-blog/\fR\m[]
+.SH "SEE ALSO"
+.sp
+\fBperf-record\fR(1), \fBperf-mem\fR(1)

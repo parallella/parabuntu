@@ -1,0 +1,45 @@
+'\" t
+.\"     Title: perf-kallsyms
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 05/27/2019
+.\"    Manual: perf Manual
+.\"    Source: perf
+.\"  Language: English
+.\"
+.TH "PERF\-KALLSYMS" "1" "05/27/2019" "perf" "perf Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+perf-kallsyms \- Searches running kernel for symbols
+.SH "SYNOPSIS"
+.sp
+.nf
+\fIperf kallsyms <options> symbol_name[,symbol_name\&...]\fR
+.fi
+.SH "DESCRIPTION"
+.sp
+This command searches the running kernel kallsyms file for the given symbol(s) and prints information about it, including the DSO, the kallsyms begin/end addresses and the addresses in the ELF kallsyms symbol table (for symbols in modules)\&.
+.SH "OPTIONS"
+.PP
+\-v, \-\-verbose=
+.RS 4
+Increase verbosity level, showing details about symbol table loading, etc\&.
+.RE

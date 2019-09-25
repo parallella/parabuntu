@@ -1,0 +1,68 @@
+'\" t
+.\"     Title: perf-evlist
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 05/27/2019
+.\"    Manual: perf Manual
+.\"    Source: perf
+.\"  Language: English
+.\"
+.TH "PERF\-EVLIST" "1" "05/27/2019" "perf" "perf Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+perf-evlist \- List the event names in a perf\&.data file
+.SH "SYNOPSIS"
+.sp
+.nf
+\fIperf evlist <options>\fR
+.fi
+.SH "DESCRIPTION"
+.sp
+This command displays the names of events sampled in a perf\&.data file\&.
+.SH "OPTIONS"
+.PP
+\-i, \-\-input=
+.RS 4
+Input file name\&. (default: perf\&.data unless stdin is a fifo)
+.RE
+.PP
+\-F, \-\-freq=
+.RS 4
+Show just the sample frequency used for each event\&.
+.RE
+.PP
+\-v, \-\-verbose=
+.RS 4
+Show all fields\&.
+.RE
+.PP
+\-g, \-\-group
+.RS 4
+Show event group information\&.
+.RE
+.PP
+\-\-trace\-fields
+.RS 4
+Show tracepoint field names\&.
+.RE
+.SH "SEE ALSO"
+.sp
+\fBperf-record\fR(1), \fBperf-list\fR(1), \fBperf-report\fR(1)

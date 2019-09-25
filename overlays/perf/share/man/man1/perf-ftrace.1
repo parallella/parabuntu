@@ -1,0 +1,103 @@
+'\" t
+.\"     Title: perf-ftrace
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 05/27/2019
+.\"    Manual: perf Manual
+.\"    Source: perf
+.\"  Language: English
+.\"
+.TH "PERF\-FTRACE" "1" "05/27/2019" "perf" "perf Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+perf-ftrace \- simple wrapper for kernel\*(Aqs ftrace functionality
+.SH "SYNOPSIS"
+.sp
+.nf
+\fIperf ftrace\fR <command>
+.fi
+.SH "DESCRIPTION"
+.sp
+The \fIperf ftrace\fR command is a simple wrapper of kernel\(cqs ftrace functionality\&. It only supports single thread tracing currently and just reads trace_pipe in text and then write it to stdout\&.
+.sp
+The following options apply to perf ftrace\&.
+.SH "OPTIONS"
+.PP
+\-t, \-\-tracer=
+.RS 4
+Tracer to use: function_graph or function\&.
+.RE
+.PP
+\-v, \-\-verbose=
+.RS 4
+Verbosity level\&.
+.RE
+.PP
+\-p, \-\-pid=
+.RS 4
+Trace on existing process id (comma separated list)\&.
+.RE
+.PP
+\-a, \-\-all\-cpus
+.RS 4
+Force system\-wide collection\&. Scripts run without a <command> normally use \-a by default, while scripts run with a <command> normally don\(cqt \- this option allows the latter to be run in system\-wide mode\&.
+.RE
+.PP
+\-C, \-\-cpu=
+.RS 4
+Only trace for the list of CPUs provided\&. Multiple CPUs can be provided as a comma separated list with no space like: 0,1\&. Ranges of CPUs are specified with \-: 0\-2\&. Default is to trace on all online CPUs\&.
+.RE
+.PP
+\-T, \-\-trace\-funcs=
+.RS 4
+Only trace functions given by the argument\&. Multiple functions can be given by using this option more than once\&. The function argument also can be a glob pattern\&. It will be passed to
+\fIset_ftrace_filter\fR
+in tracefs\&.
+.RE
+.PP
+\-N, \-\-notrace\-funcs=
+.RS 4
+Do not trace functions given by the argument\&. Like \-T option, this can be used more than once to specify multiple functions (or glob patterns)\&. It will be passed to
+\fIset_ftrace_notrace\fR
+in tracefs\&.
+.RE
+.PP
+\-G, \-\-graph\-funcs=
+.RS 4
+Set graph filter on the given function (or a glob pattern)\&. This is useful for the function_graph tracer only and enables tracing for functions executed from the given function\&. This can be used more than once to specify multiple functions\&. It will be passed to
+\fIset_graph_function\fR
+in tracefs\&.
+.RE
+.PP
+\-g, \-\-nograph\-funcs=
+.RS 4
+Set graph notrace filter on the given function (or a glob pattern)\&. Like \-G option, this is useful for the function_graph tracer only and disables tracing for function executed from the given function\&. This can be used more than once to specify multiple functions\&. It will be passed to
+\fIset_graph_notrace\fR
+in tracefs\&.
+.RE
+.PP
+\-D, \-\-graph\-depth=
+.RS 4
+Set max depth for function graph tracer to follow
+.RE
+.SH "SEE ALSO"
+.sp
+\fBperf-record\fR(1), \fBperf-trace\fR(1)

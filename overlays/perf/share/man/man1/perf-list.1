@@ -1,0 +1,445 @@
+'\" t
+.\"     Title: perf-list
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 05/27/2019
+.\"    Manual: perf Manual
+.\"    Source: perf
+.\"  Language: English
+.\"
+.TH "PERF\-LIST" "1" "05/27/2019" "perf" "perf Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+perf-list \- List all symbolic event types
+.SH "SYNOPSIS"
+.sp
+.nf
+\fIperf list\fR [\-\-no\-desc] [\-\-long\-desc] [hw|sw|cache|tracepoint|pmu|sdt|event_glob]
+.fi
+.SH "DESCRIPTION"
+.sp
+This command displays the symbolic event types which can be selected in the various perf commands with the \-e option\&.
+.SH "OPTIONS"
+.PP
+\-\-no\-desc
+.RS 4
+Don\(cqt print descriptions\&.
+.RE
+.PP
+\-v, \-\-long\-desc
+.RS 4
+Print longer event descriptions\&.
+.RE
+.PP
+\-\-details
+.RS 4
+Print how named events are resolved internally into perf events, and also any extra expressions computed by perf stat\&.
+.RE
+.SH "EVENT MODIFIERS"
+.sp
+Events can optionally have a modifier by appending a colon and one or more modifiers\&. Modifiers allow the user to restrict the events to be counted\&. The following modifiers exist:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+u \- user\-space counting
+k \- kernel counting
+h \- hypervisor counting
+I \- non idle counting
+G \- guest counting (in KVM guests)
+H \- host counting (not in KVM guests)
+p \- precise level
+P \- use maximum detected precise level
+S \- read sample value (PERF_SAMPLE_READ)
+D \- pin the event to the PMU
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+The \fIp\fR modifier can be used for specifying how precise the instruction address should be\&. The \fIp\fR modifier can be specified multiple times:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+0 \- SAMPLE_IP can have arbitrary skid
+1 \- SAMPLE_IP must have constant skid
+2 \- SAMPLE_IP requested to have 0 skid
+3 \- SAMPLE_IP must have 0 skid, or uses randomization to avoid
+    sample shadowing effects\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+For Intel systems precise event sampling is implemented with PEBS which supports up to precise\-level 2, and precise level 3 for some special cases
+.sp
+On AMD systems it is implemented using IBS (up to precise\-level 2)\&. The precise modifier works with event types 0x76 (cpu\-cycles, CPU clocks not halted) and 0xC1 (micro\-ops retired)\&. Both events map to IBS execution sampling (IBS op) with the IBS Op Counter Control bit (IbsOpCntCtl) set respectively (see AMD64 Architecture Programmer\(cqs Manual Volume 2: System Programming, 13\&.3 Instruction\-Based Sampling)\&. Examples to use IBS:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+perf record \-a \-e cpu\-cycles:p \&.\&.\&.    # use ibs op counting cycles
+perf record \-a \-e r076:p \&.\&.\&.          # same as \-e cpu\-cycles:p
+perf record \-a \-e r0C1:p \&.\&.\&.          # use ibs op counting micro\-ops
+.fi
+.if n \{\
+.RE
+.\}
+.SH "RAW HARDWARE EVENT DESCRIPTOR"
+.sp
+Even when an event is not available in a symbolic form within perf right now, it can be encoded in a per processor specific way\&.
+.sp
+For instance For x86 CPUs NNN represents the raw register encoding with the layout of IA32_PERFEVTSELx MSRs (see [Intel\(rg 64 and IA\-32 Architectures Software Developer\(cqs Manual Volume 3B: System Programming Guide] Figure 30\-1 Layout of IA32_PERFEVTSELx MSRs) or AMD\(cqs PerfEvtSeln (see [AMD64 Architecture Programmer\(cqs Manual Volume 2: System Programming], Page 344, Figure 13\-7 Performance Event\-Select Register (PerfEvtSeln))\&.
+.sp
+Note: Only the following bit fields can be set in x86 counter registers: event, umask, edge, inv, cmask\&. Esp\&. guest/host only and OS/user mode flags must be setup using EVENT MODIFIERS\&.
+.sp
+Example:
+.sp
+If the Intel docs for a QM720 Core i7 describe an event as:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Event  Umask  Event Mask
+Num\&.   Value  Mnemonic    Description                        Comment
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+A8H      01H  LSD\&.UOPS    Counts the number of micro\-ops     Use cmask=1 and
+                          delivered by loop stream detector  invert to count
+                                                             cycles
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+raw encoding of 0x1A8 can be used:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+perf stat \-e r1a8 \-a sleep 1
+perf record \-e r1a8 \&.\&.\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+You should refer to the processor specific documentation for getting these details\&. Some of them are referenced in the SEE ALSO section below\&.
+.SH "ARBITRARY PMUS"
+.sp
+perf also supports an extended syntax for specifying raw parameters to PMUs\&. Using this typically requires looking up the specific event in the CPU vendor specific documentation\&.
+.sp
+The available PMUs and their raw parameters can be listed with
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ls /sys/devices/*/format
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+For example the raw event "LSD\&.UOPS" core pmu event above could be specified as
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+perf stat \-e cpu/event=0xa8,umask=0x1,name=LSD\&.UOPS_CYCLES,cmask=1/ \&.\&.\&.
+.fi
+.if n \{\
+.RE
+.\}
+.SH "PER SOCKET PMUS"
+.sp
+Some PMUs are not associated with a core, but with a whole CPU socket\&. Events on these PMUs generally cannot be sampled, but only counted globally with perf stat \-a\&. They can be bound to one logical CPU, but will measure all the CPUs in the same socket\&.
+.sp
+This example measures memory bandwidth every second on the first memory controller on socket 0 of a Intel Xeon system
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+perf stat \-C 0 \-a uncore_imc_0/cas_count_read/,uncore_imc_0/cas_count_write/ \-I 1000 \&.\&.\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Each memory controller has its own PMU\&. Measuring the complete system bandwidth would require specifying all imc PMUs (see perf list output), and adding the values together\&.
+.sp
+This example measures the combined core power every second
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+perf stat \-I 1000 \-e power/energy\-cores/  \-a
+.fi
+.if n \{\
+.RE
+.\}
+.SH "ACCESS RESTRICTIONS"
+.sp
+For non root users generally only context switched PMU events are available\&. This is normally only the events in the cpu PMU, the predefined events like cycles and instructions and some software events\&.
+.sp
+Other PMUs and global measurements are normally root only\&. Some event qualifiers, such as "any", are also root only\&.
+.sp
+This can be overriden by setting the kernel\&.perf_event_paranoid sysctl to \-1, which allows non root to use these events\&.
+.sp
+For accessing trace point events perf needs to have read access to /sys/kernel/debug/tracing, even when perf_event_paranoid is in a relaxed setting\&.
+.SH "TRACING"
+.sp
+Some PMUs control advanced hardware tracing capabilities, such as Intel PT, that allows low overhead execution tracing\&. These are described in a separate intel\-pt\&.txt document\&.
+.SH "PARAMETERIZED EVENTS"
+.sp
+Some pmu events listed by \fIperf\-list\fR will be displayed with \fI?\fR in them\&. For example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+hv_gpci/dtbp_ptitc,phys_processor_idx=?/
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+This means that when provided as an event, a value for \fI?\fR must also be supplied\&. For example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+perf stat \-C 0 \-e \*(Aqhv_gpci/dtbp_ptitc,phys_processor_idx=0x2/\*(Aq \&.\&.\&.
+.fi
+.if n \{\
+.RE
+.\}
+.SH "EVENT GROUPS"
+.sp
+Perf supports time based multiplexing of events, when the number of events active exceeds the number of hardware performance counters\&. Multiplexing can cause measurement errors when the workload changes its execution profile\&.
+.sp
+When metrics are computed using formulas from event counts, it is useful to ensure some events are always measured together as a group to minimize multiplexing errors\&. Event groups can be specified using { }\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+perf stat \-e \*(Aq{instructions,cycles}\*(Aq \&.\&.\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+The number of available performance counters depend on the CPU\&. A group cannot contain more events than available counters\&. For example Intel Core CPUs typically have four generic performance counters for the core, plus three fixed counters for instructions, cycles and ref\-cycles\&. Some special events have restrictions on which counter they can schedule, and may not support multiple instances in a single group\&. When too many events are specified in the group none of them will not be measured\&.
+.sp
+Globally pinned events can limit the number of counters available for other groups\&. On x86 systems, the NMI watchdog pins a counter by default\&. The nmi watchdog can be disabled as root with
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+echo 0 > /proc/sys/kernel/nmi_watchdog
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Events from multiple different PMUs cannot be mixed in a group, with some exceptions for software events\&.
+.SH "LEADER SAMPLING"
+.sp
+perf also supports group leader sampling using the :S specifier\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+perf record \-e \*(Aq{cycles,instructions}:S\*(Aq \&.\&.\&.
+perf report \-\-group
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Normally all events in a event group sample, but with :S only the first event (the leader) samples, and it only reads the values of the other events in the group\&.
+.SH "OPTIONS"
+.sp
+Without options all known events will be listed\&.
+.sp
+To limit the list use:
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 1.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  1." 4.2
+.\}
+\fIhw\fR
+or
+\fIhardware\fR
+to list hardware events such as cache\-misses, etc\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 2.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  2." 4.2
+.\}
+\fIsw\fR
+or
+\fIsoftware\fR
+to list software events such as context switches, etc\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 3.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  3." 4.2
+.\}
+\fIcache\fR
+or
+\fIhwcache\fR
+to list hardware cache events such as L1\-dcache\-loads, etc\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 4.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  4." 4.2
+.\}
+\fItracepoint\fR
+to list all tracepoint events, alternatively use
+\fIsubsys_glob:event_glob\fR
+to filter by tracepoint subsystems such as sched, block, etc\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 5.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  5." 4.2
+.\}
+\fIpmu\fR
+to print the kernel supplied PMU events\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 6.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  6." 4.2
+.\}
+\fIsdt\fR
+to list all Statically Defined Tracepoint events\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 7.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  7." 4.2
+.\}
+If none of the above is matched, it will apply the supplied glob to all events, printing the ones that match\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 8.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  8." 4.2
+.\}
+As a last resort, it will do a substring search in all event names\&.
+.RE
+.sp
+One or more types can be used at the same time, listing the events for the types specified\&.
+.sp
+Support raw format:
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 1.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  1." 4.2
+.\}
+\fI\-\-raw\-dump\fR, shows the raw\-dump of all the events\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 2.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  2." 4.2
+.\}
+\fI\-\-raw\-dump [hw|sw|cache|tracepoint|pmu|event_glob]\fR, shows the raw\-dump of a certain kind of events\&.
+.RE
+.SH "SEE ALSO"
+.sp
+\fBperf-stat\fR(1), \fBperf-top\fR(1), \fBperf-record\fR(1), \m[blue]\fBIntel\(rg 64 and IA\-32 Architectures Software Developer\(cqs Manual Volume 3B: System Programming Guide\fR\m[]\&\s-2\u[1]\d\s+2, \m[blue]\fBAMD64 Architecture Programmer\(cqs Manual Volume 2: System Programming\fR\m[]\&\s-2\u[2]\d\s+2
+.SH "NOTES"
+.IP " 1." 4
+Intel\(rg 64 and IA-32 Architectures Software Developer\(cqs Manual Volume 3B: System Programming Guide
+.RS 4
+\%http://www.intel.com/sdm/
+.RE
+.IP " 2." 4
+AMD64 Architecture Programmer\(cqs Manual Volume 2: System Programming
+.RS 4
+\%http://support.amd.com/us/Processor_TechDocs/24593_APM_v2.pdf
+.RE

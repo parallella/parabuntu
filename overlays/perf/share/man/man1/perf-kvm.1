@@ -1,0 +1,274 @@
+'\" t
+.\"     Title: perf-kvm
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 05/27/2019
+.\"    Manual: perf Manual
+.\"    Source: perf
+.\"  Language: English
+.\"
+.TH "PERF\-KVM" "1" "05/27/2019" "perf" "perf Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+perf-kvm \- Tool to trace/measure kvm guest os
+.SH "SYNOPSIS"
+.sp
+.nf
+\fIperf kvm\fR [\-\-host] [\-\-guest] [\-\-guestmount=<path>
+        [\-\-guestkallsyms=<path> \-\-guestmodules=<path> | \-\-guestvmlinux=<path>]]
+        {top|record|report|diff|buildid\-list} [<options>]
+\fIperf kvm\fR [\-\-host] [\-\-guest] [\-\-guestkallsyms=<path> \-\-guestmodules=<path>
+        | \-\-guestvmlinux=<path>] {top|record|report|diff|buildid\-list|stat} [<options>]
+\*(Aqperf kvm stat [record|report|live] [<options>]
+.fi
+.SH "DESCRIPTION"
+.sp
+There are a couple of variants of perf kvm:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\*(Aqperf kvm [options] top <command>\*(Aq to generates and displays
+a performance counter profile of guest os in realtime
+of an arbitrary workload\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\*(Aqperf kvm record <command>\*(Aq to record the performance counter profile
+of an arbitrary workload and save it into a perf data file\&. We set the
+default behavior of perf kvm as \-\-guest, so if neither \-\-host nor \-\-guest
+is input, the perf data file name is perf\&.data\&.guest\&. If \-\-host is input,
+the perf data file name is perf\&.data\&.kvm\&. If you want to record data into
+perf\&.data\&.host, please input \-\-host \-\-no\-guest\&. The behaviors are shown as
+following:
+  Default(\*(Aq\*(Aq)         \->  perf\&.data\&.guest
+  \-\-host              \->  perf\&.data\&.kvm
+  \-\-guest             \->  perf\&.data\&.guest
+  \-\-host \-\-guest      \->  perf\&.data\&.kvm
+  \-\-host \-\-no\-guest   \->  perf\&.data\&.host
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\*(Aqperf kvm report\*(Aq to display the performance counter profile information
+recorded via perf kvm record\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\*(Aqperf kvm diff\*(Aq to displays the performance difference amongst two perf\&.data
+files captured via perf record\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\*(Aqperf kvm buildid\-list\*(Aq to  display the buildids found in a perf data file,
+so that other tools can be used to fetch packages with matching symbol tables
+for use by perf report\&. As buildid is read from /sys/kernel/notes in os, then
+if you want to list the buildid for guest, please make sure your perf data file
+was captured with \-\-guestmount in perf kvm record\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\*(Aqperf kvm stat <command>\*(Aq to run a command and gather performance counter
+statistics\&.
+Especially, perf \*(Aqkvm stat record/report\*(Aq generates a statistical analysis
+of KVM events\&. Currently, vmexit, mmio (x86 only) and ioport (x86 only)
+events are supported\&. \*(Aqperf kvm stat record <command>\*(Aq records kvm events
+and the events between start and end <command>\&.
+And this command produces a file which contains tracing results of kvm
+events\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\*(Aqperf kvm stat report\*(Aq reports statistical data which includes events
+handled time, samples, and so on\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\*(Aqperf kvm stat live\*(Aq reports statistical data in a live mode (similar to
+record + report but with statistical data updated live at a given display
+rate)\&.
+.fi
+.if n \{\
+.RE
+.\}
+.SH "OPTIONS"
+.PP
+\-i, \-\-input=<path>
+.RS 4
+Input file name\&.
+.RE
+.PP
+\-o, \-\-output=<path>
+.RS 4
+Output file name\&.
+.RE
+.PP
+\-\-host
+.RS 4
+Collect host side performance profile\&.
+.RE
+.PP
+\-\-guest
+.RS 4
+Collect guest side performance profile\&.
+.RE
+.PP
+\-\-guestmount=<path>
+.RS 4
+Guest os root file system mount directory\&. Users mounts guest os root directories under <path> by a specific filesystem access method, typically, sshfs\&. For example, start 2 guest os\&. The one\(cqs pid is 8888 and the other\(cqs is 9999\&. #mkdir
+/guestmount; cd/guestmount #sshfs \-o allow_other,direct_io \-p 5551 localhost:/ 8888/ #sshfs \-o allow_other,direct_io \-p 5552 localhost:/ 9999/ #perf kvm \-\-host \-\-guest \-\-guestmount=~/guestmount top
+.RE
+.PP
+\-\-guestkallsyms=<path>
+.RS 4
+Guest os /proc/kallsyms file copy\&.
+\fIperf\fR
+kvm\*(Aq reads it to get guest kernel symbols\&. Users copy it out from guest os\&.
+.RE
+.PP
+\-\-guestmodules=<path>
+.RS 4
+Guest os /proc/modules file copy\&.
+\fIperf\fR
+kvm\*(Aq reads it to get guest kernel module information\&. Users copy it out from guest os\&.
+.RE
+.PP
+\-\-guestvmlinux=<path>
+.RS 4
+Guest os kernel vmlinux\&.
+.RE
+.PP
+\-v, \-\-verbose
+.RS 4
+Be more verbose (show counter open errors, etc)\&.
+.RE
+.SH "STAT REPORT OPTIONS"
+.PP
+\-\-vcpu=<value>
+.RS 4
+analyze events which occur on this vcpu\&. (default: all vcpus)
+.RE
+.PP
+\-\-event=<value>
+.RS 4
+event to be analyzed\&. Possible values: vmexit, mmio (x86 only), ioport (x86 only)\&. (default: vmexit)
+.RE
+.PP
+\-k, \-\-key=<value>
+.RS 4
+Sorting key\&. Possible values: sample (default, sort by samples number), time (sort by average time)\&.
+.RE
+.PP
+\-p, \-\-pid=
+.RS 4
+Analyze events only for given process ID(s) (comma separated list)\&.
+.RE
+.SH "STAT LIVE OPTIONS"
+.PP
+\-d, \-\-display
+.RS 4
+Time in seconds between display updates
+.RE
+.PP
+\-m, \-\-mmap\-pages=
+.RS 4
+Number of mmap data pages (must be a power of two) or size specification with appended unit character \- B/K/M/G\&. The size is rounded up to have nearest pages power of two value\&.
+.RE
+.PP
+\-a, \-\-all\-cpus
+.RS 4
+System\-wide collection from all CPUs\&.
+.RE
+.PP
+\-p, \-\-pid=
+.RS 4
+Analyze events only for given process ID(s) (comma separated list)\&.
+.RE
+.PP
+\-\-vcpu=<value>
+.RS 4
+analyze events which occur on this vcpu\&. (default: all vcpus)
+.RE
+.PP
+\-\-event=<value>
+.RS 4
+event to be analyzed\&. Possible values: vmexit, mmio (x86 only), ioport (x86 only)\&. (default: vmexit)
+.RE
+.PP
+\-k, \-\-key=<value>
+.RS 4
+Sorting key\&. Possible values: sample (default, sort by samples number), time (sort by average time)\&.
+.RE
+.PP
+\-\-duration=<value>
+.RS 4
+Show events other than HLT (x86 only) or Wait state (s390 only) that take longer than duration usecs\&.
+.RE
+.PP
+\-\-proc\-map\-timeout
+.RS 4
+When processing pre\-existing threads /proc/XXX/mmap, it may take a long time, because the file may be huge\&. A time out is needed in such cases\&. This option sets the time out limit\&. The default value is 500 ms\&.
+.RE
+.SH "SEE ALSO"
+.sp
+\fBperf-top\fR(1), \fBperf-record\fR(1), \fBperf-report\fR(1), \fBperf-diff\fR(1), \fBperf-buildid-list\fR(1), \fBperf-stat\fR(1)

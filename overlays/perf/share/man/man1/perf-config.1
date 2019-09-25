@@ -1,0 +1,1055 @@
+'\" t
+.\"     Title: perf-config
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 05/27/2019
+.\"    Manual: perf Manual
+.\"    Source: perf
+.\"  Language: English
+.\"
+.TH "PERF\-CONFIG" "1" "05/27/2019" "perf" "perf Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+perf-config \- Get and set variables in a configuration file\&.
+.SH "SYNOPSIS"
+.sp
+.nf
+\fIperf config\fR [<file\-option>] [section\&.name[=value] \&...]
+or
+\fIperf config\fR [<file\-option>] \-l | \-\-list
+.fi
+.SH "DESCRIPTION"
+.sp
+You can manage variables in a configuration file with this command\&.
+.SH "OPTIONS"
+.PP
+\-l, \-\-list
+.RS 4
+Show current config variables, name and value, for all sections\&.
+.RE
+.PP
+\-\-user
+.RS 4
+For writing and reading options: write to user
+\fI$HOME/\&.perfconfig\fR
+file or read it\&.
+.RE
+.PP
+\-\-system
+.RS 4
+For writing and reading options: write to system\-wide
+\fI$(sysconfdir)/perfconfig\fR
+or read it\&.
+.RE
+.SH "CONFIGURATION FILE"
+.sp
+The perf configuration file contains many variables to change various aspects of each of its tools, including output, disk usage, etc\&. The \fI$HOME/\&.perfconfig\fR file is used to store a per\-user configuration\&. The file \fI$(sysconfdir)/perfconfig\fR can be used to store a system\-wide default configuration\&.
+.sp
+When reading or writing, the values are read from the system and user configuration files by default, and options \fI\-\-system\fR and \fI\-\-user\fR can be used to tell the command to read from or write to only that location\&.
+.SS "Syntax"
+.sp
+The file consist of sections\&. A section starts with its name surrounded by square brackets and continues till the next section begins\&. Each variable must be in a section, and have the form \fIname = value\fR, for example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[section]
+        name1 = value1
+        name2 = value2
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Section names are case sensitive and can contain any characters except newline (double quote " and backslash have to be escaped as \e" and \e\e, respectively)\&. Section headers can\(cqt span multiple lines\&.
+.SS "Example"
+.sp
+Given a $HOME/\&.perfconfig like this:
+.sp
+# # This is the config file, and # a \fI#\fR and \fI;\fR character indicates a comment #
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[colors]
+        # Color variables
+        top = red, default
+        medium = green, default
+        normal = lightgray, default
+        selected = white, lightgray
+        jump_arrows = blue, default
+        addr = magenta, default
+        root = white, blue
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[tui]
+        # Defaults if linked with libslang
+        report = on
+        annotate = on
+        top = on
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[buildid]
+        # Default, disable using /dev/null
+        dir = ~/\&.debug
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[annotate]
+        # Defaults
+        hide_src_code = false
+        use_offset = true
+        jump_arrows = true
+        show_nr_jumps = false
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[help]
+        # Format can be man, info, web or html
+        format = man
+        autocorrect = 0
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[ui]
+        show\-headers = true
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[call\-graph]
+        # fp (framepointer), dwarf
+        record\-mode = fp
+        print\-type = graph
+        order = caller
+        sort\-key = function
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[report]
+        # Defaults
+        sort\-order = comm,dso,symbol
+        percent\-limit = 0
+        queue\-size = 0
+        children = true
+        group = true
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+You can hide source code of annotate feature setting the config to false with
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+% perf config annotate\&.hide_src_code=true
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+If you want to add or modify several config items, you can do like
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+% perf config ui\&.show\-headers=false kmem\&.default=slab
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+To modify the sort order of report functionality in user config file(i\&.e\&. ~/\&.perfconfig), do
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+% perf config \-\-user report sort\-order=srcline
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+To change colors of selected line to other foreground and background colors in system config file (i\&.e\&. $(sysconf)/perfconfig), do
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+% perf config \-\-system colors\&.selected=yellow,green
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+To query the record mode of call graph, do
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+% perf config call\-graph\&.record\-mode
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+If you want to know multiple config key/value pairs, you can do like
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+% perf config report\&.queue\-size call\-graph\&.order report\&.children
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+To query the config value of sort order of call graph in user config file (i\&.e\&. ~/\&.perfconfig), do
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+% perf config \-\-user call\-graph\&.sort\-order
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+To query the config value of buildid directory in system config file (i\&.e\&. $(sysconf)/perfconfig), do
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+% perf config \-\-system buildid\&.dir
+.fi
+.if n \{\
+.RE
+.\}
+.SS "Variables"
+.PP
+colors\&.*
+.RS 4
+The variables for customizing the colors used in the output for the
+\fIreport\fR,
+\fItop\fR
+and
+\fIannotate\fR
+in the TUI\&. They should specify the foreground and background colors, separated by a comma, for example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+medium = green, lightgray
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+If you want to use the color configured for you terminal, just leave it
+as \*(Aqdefault\*(Aq, for example:
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+medium = default, lightgray
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Available colors:
+red, yellow, green, cyan, gray, black, blue,
+white, default, magenta, lightgray
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+colors\&.top
+.RS 4
+\fItop\fR
+means a overhead percentage which is more than 5%\&. And values of this variable specify percentage colors\&. Basic key values are foreground\-color
+\fIred\fR
+and background\-color
+\fIdefault\fR\&.
+.RE
+.PP
+colors\&.medium
+.RS 4
+\fImedium\fR
+means a overhead percentage which has more than 0\&.5%\&. Default values are
+\fIgreen\fR
+and
+\fIdefault\fR\&.
+.RE
+.PP
+colors\&.normal
+.RS 4
+\fInormal\fR
+means the rest of overhead percentages except
+\fItop\fR,
+\fImedium\fR,
+\fIselected\fR\&. Default values are
+\fIlightgray\fR
+and
+\fIdefault\fR\&.
+.RE
+.PP
+colors\&.selected
+.RS 4
+This selects the colors for the current entry in a list of entries from sub\-commands (top, report, annotate)\&. Default values are
+\fIblack\fR
+and
+\fIlightgray\fR\&.
+.RE
+.PP
+colors\&.jump_arrows
+.RS 4
+Colors for jump arrows on assembly code listings such as
+\fIjns\fR,
+\fIjmp\fR,
+\fIjane\fR, etc\&. Default values are
+\fIblue\fR,
+\fIdefault\fR\&.
+.RE
+.PP
+colors\&.addr
+.RS 4
+This selects colors for addresses from
+\fIannotate\fR\&. Default values are
+\fImagenta\fR,
+\fIdefault\fR\&.
+.RE
+.PP
+colors\&.root
+.RS 4
+Colors for headers in the output of a sub\-commands (top, report)\&. Default values are
+\fIwhite\fR,
+\fIblue\fR\&.
+.RE
+.PP
+tui\&.\fB, gtk\&.\fR
+.RS 4
+Subcommands that can be configured here are
+\fItop\fR,
+\fIreport\fR
+and
+\fIannotate\fR\&. These values are booleans, for example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[tui]
+        top = true
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+will make the TUI be the default for the \*(Aqtop\*(Aq subcommand\&. Those will be
+available if the required libs were detected at tool build time\&.
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+buildid\&.*, buildid\&.dir
+.RS 4
+Each executable and shared library in modern distributions comes with a content based identifier that, if available, will be inserted in a
+\fIperf\&.data\fR
+file header to, at analysis time find what is needed to do symbol resolution, code annotation, etc\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+The recording tools also stores a hard link or copy in a per\-user
+directory, $HOME/\&.debug/, of binaries, shared libraries, /proc/kallsyms
+and /proc/kcore files to be used at analysis time\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+The buildid\&.dir variable can be used to either change this directory
+cache location, or to disable it altogether\&. If you want to disable it,
+set buildid\&.dir to /dev/null\&. The default is $HOME/\&.debug
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+annotate\&.*
+.RS 4
+These options work only for TUI\&. These are in control of addresses, jump function, source code in lines of assembly code from a specific program\&.
+.RE
+.PP
+annotate\&.hide_src_code
+.RS 4
+If a program which is analyzed has source code, this option lets
+\fIannotate\fR
+print a list of assembly code with the source code\&. For example, let\(cqs see a part of a program\&. There\(cqre four lines\&. If this option is
+\fItrue\fR, they can be printed without source code from a program as below\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+│        push   %rbp
+│        mov    %rsp,%rbp
+│        sub    $0x10,%rsp
+│        mov    (%rdi),%rdx
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+But if this option is \*(Aqfalse\*(Aq, source code of the part
+can be also printed as below\&. Default is \*(Aqfalse\*(Aq\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+│      struct rb_node *rb_next(const struct rb_node *node)
+│      {
+│        push   %rbp
+│        mov    %rsp,%rbp
+│        sub    $0x10,%rsp
+│              struct rb_node *parent;
+│
+│              if (RB_EMPTY_NODE(node))
+│        mov    (%rdi),%rdx
+│              return n;
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+annotate\&.use_offset
+.RS 4
+Basing on a first address of a loaded function, offset can be used\&. Instead of using original addresses of assembly code, addresses subtracted from a base address can be printed\&. Let\(cqs illustrate an example\&. If a base address is 0XFFFFFFFF81624d50 as below,
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ffffffff81624d50 <load0>
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+an address on assembly code has a specific absolute address as below
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ffffffff816250b8:│  mov    0x8(%r14),%rdi
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+but if use_offset is \*(Aqtrue\*(Aq, an address subtracted from a base address is printed\&.
+Default is true\&. This option is only applied to TUI\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+368:│  mov    0x8(%r14),%rdi
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+annotate\&.jump_arrows
+.RS 4
+There can be jump instruction among assembly code\&. Depending on a boolean value of jump_arrows, arrows can be printed or not which represent where do the instruction jump into as below\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+│     ┌──jmp    1333
+│     │  xchg   %ax,%ax
+│1330:│  mov    %r15,%r10
+│1333:└─\(->cmp    %r15,%r14
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+If jump_arrow is \*(Aqfalse\*(Aq, the arrows isn\*(Aqt printed as below\&.
+Default is \*(Aqfalse\*(Aq\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+│      \(da jmp    1333
+│        xchg   %ax,%ax
+│1330:   mov    %r15,%r10
+│1333:   cmp    %r15,%r14
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+annotate\&.show_linenr
+.RS 4
+When showing source code if this option is
+\fItrue\fR, line numbers are printed as below\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+│1628         if (type & PERF_SAMPLE_IDENTIFIER) {
+│     \(da jne    508
+│1628                 data\->id = *array;
+│1629                 array++;
+│1630         }
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+However if this option is \*(Aqfalse\*(Aq, they aren\*(Aqt printed as below\&.
+Default is \*(Aqfalse\*(Aq\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+│             if (type & PERF_SAMPLE_IDENTIFIER) {
+│     \(da jne    508
+│                     data\->id = *array;
+│                     array++;
+│             }
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+annotate\&.show_nr_jumps
+.RS 4
+Let\(cqs see a part of assembly code\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+│1382:   movb   $0x1,\-0x270(%rbp)
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+If use this, the number of branches jumping to that address can be printed as below\&.
+Default is \*(Aqfalse\*(Aq\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+│1 1382:   movb   $0x1,\-0x270(%rbp)
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+annotate\&.show_total_period
+.RS 4
+To compare two records on an instruction base, with this option provided, display total number of samples that belong to a line in assembly code\&. If this option is
+\fItrue\fR, total periods are printed instead of percent values as below\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+302 │      mov    %eax,%eax
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+But if this option is \*(Aqfalse\*(Aq, percent values for overhead are printed i\&.e\&.
+Default is \*(Aqfalse\*(Aq\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+99\&.93 │      mov    %eax,%eax
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+hist\&.*, hist\&.percentage
+.RS 4
+This option control the way to calculate overhead of filtered entries \- that means the value of this option is effective only if there\(cqs a filter (by comm, dso or symbol name)\&. Suppose a following example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Overhead  Symbols
+\&.\&.\&.\&.\&.\&.\&.\&.  \&.\&.\&.\&.\&.\&.\&.
+ 33\&.33%     foo
+ 33\&.33%     bar
+ 33\&.33%     baz
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+This is an original overhead and we\*(Aqll filter out the first \*(Aqfoo\*(Aq
+entry\&. The value of \*(Aqrelative\*(Aq would increase the overhead of \*(Aqbar\*(Aq
+and \*(Aqbaz\*(Aq to 50\&.00% for each, while \*(Aqabsolute\*(Aq would show their
+current overhead (33\&.33%)\&.
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+ui\&.*, ui\&.show\-headers
+.RS 4
+This option controls display of column headers (like
+\fIOverhead\fR
+and
+\fISymbol\fR) in
+\fIreport\fR
+and
+\fItop\fR\&. If this option is false, they are hidden\&. This option is only applied to TUI\&.
+.RE
+.PP
+call\-graph\&.*
+.RS 4
+When sub\-commands
+\fItop\fR
+and
+\fIreport\fR
+work with \-g/\(em\-children there\(cqre options in control of call\-graph\&.
+.RE
+.PP
+call\-graph\&.record\-mode
+.RS 4
+The record\-mode can be
+\fIfp\fR
+(frame pointer),
+\fIdwarf\fR
+and
+\fIlbr\fR\&. The value of
+\fIdwarf\fR
+is effective only if perf detect needed library (libunwind or a recent version of libdw)\&.
+\fIlbr\fR
+only work for cpus that support it\&.
+.RE
+.PP
+call\-graph\&.dump\-size
+.RS 4
+The size of stack to dump in order to do post\-unwinding\&. Default is 8192 (byte)\&. When using dwarf into record\-mode, the default size will be used if omitted\&.
+.RE
+.PP
+call\-graph\&.print\-type
+.RS 4
+The print\-types can be graph (graph absolute), fractal (graph relative), flat and folded\&. This option controls a way to show overhead for each callchain entry\&. Suppose a following example\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Overhead  Symbols
+\&.\&.\&.\&.\&.\&.\&.\&.  \&.\&.\&.\&.\&.\&.\&.
+  40\&.00%  foo
+          |
+          \-\-\-foo
+             |
+             |\-\-50\&.00%\-\-bar
+             |          main
+             |
+              \-\-50\&.00%\-\-baz
+                        main
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+This output is a \*(Aqfractal\*(Aq format\&. The \*(Aqfoo\*(Aq came from \*(Aqbar\*(Aq and \*(Aqbaz\*(Aq exactly
+half and half so \*(Aqfractal\*(Aq shows 50\&.00% for each
+(meaning that it assumes 100% total overhead of \*(Aqfoo\*(Aq)\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+The \*(Aqgraph\*(Aq uses absolute overhead value of \*(Aqfoo\*(Aq as total so each of
+\*(Aqbar\*(Aq and \*(Aqbaz\*(Aq callchain will have 20\&.00% of overhead\&.
+If \*(Aqflat\*(Aq is used, single column and linear exposure of call chains\&.
+\*(Aqfolded\*(Aq mean call chains are displayed in a line, separated by semicolons\&.
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+call\-graph\&.order
+.RS 4
+This option controls print order of callchains\&. The default is
+\fIcallee\fR
+which means callee is printed at top and then followed by its caller and so on\&. The
+\fIcaller\fR
+prints it in reverse order\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+If this option is not set and report\&.children or top\&.children is
+set to true (or the equivalent command line option is given),
+the default value of this option is changed to \*(Aqcaller\*(Aq for the
+execution of \*(Aqperf report\*(Aq or \*(Aqperf top\*(Aq\&. Other commands will
+still default to \*(Aqcallee\*(Aq\&.
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+call\-graph\&.sort\-key
+.RS 4
+The callchains are merged if they contain same information\&. The sort\-key option determines a way to compare the callchains\&. A value of
+\fIsort\-key\fR
+can be
+\fIfunction\fR
+or
+\fIaddress\fR\&. The default is
+\fIfunction\fR\&.
+.RE
+.PP
+call\-graph\&.threshold
+.RS 4
+When there\(cqre many callchains it\(cqd print tons of lines\&. So perf omits small callchains under a certain overhead (threshold) and this option control the threshold\&. Default is 0\&.5 (%)\&. The overhead is calculated by value depends on call\-graph\&.print\-type\&.
+.RE
+.PP
+call\-graph\&.print\-limit
+.RS 4
+This is a maximum number of lines of callchain printed for a single histogram entry\&. Default is 0 which means no limitation\&.
+.RE
+.PP
+report\&.*, report\&.sort_order
+.RS 4
+Allows changing the default sort order from "comm,dso,symbol" to some other default, for instance "sym,dso" may be more fitting for kernel developers\&.
+.RE
+.PP
+report\&.percent\-limit
+.RS 4
+This one is mostly the same as call\-graph\&.threshold but works for histogram entries\&. Entries having an overhead lower than this percentage will not be printed\&. Default is
+\fI0\fR\&. If percent\-limit is
+\fI10\fR, only entries which have more than 10% of overhead will be printed\&.
+.RE
+.PP
+report\&.queue\-size
+.RS 4
+This option sets up the maximum allocation size of the internal event queue for ordering events\&. Default is 0, meaning no limit\&.
+.RE
+.PP
+report\&.children
+.RS 4
+\fIChildren\fR
+means functions called from another function\&. If this option is true,
+\fIperf report\fR
+cumulates callchains of children and show (accumulated) total overhead as well as
+\fISelf\fR
+overhead\&. Please refer to the
+\fIperf report\fR
+manual\&. The default is
+\fItrue\fR\&.
+.RE
+.PP
+report\&.group
+.RS 4
+This option is to show event group information together\&. Example output with this turned on, notice that there is one column per event in the group, ref\-cycles and cycles:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+# group: {ref\-cycles,cycles}
+# ========
+#
+# Samples: 7K of event \*(Aqanon group { ref\-cycles, cycles }\*(Aq
+# Event count (approx\&.): 6876107743
+#
+#         Overhead  Command      Shared Object               Symbol
+# \&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.  \&.\&.\&.\&.\&.\&.\&.  \&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.  \&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.
+#
+    99\&.84%  99\&.76%  noploop  noploop            [\&.] main
+     0\&.07%   0\&.00%  noploop  ld\-2\&.15\&.so         [\&.] strcmp
+     0\&.03%   0\&.00%  noploop  [kernel\&.kallsyms]  [k] timerqueue_del
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+top\&.*, top\&.children
+.RS 4
+Same as
+\fIreport\&.children\fR\&. So if it is enabled, the output of
+\fItop\fR
+command will have
+\fIChildren\fR
+overhead column as well as
+\fISelf\fR
+overhead column by default\&. The default is
+\fItrue\fR\&.
+.RE
+.PP
+man\&.*, man\&.viewer
+.RS 4
+This option can assign a tool to view manual pages when
+\fIhelp\fR
+subcommand was invoked\&. Supported tools are
+\fIman\fR,
+\fIwoman\fR
+(with emacs client) and
+\fIkonqueror\fR\&. Default is
+\fIman\fR\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+New man viewer tool can be also added using \*(Aqman\&.<tool>\&.cmd\*(Aq
+or use different path using \*(Aqman\&.<tool>\&.path\*(Aq config option\&.
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+pager\&.*, pager\&.<subcommand>
+.RS 4
+When the subcommand is run on stdio, determine whether it uses pager or not based on this value\&. Default is
+\fIunspecified\fR\&.
+.RE
+.PP
+kmem\&.*, kmem\&.default
+.RS 4
+This option decides which allocator is to be analyzed if neither
+\fI\-\-slab\fR
+nor
+\fI\-\-page\fR
+option is used\&. Default is
+\fIslab\fR\&.
+.RE
+.PP
+record\&.*, record\&.build\-id
+.RS 4
+This option can be
+\fIcache\fR,
+\fIno\-cache\fR
+or
+\fIskip\fR\&.
+\fIcache\fR
+is to post\-process data and save/update the binaries into the build\-id cache (in ~/\&.debug)\&. This is the default\&. But if this option is
+\fIno\-cache\fR, it will not update the build\-id cache\&.
+\fIskip\fR
+skips post\-processing and does not update the cache\&.
+.RE
+.PP
+diff\&.*, diff\&.order
+.RS 4
+This option sets the number of columns to sort the result\&. The default is 0, which means sorting by baseline\&. Setting it to 1 will sort the result by delta (or other compute method selected)\&.
+.RE
+.PP
+diff\&.compute
+.RS 4
+This options sets the method for computing the diff result\&. Possible values are
+\fIdelta\fR,
+\fIdelta\-abs\fR,
+\fIratio\fR
+and
+\fIwdiff\fR\&. Default is
+\fIdelta\fR\&.
+.RE
+.SH "SEE ALSO"
+.sp
+\fBperf\fR(1)

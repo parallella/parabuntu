@@ -1,0 +1,905 @@
+'\" t
+.\"     Title: perf-record
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 05/27/2019
+.\"    Manual: perf Manual
+.\"    Source: perf
+.\"  Language: English
+.\"
+.TH "PERF\-RECORD" "1" "05/27/2019" "perf" "perf Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+perf-record \- Run a command and record its profile into perf\&.data
+.SH "SYNOPSIS"
+.sp
+.nf
+\fIperf record\fR [\-e <EVENT> | \-\-event=EVENT] [\-a] <command>
+\fIperf record\fR [\-e <EVENT> | \-\-event=EVENT] [\-a] \(em <command> [<options>]
+.fi
+.SH "DESCRIPTION"
+.sp
+This command runs a command and gathers a performance counter profile from it, into perf\&.data \- without displaying anything\&.
+.sp
+This file can then be inspected later on, using \fIperf report\fR\&.
+.SH "OPTIONS"
+.PP
+<command>\&...
+.RS 4
+Any command you can specify in a shell\&.
+.RE
+.PP
+\-e, \-\-event=
+.RS 4
+Select the PMU event\&. Selection can be:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+a symbolic event name (use
+\fIperf list\fR
+to list all events)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+a raw PMU event (eventsel+umask) in the form of rNNN where NNN is a hexadecimal event descriptor\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+a symbolically formed PMU event like
+\fIpmu/param1=0x3,param2/\fR
+where
+\fIparam1\fR,
+\fIparam2\fR, etc are defined as formats for the PMU in /sys/bus/event_source/devices/<pmu>/format/*\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+a symbolically formed event like
+\fIpmu/config=M,config1=N,config3=K/\fR
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+where M, N, K are numbers (in decimal, hex, octal format)\&. Acceptable
+values for each of \*(Aqconfig\*(Aq, \*(Aqconfig1\*(Aq and \*(Aqconfig2\*(Aq are defined by
+corresponding entries in /sys/bus/event_source/devices/<pmu>/format/*
+param1 and param2 are defined as formats for the PMU in:
+/sys/bus/event_source/devices/<pmu>/format/*
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+There are also some parameters which are not defined in \&.\&.\&./<pmu>/format/*\&.
+These params can be used to overload default config values per event\&.
+Here are some common parameters:
+\- \*(Aqperiod\*(Aq: Set event sampling period
+\- \*(Aqfreq\*(Aq: Set event sampling frequency
+\- \*(Aqtime\*(Aq: Disable/enable time stamping\&. Acceptable values are 1 for
+          enabling time stamping\&. 0 for disabling time stamping\&.
+          The default is 1\&.
+\- \*(Aqcall\-graph\*(Aq: Disable/enable callgraph\&. Acceptable str are "fp" for
+               FP mode, "dwarf" for DWARF mode, "lbr" for LBR mode and
+               "no" for disable callgraph\&.
+\- \*(Aqstack\-size\*(Aq: user stack size for dwarf mode
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+See the linkperf:perf\-list[1] man page for more parameters\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Note: If user explicitly sets options which conflict with the params,
+the value set by the parameters will be overridden\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Also not defined in \&.\&.\&./<pmu>/format/* are PMU driver specific
+configuration parameters\&.  Any configuration parameter preceded by
+the letter \*(Aq@\*(Aq is not interpreted in user space and sent down directly
+to the PMU driver\&.  For example:
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+perf record \-e some_event/@cfg1,@cfg2=config/ \&.\&.\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+will see \*(Aqcfg1\*(Aq and \*(Aqcfg2=config\*(Aq pushed to the PMU driver associated
+with the event for further processing\&.  There is no restriction on
+what the configuration parameters are, as long as their semantic is
+understood and supported by the PMU driver\&.
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+a hardware breakpoint event in the form of
+\fI\emem:addr[/len][:access]\fR
+where addr is the address in memory you want to break in\&. Access is the memory access type (read, write, execute) it can be passed as follows:
+\fI\emem:addr[:[r][w][x]]\fR\&. len is the range, number of bytes from specified addr, which the breakpoint will cover\&. If you want to profile read\-write accesses in 0x1000, just set
+\fImem:0x1000:rw\fR\&. If you want to profile write accesses in [0x1000~1008), just set
+\fImem:0x1000/8:w\fR\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+a group of events surrounded by a pair of brace ("{event1,event2,\&...}")\&. Each event is separated by commas and the group should be quoted to prevent the shell interpretation\&. You also need to use \-\-group on "perf report" to view group events together\&.
+.RE
+.RE
+.PP
+\-\-filter=<filter>
+.RS 4
+Event filter\&. This option should follow a event selector (\-e) which selects either tracepoint event(s) or a hardware trace PMU (e\&.g\&. Intel PT or CoreSight)\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+tracepoint filters
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+In the case of tracepoints, multiple \*(Aq\-\-filter\*(Aq options are combined
+using \*(Aq&&\*(Aq\&.
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+address filters
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+A hardware trace PMU advertises its ability to accept a number of
+address filters by specifying a non\-zero value in
+/sys/bus/event_source/devices/<pmu>/nr_addr_filters\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Address filters have the format:
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+filter|start|stop|tracestop <start> [/ <size>] [@<file name>]
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Where:
+\- \*(Aqfilter\*(Aq: defines a region that will be traced\&.
+\- \*(Aqstart\*(Aq: defines an address at which tracing will begin\&.
+\- \*(Aqstop\*(Aq: defines an address at which tracing will stop\&.
+\- \*(Aqtracestop\*(Aq: defines a region in which tracing will stop\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+<file name> is the name of the object file, <start> is the offset to the
+code to trace in that file, and <size> is the size of the region to
+trace\&. \*(Aqstart\*(Aq and \*(Aqstop\*(Aq filters need not specify a <size>\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+If no object file is specified then the kernel is assumed, in which case
+the start address must be a current kernel memory address\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+<start> can also be specified by providing the name of a symbol\&. If the
+symbol name is not unique, it can be disambiguated by inserting #n where
+\*(Aqn\*(Aq selects the n\*(Aqth symbol in address order\&. Alternately #0, #g or #G
+select only a global symbol\&. <size> can also be specified by providing
+the name of a symbol, in which case the size is calculated to the end
+of that symbol\&. For \*(Aqfilter\*(Aq and \*(Aqtracestop\*(Aq filters, if <size> is
+omitted and <start> is a symbol, then the size is calculated to the end
+of that symbol\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+If <size> is omitted and <start> is \*(Aq*\*(Aq, then the start and size will
+be calculated from the first and last symbols, i\&.e\&. to trace the whole
+file\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+If symbol names (or \*(Aq*\*(Aq) are provided, they must be surrounded by white
+space\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+The filter passed to the kernel is not necessarily the same as entered\&.
+To see the filter that is passed, use the \-v option\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+The kernel may not be able to configure a trace region if it is not
+within a single mapping\&.  MMAP events (or /proc/<pid>/maps) can be
+examined to determine if that is a possibility\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Multiple filters can be separated with space or comma\&.
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.RE
+.PP
+\-\-exclude\-perf
+.RS 4
+Don\(cqt record events issued by perf itself\&. This option should follow a event selector (\-e) which selects tracepoint event(s)\&. It adds a filter expression
+\fIcommon_pid != $PERFPID\fR
+to filters\&. If other
+\fI\-\-filter\fR
+exists, the new filter expression will be combined with them by
+\fI&&\fR\&.
+.RE
+.PP
+\-a, \-\-all\-cpus
+.RS 4
+System\-wide collection from all CPUs (default if no target is specified)\&.
+.RE
+.PP
+\-p, \-\-pid=
+.RS 4
+Record events on existing process ID (comma separated list)\&.
+.RE
+.PP
+\-t, \-\-tid=
+.RS 4
+Record events on existing thread ID (comma separated list)\&. This option also disables inheritance by default\&. Enable it by adding \-\-inherit\&.
+.RE
+.PP
+\-u, \-\-uid=
+.RS 4
+Record events in threads owned by uid\&. Name or number\&.
+.RE
+.PP
+\-r, \-\-realtime=
+.RS 4
+Collect data with this RT SCHED_FIFO priority\&.
+.RE
+.PP
+\-\-no\-buffering
+.RS 4
+Collect data without buffering\&.
+.RE
+.PP
+\-c, \-\-count=
+.RS 4
+Event period to sample\&.
+.RE
+.PP
+\-o, \-\-output=
+.RS 4
+Output file name\&.
+.RE
+.PP
+\-i, \-\-no\-inherit
+.RS 4
+Child tasks do not inherit counters\&.
+.RE
+.PP
+\-F, \-\-freq=
+.RS 4
+Profile at this frequency\&.
+.RE
+.PP
+\-m, \-\-mmap\-pages=
+.RS 4
+Number of mmap data pages (must be a power of two) or size specification with appended unit character \- B/K/M/G\&. The size is rounded up to have nearest pages power of two value\&. Also, by adding a comma, the number of mmap pages for AUX area tracing can be specified\&.
+.RE
+.PP
+\-\-group
+.RS 4
+Put all events in a single event group\&. This precedes the \-\-event option and remains only for backward compatibility\&. See \-\-event\&.
+.RE
+.PP
+\-g
+.RS 4
+Enables call\-graph (stack chain/backtrace) recording\&.
+.RE
+.PP
+\-\-call\-graph
+.RS 4
+Setup and enable call\-graph (stack chain/backtrace) recording, implies \-g\&. Default is "fp"\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Allows specifying "fp" (frame pointer) or "dwarf"
+(DWARF\*(Aqs CFI \- Call Frame Information) or "lbr"
+(Hardware Last Branch Record facility) as the method to collect
+the information used to show the call graphs\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+In some systems, where binaries are build with gcc
+\-\-fomit\-frame\-pointer, using the "fp" method will produce bogus
+call graphs, using "dwarf", if available (perf tools linked to
+the libunwind or libdw library) should be used instead\&.
+Using the "lbr" method doesn\*(Aqt require any compiler options\&. It
+will produce call graphs from the hardware LBR registers\&. The
+main limitation is that it is only available on new Intel
+platforms, such as Haswell\&. It can only get user call chain\&. It
+doesn\*(Aqt work with branch stack sampling at the same time\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+When "dwarf" recording is used, perf also records (user) stack dump
+when sampled\&.  Default size of the stack dump is 8192 (bytes)\&.
+User can change the size by passing the size after comma like
+"\-\-call\-graph dwarf,4096"\&.
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+\-q, \-\-quiet
+.RS 4
+Don\(cqt print any message, useful for scripting\&.
+.RE
+.PP
+\-v, \-\-verbose
+.RS 4
+Be more verbose (show counter open errors, etc)\&.
+.RE
+.PP
+\-s, \-\-stat
+.RS 4
+Record per\-thread event counts\&. Use it with
+\fIperf report \-T\fR
+to see the values\&.
+.RE
+.PP
+\-d, \-\-data
+.RS 4
+Record the sample virtual addresses\&.
+.RE
+.PP
+\-\-phys\-data
+.RS 4
+Record the sample physical addresses\&.
+.RE
+.PP
+\-T, \-\-timestamp
+.RS 4
+Record the sample timestamps\&. Use it with
+\fIperf report \-D\fR
+to see the timestamps, for instance\&.
+.RE
+.PP
+\-P, \-\-period
+.RS 4
+Record the sample period\&.
+.RE
+.PP
+\-\-sample\-cpu
+.RS 4
+Record the sample cpu\&.
+.RE
+.PP
+\-n, \-\-no\-samples
+.RS 4
+Don\(cqt sample\&.
+.RE
+.PP
+\-R, \-\-raw\-samples
+.RS 4
+Collect raw sample records from all opened counters (default for tracepoint counters)\&.
+.RE
+.PP
+\-C, \-\-cpu
+.RS 4
+Collect samples only on the list of CPUs provided\&. Multiple CPUs can be provided as a comma\-separated list with no space: 0,1\&. Ranges of CPUs are specified with \-: 0\-2\&. In per\-thread mode with inheritance mode on (default), samples are captured only when the thread executes on the designated CPUs\&. Default is to monitor all CPUs\&.
+.RE
+.PP
+\-B, \-\-no\-buildid
+.RS 4
+Do not save the build ids of binaries in the perf\&.data files\&. This skips post processing after recording, which sometimes makes the final step in the recording process to take a long time, as it needs to process all events looking for mmap records\&. The downside is that it can misresolve symbols if the workload binaries used when recording get locally rebuilt or upgraded, because the only key available in this case is the pathname\&. You can also set the "record\&.build\-id" config variable to \*(Aqskip to have this behaviour permanently\&.
+.RE
+.PP
+\-N, \-\-no\-buildid\-cache
+.RS 4
+Do not update the buildid cache\&. This saves some overhead in situations where the information in the perf\&.data file (which includes buildids) is sufficient\&. You can also set the "record\&.build\-id" config variable to
+\fIno\-cache\fR
+to have the same effect\&.
+.RE
+.PP
+\-G name,\&..., \-\-cgroup name,\&...
+.RS 4
+monitor only in the container (cgroup) called "name"\&. This option is available only in per\-cpu mode\&. The cgroup filesystem must be mounted\&. All threads belonging to container "name" are monitored when they run on the monitored CPUs\&. Multiple cgroups can be provided\&. Each cgroup is applied to the corresponding event, i\&.e\&., first cgroup to first event, second cgroup to second event and so on\&. It is possible to provide an empty cgroup (monitor all the time) using, e\&.g\&., \-G foo,,bar\&. Cgroups must have corresponding events, i\&.e\&., they always refer to events defined earlier on the command line\&.
+.RE
+.PP
+\-b, \-\-branch\-any
+.RS 4
+Enable taken branch stack sampling\&. Any type of taken branch may be sampled\&. This is a shortcut for \-\-branch\-filter any\&. See \-\-branch\-filter for more infos\&.
+.RE
+.PP
+\-j, \-\-branch\-filter
+.RS 4
+Enable taken branch stack sampling\&. Each sample captures a series of consecutive taken branches\&. The number of branches captured with each sample depends on the underlying hardware, the type of branches of interest, and the executed code\&. It is possible to select the types of branches captured by enabling filters\&. The following filters are defined:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+any: any type of branches
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+any_call: any function call or system call
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+any_ret: any function return or system call return
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ind_call: any indirect branch
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+call: direct calls, including far (to/from kernel) calls
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+u: only when the branch target is at the user level
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+k: only when the branch target is in the kernel
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+hv: only when the target is at the hypervisor level
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+in_tx: only when the target is in a hardware transaction
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+no_tx: only when the target is not in a hardware transaction
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+abort_tx: only when the target is a hardware transaction abort
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+cond: conditional branches
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+save_type: save branch type during sampling in case binary is not available later
+.RE
+.sp
+The option requires at least one branch type among any, any_call, any_ret, ind_call, cond\&. The privilege levels may be omitted, in which case, the privilege levels of the associated event are applied to the branch filter\&. Both kernel (k) and hypervisor (hv) privilege levels are subject to permissions\&. When sampling on multiple events, branch stack sampling is enabled for all the sampling events\&. The sampled branch type is the same for all events\&. The various filters must be specified as a comma separated list: \-\-branch\-filter any_ret,u,k Note that this feature may not be available on all processors\&.
+.RE
+.PP
+\-\-weight
+.RS 4
+Enable weightened sampling\&. An additional weight is recorded per sample and can be displayed with the weight and local_weight sort keys\&. This currently works for TSX abort events and some memory events in precise mode on modern Intel CPUs\&.
+.RE
+.PP
+\-\-namespaces
+.RS 4
+Record events of type PERF_RECORD_NAMESPACES\&.
+.RE
+.PP
+\-\-transaction
+.RS 4
+Record transaction flags for transaction related events\&.
+.RE
+.PP
+\-\-per\-thread
+.RS 4
+Use per\-thread mmaps\&. By default per\-cpu mmaps are created\&. This option overrides that and uses per\-thread mmaps\&. A side\-effect of that is that inheritance is automatically disabled\&. \-\-per\-thread is ignored with a warning if combined with \-a or \-C options\&.
+.RE
+.PP
+\-D, \-\-delay=
+.RS 4
+After starting the program, wait msecs before measuring\&. This is useful to filter out the startup phase of the program, which is often very different\&.
+.RE
+.PP
+\-I, \-\-intr\-regs
+.RS 4
+Capture machine state (registers) at interrupt, i\&.e\&., on counter overflows for each sample\&. List of captured registers depends on the architecture\&. This option is off by default\&. It is possible to select the registers to sample using their symbolic names, e\&.g\&. on x86, ax, si\&. To list the available registers use \-\-intr\-regs=\e?\&. To name registers, pass a comma separated list such as \-\-intr\-regs=ax,bx\&. The list of register is architecture dependent\&.
+.RE
+.PP
+\-\-running\-time
+.RS 4
+Record running and enabled time for read events (:S)
+.RE
+.PP
+\-k, \-\-clockid
+.RS 4
+Sets the clock id to use for the various time fields in the perf_event_type records\&. See clock_gettime()\&. In particular CLOCK_MONOTONIC and CLOCK_MONOTONIC_RAW are supported, some events might also allow CLOCK_BOOTTIME, CLOCK_REALTIME and CLOCK_TAI\&.
+.RE
+.PP
+\-S, \-\-snapshot
+.RS 4
+Select AUX area tracing Snapshot Mode\&. This option is valid only with an AUX area tracing event\&. Optionally the number of bytes to capture per snapshot can be specified\&. In Snapshot Mode, trace data is captured only when signal SIGUSR2 is received\&.
+.RE
+.PP
+\-\-proc\-map\-timeout
+.RS 4
+When processing pre\-existing threads /proc/XXX/mmap, it may take a long time, because the file may be huge\&. A time out is needed in such cases\&. This option sets the time out limit\&. The default value is 500 ms\&.
+.RE
+.PP
+\-\-switch\-events
+.RS 4
+Record context switch events i\&.e\&. events of type PERF_RECORD_SWITCH or PERF_RECORD_SWITCH_CPU_WIDE\&.
+.RE
+.PP
+\-\-clang\-path=PATH
+.RS 4
+Path to clang binary to use for compiling BPF scriptlets\&. (enabled when BPF support is on)
+.RE
+.PP
+\-\-clang\-opt=OPTIONS
+.RS 4
+Options passed to clang when compiling BPF scriptlets\&. (enabled when BPF support is on)
+.RE
+.PP
+\-\-vmlinux=PATH
+.RS 4
+Specify vmlinux path which has debuginfo\&. (enabled when BPF prologue is on)
+.RE
+.PP
+\-\-buildid\-all
+.RS 4
+Record build\-id of all DSOs regardless whether it\(cqs actually hit or not\&.
+.RE
+.PP
+\-\-all\-kernel
+.RS 4
+Configure all used events to run in kernel space\&.
+.RE
+.PP
+\-\-all\-user
+.RS 4
+Configure all used events to run in user space\&.
+.RE
+.sp
+\-\-timestamp\-filename Append timestamp to output file name\&.
+.PP
+\-\-switch\-output[=mode]
+.RS 4
+Generate multiple perf\&.data files, timestamp prefixed, switching to a new one based on
+\fImode\fR
+value: "signal" \- when receiving a SIGUSR2 (default value) or <size> \- when reaching the size threshold, size is expected to be a number with appended unit character \- B/K/M/G <time> \- when reaching the time threshold, size is expected to be a number with appended unit character \- s/m/h/d
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Note: the precision of  the size  threshold  hugely depends
+on your configuration  \- the number and size of  your  ring
+buffers (\-m)\&. It is generally more precise for higher sizes
+(like >5M), for lower values expect different sizes\&.
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+A possible use case is to, given an external event, slice the perf\&.data file that gets then processed, possibly via a perf script, to decide if that particular perf\&.data snapshot should be kept or not\&.
+.sp
+Implies \-\-timestamp\-filename, \-\-no\-buildid and \-\-no\-buildid\-cache\&. The reason for the latter two is to reduce the data file switching overhead\&. You can still switch them on with:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\-\-switch\-output \-\-no\-no\-buildid  \-\-no\-no\-buildid\-cache
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+\-\-dry\-run
+.RS 4
+Parse options then exit\&. \-\-dry\-run can be used to detect errors in cmdline options\&.
+.RE
+.sp
+\fIperf record \-\-dry\-run \-e\fR can act as a BPF script compiler if llvm\&.dump\-obj in config file is set to true\&.
+.PP
+\-\-tail\-synthesize
+.RS 4
+Instead of collecting non\-sample events (for example, fork, comm, mmap) at the beginning of record, collect them during finalizing an output file\&. The collected non\-sample events reflects the status of the system when record is finished\&.
+.RE
+.PP
+\-\-overwrite
+.RS 4
+Makes all events use an overwritable ring buffer\&. An overwritable ring buffer works like a flight recorder: when it gets full, the kernel will overwrite the oldest records, that thus will never make it to the perf\&.data file\&.
+.RE
+.sp
+When \fI\-\-overwrite\fR and \fI\-\-switch\-output\fR are used perf records and drops events until it receives a signal, meaning that something unusual was detected that warrants taking a snapshot of the most current events, those fitting in the ring buffer at that moment\&.
+.sp
+\fIoverwrite\fR attribute can also be set or canceled for an event using config terms\&. For example: \fIcycles/overwrite/\fR and \fIinstructions/no\-overwrite/\fR\&.
+.sp
+Implies \-\-tail\-synthesize\&.
+.SH "SEE ALSO"
+.sp
+\fBperf-stat\fR(1), \fBperf-list\fR(1)

@@ -1,0 +1,178 @@
+'\" t
+.\"     Title: perf-annotate
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 05/27/2019
+.\"    Manual: perf Manual
+.\"    Source: perf
+.\"  Language: English
+.\"
+.TH "PERF\-ANNOTATE" "1" "05/27/2019" "perf" "perf Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+perf-annotate \- Read perf\&.data (created by perf record) and display annotated code
+.SH "SYNOPSIS"
+.sp
+.nf
+\fIperf annotate\fR [\-i <file> | \-\-input=file] [symbol_name]
+.fi
+.SH "DESCRIPTION"
+.sp
+This command reads the input file and displays an annotated version of the code\&. If the object file has debug symbols then the source code will be displayed alongside assembly code\&.
+.sp
+If there is no debug info in the object, then annotated assembly is displayed\&.
+.SH "OPTIONS"
+.PP
+\-i, \-\-input=
+.RS 4
+Input file name\&. (default: perf\&.data unless stdin is a fifo)
+.RE
+.PP
+\-d, \-\-dsos=<dso[,dso\&...]>
+.RS 4
+Only consider symbols in these dsos\&.
+.RE
+.PP
+\-s, \-\-symbol=<symbol>
+.RS 4
+Symbol to annotate\&.
+.RE
+.PP
+\-f, \-\-force
+.RS 4
+Don\(cqt do ownership validation\&.
+.RE
+.PP
+\-v, \-\-verbose
+.RS 4
+Be more verbose\&. (Show symbol address, etc)
+.RE
+.PP
+\-q, \-\-quiet
+.RS 4
+Do not show any message\&. (Suppress \-v)
+.RE
+.PP
+\-n, \-\-show\-nr\-samples
+.RS 4
+Show the number of samples for each symbol
+.RE
+.PP
+\-D, \-\-dump\-raw\-trace
+.RS 4
+Dump raw trace in ASCII\&.
+.RE
+.PP
+\-k, \-\-vmlinux=<file>
+.RS 4
+vmlinux pathname\&.
+.RE
+.PP
+\-m, \-\-modules
+.RS 4
+Load module symbols\&. WARNING: use only with \-k and LIVE kernel\&.
+.RE
+.PP
+\-l, \-\-print\-line
+.RS 4
+Print matching source lines (may be slow)\&.
+.RE
+.PP
+\-P, \-\-full\-paths
+.RS 4
+Don\(cqt shorten the displayed pathnames\&.
+.RE
+.PP
+\-\-stdio
+.RS 4
+Use the stdio interface\&.
+.RE
+.PP
+\-\-stdio\-color
+.RS 4
+\fIalways\fR,
+\fInever\fR
+or
+\fIauto\fR, allowing configuring color output via the command line, in addition to via "color\&.ui" \&.perfconfig\&. Use
+\fI\-\-stdio\-color always\fR
+to generate color even when redirecting to a pipe or file\&. Using just
+\fI\-\-stdio\-color\fR
+is equivalent to using
+\fIalways\fR\&.
+.RE
+.PP
+\-\-tui
+.RS 4
+Use the TUI interface\&. Use of \-\-tui requires a tty, if one is not present, as when piping to other commands, the stdio interface is used\&. This interfaces starts by centering on the line with more samples, TAB/UNTAB cycles through the lines with more samples\&.
+.RE
+.PP
+\-\-gtk
+.RS 4
+Use the GTK interface\&.
+.RE
+.PP
+\-C, \-\-cpu
+.RS 4
+Only report samples for the list of CPUs provided\&. Multiple CPUs can be provided as a comma\-separated list with no space: 0,1\&. Ranges of CPUs are specified with \-: 0\-2\&. Default is to report samples on all CPUs\&.
+.RE
+.PP
+\-\-asm\-raw
+.RS 4
+Show raw instruction encoding of assembly instructions\&.
+.RE
+.PP
+\-\-show\-total\-period
+.RS 4
+Show a column with the sum of periods\&.
+.RE
+.PP
+\-\-source
+.RS 4
+Interleave source code with assembly code\&. Enabled by default, disable with \-\-no\-source\&.
+.RE
+.PP
+\-\-symfs=<directory>
+.RS 4
+Look for files with symbols relative to this directory\&.
+.RE
+.PP
+\-M, \-\-disassembler\-style=
+.RS 4
+Set disassembler style for objdump\&.
+.RE
+.PP
+\-\-objdump=<path>
+.RS 4
+Path to objdump binary\&.
+.RE
+.PP
+\-\-skip\-missing
+.RS 4
+Skip symbols that cannot be annotated\&.
+.RE
+.PP
+\-\-group
+.RS 4
+Show event group information together
+.RE
+.SH "SEE ALSO"
+.sp
+\fBperf-record\fR(1), \fBperf-report\fR(1)

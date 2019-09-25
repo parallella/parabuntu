@@ -1,0 +1,1308 @@
+'\" t
+.\"     Title: perf-report
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 05/27/2019
+.\"    Manual: perf Manual
+.\"    Source: perf
+.\"  Language: English
+.\"
+.TH "PERF\-REPORT" "1" "05/27/2019" "perf" "perf Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+perf-report \- Read perf\&.data (created by perf record) and display the profile
+.SH "SYNOPSIS"
+.sp
+.nf
+\fIperf report\fR [\-i <file> | \-\-input=file]
+.fi
+.SH "DESCRIPTION"
+.sp
+This command displays the performance counter profile information recorded via perf record\&.
+.SH "OPTIONS"
+.PP
+\-i, \-\-input=
+.RS 4
+Input file name\&. (default: perf\&.data unless stdin is a fifo)
+.RE
+.PP
+\-v, \-\-verbose
+.RS 4
+Be more verbose\&. (show symbol address, etc)
+.RE
+.PP
+\-q, \-\-quiet
+.RS 4
+Do not show any message\&. (Suppress \-v)
+.RE
+.PP
+\-n, \-\-show\-nr\-samples
+.RS 4
+Show the number of samples for each symbol
+.RE
+.PP
+\-\-show\-cpu\-utilization
+.RS 4
+Show sample percentage for different cpu modes\&.
+.RE
+.PP
+\-T, \-\-threads
+.RS 4
+Show per\-thread event counters\&. The input data file should be recorded with \-s option\&.
+.RE
+.PP
+\-c, \-\-comms=
+.RS 4
+Only consider symbols in these comms\&. CSV that understands
+\m[blue]\fBfile://filename\fR\m[]
+entries\&. This option will affect the percentage of the overhead column\&. See \-\-percentage for more info\&.
+.RE
+.PP
+\-\-pid=
+.RS 4
+Only show events for given process ID (comma separated list)\&.
+.RE
+.PP
+\-\-tid=
+.RS 4
+Only show events for given thread ID (comma separated list)\&.
+.RE
+.PP
+\-d, \-\-dsos=
+.RS 4
+Only consider symbols in these dsos\&. CSV that understands
+\m[blue]\fBfile://filename\fR\m[]
+entries\&. This option will affect the percentage of the overhead column\&. See \-\-percentage for more info\&.
+.RE
+.PP
+\-S, \-\-symbols=
+.RS 4
+Only consider these symbols\&. CSV that understands
+\m[blue]\fBfile://filename\fR\m[]
+entries\&. This option will affect the percentage of the overhead column\&. See \-\-percentage for more info\&.
+.RE
+.PP
+\-\-symbol\-filter=
+.RS 4
+Only show symbols that match (partially) with this filter\&.
+.RE
+.PP
+\-U, \-\-hide\-unresolved
+.RS 4
+Only display entries resolved to a symbol\&.
+.RE
+.PP
+\-s, \-\-sort=
+.RS 4
+Sort histogram entries by given key(s) \- multiple keys can be specified in CSV format\&. Following sort keys are available: pid, comm, dso, symbol, parent, cpu, socket, srcline, weight, local_weight, cgroup_id\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Each key has following meaning:
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+comm: command (name) of the task which can be read via /proc/<pid>/comm
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+pid: command and tid of the task
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+dso: name of library or module executed at the time of sample
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+symbol: name of function executed at the time of sample
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+symbol_size: size of function executed at the time of sample
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+parent: name of function matched to the parent regex filter\&. Unmatched entries are displayed as "[other]"\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+cpu: cpu number the task ran at the time of sample
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+socket: processor socket number the task ran at the time of sample
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+srcline: filename and line number executed at the time of sample\&. The DWARF debugging info must be provided\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+srcfile: file name of the source file of the same\&. Requires dwarf information\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+weight: Event specific weight, e\&.g\&. memory latency or transaction abort cost\&. This is the global weight\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+local_weight: Local weight version of the weight above\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+cgroup_id: ID derived from cgroup namespace device and inode numbers\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+transaction: Transaction abort flags\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+overhead: Overhead percentage of sample
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+overhead_sys: Overhead percentage of sample running in system mode
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+overhead_us: Overhead percentage of sample running in user mode
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+overhead_guest_sys: Overhead percentage of sample running in system mode on guest machine
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+overhead_guest_us: Overhead percentage of sample running in user mode on guest machine
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+sample: Number of sample
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+period: Raw number of event count of sample
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+By default, comm, dso and symbol keys are used\&.
+(i\&.e\&. \-\-sort comm,dso,symbol)
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+If \-\-branch\-stack option is used, following sort keys are also
+available:
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+dso_from: name of library or module branched from
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+dso_to: name of library or module branched to
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+symbol_from: name of function branched from
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+symbol_to: name of function branched to
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+srcline_from: source file and line branched from
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+srcline_to: source file and line branched to
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+mispredict: "N" for predicted branch, "Y" for mispredicted branch
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+in_tx: branch in TSX transaction
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+abort: TSX transaction abort\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+cycles: Cycles in basic block
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+And default sort keys are changed to comm, dso_from, symbol_from, dso_to
+and symbol_to, see \*(Aq\-\-branch\-stack\*(Aq\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+If the \-\-mem\-mode option is used, the following sort keys are also available
+(incompatible with \-\-branch\-stack):
+symbol_daddr, dso_daddr, locked, tlb, mem, snoop, dcacheline\&.
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+symbol_daddr: name of data symbol being executed on at the time of sample
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+dso_daddr: name of library or module containing the data being executed on at the time of the sample
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+locked: whether the bus was locked at the time of the sample
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+tlb: type of tlb access for the data at the time of the sample
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+mem: type of memory access for the data at the time of the sample
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+snoop: type of snoop (if any) for the data at the time of the sample
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+dcacheline: the cacheline the data address is on at the time of the sample
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+phys_daddr: physical address of data being executed on at the time of sample
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+And the default sort keys are changed to local_weight, mem, sym, dso,
+symbol_daddr, dso_daddr, snoop, tlb, locked, see \*(Aq\-\-mem\-mode\*(Aq\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+If the data file has tracepoint event(s), following (dynamic) sort keys
+are also available:
+trace, trace_fields, [<event>\&.]<field>[/raw]
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+trace: pretty printed trace output in a single column
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+trace_fields: fields in tracepoints in separate columns
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+<field name>: optional event and field name for a specific field
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+The last form consists of event and field names\&.  If event name is
+omitted, it searches all events for matching field name\&.  The matched
+field will be shown only for the event has the field\&.  The event name
+supports substring match so user doesn\*(Aqt need to specify full subsystem
+and event name everytime\&.  For example, \*(Aqsched:sched_switch\*(Aq event can
+be shortened to \*(Aqswitch\*(Aq as long as it\*(Aqs not ambiguous\&.  Also event can
+be specified by its index (starting from 1) preceded by the \*(Aq%\*(Aq\&.
+So \*(Aq%1\*(Aq is the first event, \*(Aq%2\*(Aq is the second, and so on\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+The field name can have \*(Aq/raw\*(Aq suffix which disables pretty printing
+and shows raw field value like hex numbers\&.  The \-\-raw\-trace option
+has the same effect for all dynamic sort keys\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+The default sort keys are changed to \*(Aqtrace\*(Aq if all events in the data
+file are tracepoint\&.
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.RE
+.PP
+\-F, \-\-fields=
+.RS 4
+Specify output field \- multiple keys can be specified in CSV format\&. Following fields are available: overhead, overhead_sys, overhead_us, overhead_children, sample and period\&. Also it can contain any sort key(s)\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+By default, every sort keys not specified in \-F will be appended
+automatically\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+If the keys starts with a prefix \*(Aq+\*(Aq, then it will append the specified
+field(s) to the default field order\&. For example: perf report \-F +period,sample\&.
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+\-p, \-\-parent=<regex>
+.RS 4
+A regex filter to identify parent\&. The parent is a caller of this function and searched through the callchain, thus it requires callchain information recorded\&. The pattern is in the extended regex format and defaults to "^sys_|^do_page_fault", see
+\fI\-\-sort parent\fR\&.
+.RE
+.PP
+\-x, \-\-exclude\-other
+.RS 4
+Only display entries with parent\-match\&.
+.RE
+.PP
+\-w, \-\-column\-widths=<width[,width\&...]>
+.RS 4
+Force each column width to the provided list, for large terminal readability\&. 0 means no limit (default behavior)\&.
+.RE
+.PP
+\-t, \-\-field\-separator=
+.RS 4
+Use a special separator character and don\(cqt pad with spaces, replacing all occurrences of this separator in symbol names (and other output) with a
+\fI\&.\fR
+character, that thus it\(cqs the only non valid separator\&.
+.RE
+.PP
+\-D, \-\-dump\-raw\-trace
+.RS 4
+Dump raw trace in ASCII\&.
+.RE
+.PP
+\-g, \-\-call\-graph=<print_type,threshold[,print_limit],order,sort_key[,branch],value>
+.RS 4
+Display call chains using type, min percent threshold, print limit, call order, sort key, optional branch and value\&. Note that ordering is not fixed so any parameter can be given in an arbitrary order\&. One exception is the print_limit which should be preceded by threshold\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+print_type can be either:
+\- flat: single column, linear exposure of call chains\&.
+\- graph: use a graph tree, displaying absolute overhead rates\&. (default)
+\- fractal: like graph, but displays relative rates\&. Each branch of
+         the tree is considered as a new profiled object\&.
+\- folded: call chains are displayed in a line, separated by semicolons
+\- none: disable call chain display\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+threshold is a percentage value which specifies a minimum percent to be
+included in the output call graph\&.  Default is 0\&.5 (%)\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+print_limit is only applied when stdio interface is used\&.  It\*(Aqs to limit
+number of call graph entries in a single hist entry\&.  Note that it needs
+to be given after threshold (but not necessarily consecutive)\&.
+Default is 0 (unlimited)\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+order can be either:
+\- callee: callee based call graph\&.
+\- caller: inverted caller based call graph\&.
+Default is \*(Aqcaller\*(Aq when \-\-children is used, otherwise \*(Aqcallee\*(Aq\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+sort_key can be:
+\- function: compare on functions (default)
+\- address: compare on individual code addresses
+\- srcline: compare on source filename and line number
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+branch can be:
+\- branch: include last branch information in callgraph when available\&.
+          Usually more convenient to use \-\-branch\-history for this\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+value can be:
+\- percent: diplay overhead percent (default)
+\- period: display event period
+\- count: display event count
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+\-\-children
+.RS 4
+Accumulate callchain of children to parent entry so that then can show up in the output\&. The output will have a new "Children" column and will be sorted on the data\&. It requires callchains are recorded\&. See the \(oqoverhead calculation\(cq section for more details\&. Enabled by default, disable with \-\-no\-children\&.
+.RE
+.PP
+\-\-max\-stack
+.RS 4
+Set the stack depth limit when parsing the callchain, anything beyond the specified depth will be ignored\&. This is a trade\-off between information loss and faster processing especially for workloads that can have a very long callchain stack\&. Note that when using the \-\-itrace option the synthesized callchain size will override this value if the synthesized callchain size is bigger\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Default: 127
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+\-G, \-\-inverted
+.RS 4
+alias for inverted caller based call graph\&.
+.RE
+.PP
+\-\-ignore\-callees=<regex>
+.RS 4
+Ignore callees of the function(s) matching the given regex\&. This has the effect of collecting the callers of each such function into one place in the call\-graph tree\&.
+.RE
+.PP
+\-\-pretty=<key>
+.RS 4
+Pretty printing style\&. key: normal, raw
+.RE
+.PP
+\-\-stdio
+.RS 4
+Use the stdio interface\&.
+.RE
+.PP
+\-\-stdio\-color
+.RS 4
+\fIalways\fR,
+\fInever\fR
+or
+\fIauto\fR, allowing configuring color output via the command line, in addition to via "color\&.ui" \&.perfconfig\&. Use
+\fI\-\-stdio\-color always\fR
+to generate color even when redirecting to a pipe or file\&. Using just
+\fI\-\-stdio\-color\fR
+is equivalent to using
+\fIalways\fR\&.
+.RE
+.PP
+\-\-tui
+.RS 4
+Use the TUI interface, that is integrated with annotate and allows zooming into DSOs or threads, among other features\&. Use of \-\-tui requires a tty, if one is not present, as when piping to other commands, the stdio interface is used\&.
+.RE
+.PP
+\-\-gtk
+.RS 4
+Use the GTK2 interface\&.
+.RE
+.PP
+\-k, \-\-vmlinux=<file>
+.RS 4
+vmlinux pathname
+.RE
+.PP
+\-\-kallsyms=<file>
+.RS 4
+kallsyms pathname
+.RE
+.PP
+\-m, \-\-modules
+.RS 4
+Load module symbols\&. WARNING: This should only be used with \-k and a LIVE kernel\&.
+.RE
+.PP
+\-f, \-\-force
+.RS 4
+Don\(cqt do ownership validation\&.
+.RE
+.PP
+\-\-symfs=<directory>
+.RS 4
+Look for files with symbols relative to this directory\&.
+.RE
+.PP
+\-C, \-\-cpu
+.RS 4
+Only report samples for the list of CPUs provided\&. Multiple CPUs can be provided as a comma\-separated list with no space: 0,1\&. Ranges of CPUs are specified with \-: 0\-2\&. Default is to report samples on all CPUs\&.
+.RE
+.PP
+\-M, \-\-disassembler\-style=
+.RS 4
+Set disassembler style for objdump\&.
+.RE
+.PP
+\-\-source
+.RS 4
+Interleave source code with assembly code\&. Enabled by default, disable with \-\-no\-source\&.
+.RE
+.PP
+\-\-asm\-raw
+.RS 4
+Show raw instruction encoding of assembly instructions\&.
+.RE
+.PP
+\-\-show\-total\-period
+.RS 4
+Show a column with the sum of periods\&.
+.RE
+.PP
+\-I, \-\-show\-info
+.RS 4
+Display extended information about the perf\&.data file\&. This adds information which may be very large and thus may clutter the display\&. It currently includes: cpu and numa topology of the host system\&.
+.RE
+.PP
+\-b, \-\-branch\-stack
+.RS 4
+Use the addresses of sampled taken branches instead of the instruction address to build the histograms\&. To generate meaningful output, the perf\&.data file must have been obtained using perf record \-b or perf record \-\-branch\-filter xxx where xxx is a branch filter option\&. perf report is able to auto\-detect whether a perf\&.data file contains branch stacks and it will automatically switch to the branch view mode, unless \-\-no\-branch\-stack is used\&.
+.RE
+.PP
+\-\-branch\-history
+.RS 4
+Add the addresses of sampled taken branches to the callstack\&. This allows to examine the path the program took to each sample\&. The data collection must have used \-b (or \-j) and \-g\&.
+.RE
+.PP
+\-\-objdump=<path>
+.RS 4
+Path to objdump binary\&.
+.RE
+.PP
+\-\-group
+.RS 4
+Show event group information together\&.
+.RE
+.PP
+\-\-demangle
+.RS 4
+Demangle symbol names to human readable form\&. It\(cqs enabled by default, disable with \-\-no\-demangle\&.
+.RE
+.PP
+\-\-demangle\-kernel
+.RS 4
+Demangle kernel symbol names to human readable form (for C++ kernels)\&.
+.RE
+.PP
+\-\-mem\-mode
+.RS 4
+Use the data addresses of samples in addition to instruction addresses to build the histograms\&. To generate meaningful output, the perf\&.data file must have been obtained using perf record \-d \-W and using a special event \-e cpu/mem\-loads/ or \-e cpu/mem\-stores/\&. See
+\fIperf mem\fR
+for simpler access\&.
+.RE
+.PP
+\-\-percent\-limit
+.RS 4
+Do not show entries which have an overhead under that percent\&. (Default: 0)\&. Note that this option also sets the percent limit (threshold) of callchains\&. However the default value of callchain threshold is different than the default value of hist entries\&. Please see the \-\-call\-graph option for details\&.
+.RE
+.PP
+\-\-percentage
+.RS 4
+Determine how to display the overhead percentage of filtered entries\&. Filters can be applied by \-\-comms, \-\-dsos and/or \-\-symbols options and Zoom operations on the TUI (thread, dso, etc)\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+"relative" means it\*(Aqs relative to filtered entries only so that the
+sum of shown entries will be always 100%\&.  "absolute" means it retains
+the original value before and after the filter is applied\&.
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+\-\-header
+.RS 4
+Show header information in the perf\&.data file\&. This includes various information like hostname, OS and perf version, cpu/mem info, perf command line, event list and so on\&. Currently only \-\-stdio output supports this feature\&.
+.RE
+.PP
+\-\-header\-only
+.RS 4
+Show only perf\&.data header (forces \-\-stdio)\&.
+.RE
+.PP
+\-\-time
+.RS 4
+Only analyze samples within given time window: <start>,<stop>\&. Times have the format seconds\&.microseconds\&. If start is not given (i\&.e\&., time string is
+\fI,x\&.y\fR) then analysis starts at the beginning of the file\&. If stop time is not given (i\&.e, time string is
+\fIx\&.y,\fR) then analysis goes to end of file\&.
+.RE
+.PP
+\-\-itrace
+.RS 4
+Options for decoding instruction tracing data\&. The options are:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+i       synthesize instructions events
+b       synthesize branches events
+c       synthesize branches events (calls only)
+r       synthesize branches events (returns only)
+x       synthesize transactions events
+w       synthesize ptwrite events
+p       synthesize power events
+e       synthesize error events
+d       create a debug log
+g       synthesize a call chain (use with i or x)
+l       synthesize last branch entries (use with i or x)
+s       skip initial number of events
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+The default is all events i\&.e\&. the same as \-\-itrace=ibxwpe
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+In addition, the period (default 100000) for instructions events
+can be specified in units of:
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+i       instructions
+t       ticks
+ms      milliseconds
+us      microseconds
+ns      nanoseconds (default)
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Also the call chain size (default 16, max\&. 1024) for instructions or
+transactions events can be specified\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Also the number of last branch entries (default 64, max\&. 1024) for
+instructions or transactions events can be specified\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+It is also possible to skip events generated (instructions, branches, transactions,
+ptwrite, power) at the beginning\&. This is useful to ignore initialization code\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\-\-itrace=i0nss1000000
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+skips the first million instructions\&.
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+To disable decoding entirely, use \-\-no\-itrace\&.
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+\-\-full\-source\-path
+.RS 4
+Show the full path for source files for srcline output\&.
+.RE
+.PP
+\-\-show\-ref\-call\-graph
+.RS 4
+When multiple events are sampled, it may not be needed to collect callgraphs for all of them\&. The sample sites are usually nearby, and it\(cqs enough to collect the callgraphs on a reference event\&. So user can use "call\-graph=no" event modifier to disable callgraph for other events to reduce the overhead\&. However, perf report cannot show callgraphs for the event which disable the callgraph\&. This option extends the perf report to show reference callgraphs, which collected by reference event, in no callgraph event\&.
+.RE
+.PP
+\-\-socket\-filter
+.RS 4
+Only report the samples on the processor socket that match with this filter
+.RE
+.PP
+\-\-raw\-trace
+.RS 4
+When displaying traceevent output, do not use print fmt or plugins\&.
+.RE
+.PP
+\-\-hierarchy
+.RS 4
+Enable hierarchical output\&.
+.RE
+.PP
+\-\-inline
+.RS 4
+If a callgraph address belongs to an inlined function, the inline stack will be printed\&. Each entry is function name or file/line\&.
+.RE
+.SH "OVERHEAD CALCULATION"
+.sp
+The overhead can be shown in two columns as \fIChildren\fR and \fISelf\fR when perf collects callchains\&. The \fIself\fR overhead is simply calculated by adding all period values of the entry \- usually a function (symbol)\&. This is the value that perf shows traditionally and sum of all the \fIself\fR overhead values should be 100%\&.
+.sp
+The \fIchildren\fR overhead is calculated by adding all period values of the child functions so that it can show the total overhead of the higher level functions even if they don\(cqt directly execute much\&. \fIChildren\fR here means functions that are called from another (parent) function\&.
+.sp
+It might be confusing that the sum of all the \fIchildren\fR overhead values exceeds 100% since each of them is already an accumulation of \fIself\fR overhead of its child functions\&. But with this enabled, users can find which function has the most overhead even if samples are spread over the children\&.
+.sp
+Consider the following example; there are three functions like below\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+
+\&.ft C
+void foo(void) {
+    /* do something */
+}
+
+void bar(void) {
+    /* do something */
+    foo();
+}
+
+int main(void) {
+    bar()
+    return 0;
+}
+\&.ft
+
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+In this case \fIfoo\fR is a child of \fIbar\fR, and \fIbar\fR is an immediate child of \fImain\fR so \fIfoo\fR also is a child of \fImain\fR\&. In other words, \fImain\fR is a parent of \fIfoo\fR and \fIbar\fR, and \fIbar\fR is a parent of \fIfoo\fR\&.
+.sp
+Suppose all samples are recorded in \fIfoo\fR and \fIbar\fR only\&. When it\(cqs recorded with callchains the output will show something like below in the usual (self\-overhead\-only) output of perf report:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+
+\&.ft C
+Overhead  Symbol
+\&.\&.\&.\&.\&.\&.\&.\&.  \&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.
+  60\&.00%  foo
+          |
+          \-\-\- foo
+              bar
+              main
+              __libc_start_main
+
+  40\&.00%  bar
+          |
+          \-\-\- bar
+              main
+              __libc_start_main
+\&.ft
+
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+When the \-\-children option is enabled, the \fIself\fR overhead values of child functions (i\&.e\&. \fIfoo\fR and \fIbar\fR) are added to the parents to calculate the \fIchildren\fR overhead\&. In this case the report could be displayed as:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+
+\&.ft C
+Children      Self  Symbol
+\&.\&.\&.\&.\&.\&.\&.\&.  \&.\&.\&.\&.\&.\&.\&.\&.  \&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.
+ 100\&.00%     0\&.00%  __libc_start_main
+          |
+          \-\-\- __libc_start_main
+
+ 100\&.00%     0\&.00%  main
+          |
+          \-\-\- main
+              __libc_start_main
+
+ 100\&.00%    40\&.00%  bar
+          |
+          \-\-\- bar
+              main
+              __libc_start_main
+
+  60\&.00%    60\&.00%  foo
+          |
+          \-\-\- foo
+              bar
+              main
+              __libc_start_main
+\&.ft
+
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+In the above output, the \fIself\fR overhead of \fIfoo\fR (60%) was add to the \fIchildren\fR overhead of \fIbar\fR, \fImain\fR and \fI__libc_start_main\fR\&. Likewise, the \fIself\fR overhead of \fIbar\fR (40%) was added to the \fIchildren\fR overhead of \fImain\fR and \fI\e_\e_libc_start_main\fR\&.
+.sp
+So \fI\e_\e_libc_start_main\fR and \fImain\fR are shown first since they have same (100%) \fIchildren\fR overhead (even though they have zero \fIself\fR overhead) and they are the parents of \fIfoo\fR and \fIbar\fR\&.
+.sp
+Since v3\&.16 the \fIchildren\fR overhead is shown by default and the output is sorted by its values\&. The \fIchildren\fR overhead is disabled by specifying \-\-no\-children option on the command line or by adding \fIreport\&.children = false\fR or \fItop\&.children = false\fR in the perf config file\&.
+.SH "SEE ALSO"
+.sp
+\fBperf-stat\fR(1), \fBperf-annotate\fR(1)

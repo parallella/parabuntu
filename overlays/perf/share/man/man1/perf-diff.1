@@ -1,0 +1,392 @@
+'\" t
+.\"     Title: perf-diff
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 05/27/2019
+.\"    Manual: perf Manual
+.\"    Source: perf
+.\"  Language: English
+.\"
+.TH "PERF\-DIFF" "1" "05/27/2019" "perf" "perf Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+perf-diff \- Read perf\&.data files and display the differential profile
+.SH "SYNOPSIS"
+.sp
+.nf
+\fIperf diff\fR [baseline file] [data file1] [[data file2] \&... ]
+.fi
+.SH "DESCRIPTION"
+.sp
+This command displays the performance difference amongst two or more perf\&.data files captured via perf record\&.
+.sp
+If no parameters are passed it will assume perf\&.data\&.old and perf\&.data\&.
+.sp
+The differential profile is displayed only for events matching both specified perf\&.data files\&.
+.sp
+If no parameters are passed the samples will be sorted by dso and symbol\&. As the perf\&.data files could come from different binaries, the symbols addresses could vary\&. So perf diff is based on the comparison of the files and symbols name\&.
+.SH "OPTIONS"
+.PP
+\-D, \-\-dump\-raw\-trace
+.RS 4
+Dump raw trace in ASCII\&.
+.RE
+.PP
+\-\-kallsyms=<file>
+.RS 4
+kallsyms pathname
+.RE
+.PP
+\-m, \-\-modules
+.RS 4
+Load module symbols\&. WARNING: use only with \-k and LIVE kernel
+.RE
+.PP
+\-d, \-\-dsos=
+.RS 4
+Only consider symbols in these dsos\&. CSV that understands
+\m[blue]\fBfile://filename\fR\m[]
+entries\&. This option will affect the percentage of the Baseline/Delta column\&. See \-\-percentage for more info\&.
+.RE
+.PP
+\-C, \-\-comms=
+.RS 4
+Only consider symbols in these comms\&. CSV that understands
+\m[blue]\fBfile://filename\fR\m[]
+entries\&. This option will affect the percentage of the Baseline/Delta column\&. See \-\-percentage for more info\&.
+.RE
+.PP
+\-S, \-\-symbols=
+.RS 4
+Only consider these symbols\&. CSV that understands
+\m[blue]\fBfile://filename\fR\m[]
+entries\&. This option will affect the percentage of the Baseline/Delta column\&. See \-\-percentage for more info\&.
+.RE
+.PP
+\-s, \-\-sort=
+.RS 4
+Sort by key(s): pid, comm, dso, symbol, cpu, parent, srcline\&. Please see description of \-\-sort in the perf\-report man page\&.
+.RE
+.PP
+\-t, \-\-field\-separator=
+.RS 4
+Use a special separator character and don\(cqt pad with spaces, replacing all occurrences of this separator in symbol names (and other output) with a
+\fI\&.\fR
+character, that thus it\(cqs the only non valid separator\&.
+.RE
+.PP
+\-v, \-\-verbose
+.RS 4
+Be verbose, for instance, show the raw counts in addition to the diff\&.
+.RE
+.PP
+\-q, \-\-quiet
+.RS 4
+Do not show any message\&. (Suppress \-v)
+.RE
+.PP
+\-f, \-\-force
+.RS 4
+Don\(cqt do ownership validation\&.
+.RE
+.PP
+\-\-symfs=<directory>
+.RS 4
+Look for files with symbols relative to this directory\&.
+.RE
+.PP
+\-b, \-\-baseline\-only
+.RS 4
+Show only items with match in baseline\&.
+.RE
+.PP
+\-c, \-\-compute
+.RS 4
+Differential computation selection \- delta, ratio, wdiff, delta\-abs (default is delta\-abs)\&. Default can be changed using diff\&.compute config option\&. See COMPARISON METHODS section for more info\&.
+.RE
+.PP
+\-p, \-\-period
+.RS 4
+Show period values for both compared hist entries\&.
+.RE
+.PP
+\-F, \-\-formula
+.RS 4
+Show formula for given computation\&.
+.RE
+.PP
+\-o, \-\-order
+.RS 4
+Specify compute sorting column number\&. 0 means sorting by baseline overhead and 1 (default) means sorting by computed value of column 1 (data from the first file other base baseline)\&. Values more than 1 can be used only if enough data files are provided\&. The default value can be set using the diff\&.order config option\&.
+.RE
+.PP
+\-\-percentage
+.RS 4
+Determine how to display the overhead percentage of filtered entries\&. Filters can be applied by \-\-comms, \-\-dsos and/or \-\-symbols options\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+"relative" means it\*(Aqs relative to filtered entries only so that the
+sum of shown entries will be always 100%\&.  "absolute" means it retains
+the original value before and after the filter is applied\&.
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.SH "COMPARISON"
+.sp
+The comparison is governed by the baseline file\&. The baseline perf\&.data file is iterated for samples\&. All other perf\&.data files specified on the command line are searched for the baseline sample pair\&. If the pair is found, specified computation is made and result is displayed\&.
+.sp
+All samples from non\-baseline perf\&.data files, that do not match any baseline entry, are displayed with empty space within baseline column and possible computation results (delta) in their related column\&.
+.sp
+Example files samples: \- file A with samples f1, f2, f3, f4, f6 \- file B with samples f2, f4, f5 \- file C with samples f1, f2, f5
+.sp
+Example output: x \- computation takes place for pair b \- baseline sample percentage
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+perf diff A B C
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+baseline/A compute/B compute/C  samples
+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+b                    x          f1
+b          x         x          f2
+b                               f3
+b          x                    f4
+b                               f6
+           x         x          f5
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+perf diff B A C
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+baseline/B compute/A compute/C  samples
+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+b          x         x          f2
+b          x                    f4
+b                    x          f5
+           x         x          f1
+           x                    f3
+           x                    f6
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+perf diff C B A
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+baseline/C compute/B compute/A  samples
+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+b                    x          f1
+b          x         x          f2
+b          x                    f5
+                     x          f3
+           x         x          f4
+                     x          f6
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.SH "COMPARISON METHODS"
+.SS "delta"
+.sp
+If specified the \fIDelta\fR column is displayed with value \fId\fR computed as:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+d = A\->period_percent \- B\->period_percent
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+with: \- A/B being matching hist entry from data/baseline file specified (or perf\&.data/perf\&.data\&.old) respectively\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+period_percent being the % of the hist entry period value within single data file
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+with filtering by \-C, \-d and/or \-S, period_percent might be changed relative to how entries are filtered\&. Use \-\-percentage=absolute to prevent such fluctuation\&.
+.RE
+.SS "delta\-abs"
+.sp
+Same as \*(Aqdelta` method, but sort the result with the absolute values\&.
+.SS "ratio"
+.sp
+If specified the \fIRatio\fR column is displayed with value \fIr\fR computed as:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+r = A\->period / B\->period
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+with: \- A/B being matching hist entry from data/baseline file specified (or perf\&.data/perf\&.data\&.old) respectively\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+period being the hist entry period value
+.RE
+.SS "wdiff:WEIGHT\-B,WEIGHT\-A"
+.sp
+If specified the \fIWeighted diff\fR column is displayed with value \fId\fR computed as:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+d = B\->period * WEIGHT\-A \- A\->period * WEIGHT\-B
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+A/B being matching hist entry from data/baseline file specified (or perf\&.data/perf\&.data\&.old) respectively\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+period being the hist entry period value
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+WEIGHT\-A/WEIGHT\-B being user supplied weights in the the
+\fI\-c\fR
+option behind
+\fI:\fR
+separator like
+\fI\-c wdiff:1,2\fR\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+WEIGHT\-A being the weight of the data file
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+WEIGHT\-B being the weight of the baseline data file
+.RE
+.SH "SEE ALSO"
+.sp
+\fBperf-record\fR(1), \fBperf-report\fR(1)

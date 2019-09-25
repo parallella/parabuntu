@@ -47,6 +47,7 @@ trap 'cleanup; exit 1' EXIT
 
 unset LC_ALL
 unset LC_TIME
+export LC_ALL=C
 
 if ! [ -e ${ubuntu_tarball} ]; then
 	echo Downloading Ubuntu Base tarball
@@ -65,7 +66,7 @@ rm -rf ${root_image} ${root_image}.gz
 echo Creating rootfs image file
 mkdir -p ${top}/out
 # TODO: Can we create a sparse file instead?
-dd if=/dev/zero of=${root_image} bs=1024 count=$[${root_size}/1024]
+truncate -s ${root_size} ${root_image}
 
 echo Setting up loopback
 root_dev=$(losetup -o 0 --sizelimit ${root_size} -f --show ${root_image})
@@ -74,6 +75,7 @@ echo Creating filesystems
 mkfs.ext4 -L root ${root_dev}
 
 echo Mounting root filesystem
+mkdir -p ${root_mnt}
 mount ${root_dev} ${root_mnt}
 
 echo Unpacking Ubuntu tarball
@@ -85,11 +87,10 @@ for d in $(find ${top}/overlays -mindepth 1 -maxdepth 1 -type d | sort -g); do
 	echo Applying overlay $d
 	rsync -ap --no-owner --no-group $d/ ${root_mnt}
 done
-for f in $(find ${top}/overlays -mindepth 1 -maxdepth 1 -type f -name *.tar.gz | sort -g); do
+for f in $(find ${top}/overlays -mindepth 1 -maxdepth 1 -type f -name "*.tar.gz" | sort -g); do
 	echo Applying overlay tarball $f
 	tar xfp $f -C ${root_mnt}
 done
-
 
 find ${root_mnt} -name ".gitkeep" -delete
 

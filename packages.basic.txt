@@ -46,6 +46,10 @@ ifplugd
 bwm-ng
 nfs-common
 net-tools
+iputils-ping
+iputils-arping
+traceroute
+
 
 ### Linux Tools
 device-tree-compiler
@@ -72,7 +76,7 @@ libclc-dev
 opencl-headers
 ##https://superuser.com/questions/1091984/how-to-install-libelfg0-dev-on-ubuntu-16-04-lts-64bit-version
 libelf1
-libelf-dev
+#libelf-dev -- conflict
 'libconfig++9v5' 'libconfig++-dev' libconfig-dev libconfig9
 libevent-2.1.6 libevent-dev
 

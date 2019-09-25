@@ -165,6 +165,9 @@ echo Copying tests
 #TODO: Move to Parallella overlay?
 cp -r tests ${root_mnt}/home/parallella/
 
+echo Copying debian packages
+cp -rv ${top}/deb-pkgs ${root_mnt}/tmp/
+
 echo Starting ARM chroot
 chroot ${root_mnt} ./tmp/rootfs-arm.sh
 #chroot ${root_mnt}

@@ -17,6 +17,9 @@ cd $top
 export LC_ALL=C
 export DEBIAN_FRONTEND=noninteractive
 
+echo Installing local deb packages
+apt-get install -yy multiarch-support
+dpkg -i /tmp/deb-pkgs/*.deb
 
 # Set Zonedata so the interactive prompt won't pop up while installing packages
 sudo ln -fs /usr/share/zoneinfo/US/Eastern /etc/localtime

@@ -21,6 +21,11 @@ echo Installing local deb packages
 apt-get install -yy multiarch-support
 dpkg -i /tmp/deb-pkgs/*.deb
 
+echo fixing libelf symlink for coprthr
+#HACK HACK HACK
+(cd /usr/lib/arm-linux-gnueabihf/ && ln -sf libelf.so.0.8.13 libelf.so)
+
+
 # Set Zonedata so the interactive prompt won't pop up while installing packages
 sudo ln -fs /usr/share/zoneinfo/US/Eastern /etc/localtime
 sudo dpkg-reconfigure -f noninteractive tzdata

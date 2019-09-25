@@ -28,9 +28,11 @@ echo fixing libelf symlink for coprthr
 echo Updating packages
 apt-get update -yy || true
 
+echo Fixing zoneinfo
 # Set Zonedata so the interactive prompt won't pop up while installing packages
-sudo ln -fs /usr/share/zoneinfo/US/Eastern /etc/localtime
-sudo dpkg-reconfigure -f noninteractive tzdata
+ln -fs /usr/share/zoneinfo/US/Eastern /etc/localtime
+apt-get install -yy tzdata
+dpkg-reconfigure -f noninteractive tzdata
 
 echo Upgrading packages
 apt-get dist-upgrade -yy

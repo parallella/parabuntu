@@ -78,7 +78,8 @@ opencl-headers
 libelf1
 #libelf-dev -- conflict
 'libconfig++9v5' 'libconfig++-dev' libconfig-dev libconfig9
-libevent-2.1.6 libevent-dev
+#libevent-2.1.* will be installed by libevent-dev depends.
+libevent-dev
 
 # Needed for parallella-utils xtemp
 libx11-6
@@ -87,6 +88,6 @@ i2c-tools
 
 # OpenMPI
 libopenmpi-dev
-libopenmpi2
+libopenmpi3
 openmpi-bin
 openmpi-common

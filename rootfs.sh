@@ -157,6 +157,22 @@ cp -r tests ${root_mnt}/home/parallella/
 echo Copying debian packages
 cp -rv ${top}/deb-pkgs ${root_mnt}/tmp/
 
+# Ubuntu 20.04 uses symlinks to /usr for /bin, /sbin and /lib
+# after applying overlays, it change bin lib to a regular folder
+fixSymbLink () {
+	if [[ -e "${root_mnt}/$1" && ! -L "${root_mnt}/$1" ]]
+	then
+	    echo Fixing symbolic link $1
+	    pushd ${root_mnt}
+	    rsync -ap --no-owner --no-group $1/ usr/$1
+	    rm -rf $1
+	    ln -sf usr/$1
+	    popd	    
+	fi
+}
+fixSymbLink bin
+fixSymbLink lib
+
 echo Starting ARM chroot
 chroot ${root_mnt} ./tmp/rootfs-arm.sh
 #chroot ${root_mnt}

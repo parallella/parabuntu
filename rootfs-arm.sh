@@ -25,7 +25,10 @@ echo Updating packages
 apt-get update -yy || true
 
 echo Installing local deb packages
-apt-get install -yy multiarch-support
+apt-get install -yy wget
+wget -P /tmp/ http://ftp.us.debian.org/debian/pool/main/g/glibc/multiarch-support_2.28-10_armhf.deb 
+#apt-get install -yy multiarch-support
+dpkg -i /tmp/multiarch-support*.deb
 dpkg -i /tmp/deb-pkgs/*.deb
 
 echo fixing libelf symlink for coprthr

@@ -33,7 +33,7 @@ dpkg -i /tmp/deb-pkgs/*.deb
 
 echo fixing libelf symlink for coprthr
 #HACK HACK HACK
-(cd /usr/lib/arm-linux-gnueabihf/ && ln -sf libelf.so.0.8.13 libelf.so)
+(cd /usr/lib/arm-linux-gnueabihf/ && ln -sf libelf.so.1 libelf.so)
 
 
 echo Fixing zoneinfo

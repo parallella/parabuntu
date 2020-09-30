@@ -7,12 +7,14 @@
 
 ## Requirements
 
-The scripts require qemu-arm-static and binfmt being set up properly.
+- The scripts require qemu-arm-static and binfmt being set up properly.
+- Only works on Ubuntu 20.04(tested) and Ubuntu based Linux distribution
 
 ```sh
 sudo apt-get update
 sudo apt-get install qemu binfmt-support qemu binfmt-support qemu-user-static
 sudo apt-get install flex bison zerofree u-boot-tools
+sudo apt install debootstrap
 ```
 
 ## Flow

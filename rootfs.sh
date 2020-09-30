@@ -49,17 +49,6 @@ unset LC_ALL
 unset LC_TIME
 export LC_ALL=C
 
-if ! [ -e ${ubuntu_tarball} ]; then
-	echo Downloading Ubuntu Base tarball
-	wget ${UBUNTU_URL} -O ${ubuntu_tarball}
-fi
-
-echo Checking md5sums
-if ! md5sum -c md5sum.txt; then
-	echo md5sum fail
-	exit 1
-fi
-
 echo Removing old rootfs image
 rm -rf ${root_image} ${root_image}.gz
 
@@ -78,8 +67,8 @@ echo Mounting root filesystem
 mkdir -p ${root_mnt}
 mount ${root_dev} ${root_mnt}
 
-echo Unpacking Ubuntu tarball
-tar xfzp ${ubuntu_tarball} -C ${root_mnt} --strip-components 0
+echo fetching Ubuntu focal
+sudo debootstrap --arch=armhf focal ${root_mnt}
 
 echo Applying overlays
 #TODO: Use tarballs (for owner/group)?
@@ -167,6 +156,22 @@ cp -r tests ${root_mnt}/home/parallella/
 
 echo Copying debian packages
 cp -rv ${top}/deb-pkgs ${root_mnt}/tmp/
+
+# Ubuntu 20.04 uses symlinks to /usr for /bin, /sbin and /lib
+# after applying overlays, it change bin lib to a regular folder
+fixSymbLink () {
+	if [[ -e "${root_mnt}/$1" && ! -L "${root_mnt}/$1" ]]
+	then
+	    echo Fixing symbolic link $1
+	    pushd ${root_mnt}
+	    rsync -ap --no-owner --no-group $1/ usr/$1
+	    rm -rf $1
+	    ln -sf usr/$1
+	    popd	    
+	fi
+}
+fixSymbLink bin
+fixSymbLink lib
 
 echo Starting ARM chroot
 chroot ${root_mnt} ./tmp/rootfs-arm.sh
